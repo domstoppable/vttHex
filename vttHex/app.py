@@ -6,7 +6,7 @@ from PySide2 import QtCore, QtWidgets, QtGui, QtMultimedia
 from . import ui
 from . import tools
 from . import mbopp_data
-
+from . import serial
 
 class VttHexApp(QtWidgets.QApplication):
 	def __init__(self):
@@ -16,17 +16,30 @@ class VttHexApp(QtWidgets.QApplication):
 		self.phonePlayerTimer.setInterval(0)
 		self.phonePlayerTimer.timeout.connect(self.updatePhonePlayer)
 
+		self.serialTimer = QtCore.QTimer()
+		self.serialTimer.setInterval(15)
+		self.serialTimer.timeout.connect(self.checkForSerialMessages)
+
 		self.phonePlayer = tools.PhonePlayer()
 		self.lastTimestamp = None
 		self.enabledPhone = None
+		self.serial = None
+
+	def startSerial(self):
+		self.serial = serial.SerialComms()
+		self.serial.open('/dev/ttyUSB0', 115200)
+		self.serialTimer.start()
 
 	def exec(self):
 		self.window.show()
+		self.startSerial()
 		super().exec_()
 
 	def buildWindow(self):
 		window = ui.load('main.ui')
 		window.mboppControls.playClicked.connect(self.onPlayClicked)
+		window.phoneGrid.tilePressed.connect(self.onTilePressed)
+		window.phoneGrid.tileReleased.connect(self.onTileReleased)
 
 		self.window = window
 
@@ -46,13 +59,16 @@ class VttHexApp(QtWidgets.QApplication):
 	def togglePhone(self, phone, enabled=True):
 		if self.enabledPhone is not None:
 			self.window.phoneGrid.setPhoneEnabled(self.enabledPhone, False)
+			self.serial.sendPhoneState(self.enabledPhone, False)
 
 		if phone is not None and phone not in ['sp', 'si']:
+			if self.serial is not None:
+				self.serial.sendPhoneState(phone, enabled)
+
 			self.window.phoneGrid.setPhoneEnabled(phone, enabled)
-			if enabled:
-				self.enabledPhone = phone
-			else:
-				self.enabledPhone = None
+			self.enabledPhone = phone if enabled else None
+		else:
+			self.enabledPhone = None
 
 	def startPhonePlayer(self):
 		self.lastTimestamp = None
@@ -62,6 +78,11 @@ class VttHexApp(QtWidgets.QApplication):
 	def stopPhonePlayer(self):
 		self.phonePlayerTimer.stop()
 		self.togglePhone(None)
+
+	def checkForSerialMessages(self):
+		lines = self.serial.readLines()
+		for l in lines:
+			print('RECV:', l)
 
 	def updatePhonePlayer(self):
 		now = time.time()
@@ -78,6 +99,14 @@ class VttHexApp(QtWidgets.QApplication):
 				self.togglePhone(action['phone'], action['enable'])
 
 		self.lastTimestamp = now
+
+	def onTilePressed(self, cellID):
+		self.serial.sendCellState(cellID, True)
+		print('Pressed', cellID)
+
+	def onTileReleased(self, cellID):
+		self.serial.sendCellState(cellID, False)
+		print('Released', cellID)
 
 def run():
 	app = VttHexApp()

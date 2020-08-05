@@ -53,6 +53,9 @@ class HexTile(QtWidgets.QWidget):
 			self.child.resize(self.size())
 
 class HexGrid(QtWidgets.QWidget):
+	tilePressed = QtCore.Signal(int)
+	tileReleased = QtCore.Signal(int)
+
 	def __init__(self, parent=None, rows=3, columns=3):
 		super().__init__(parent=parent)
 
@@ -115,6 +118,17 @@ class HexGrid(QtWidgets.QWidget):
 
 	def addWidget(self, child):
 		self.tiles.append(HexTile(child, self))
+		if isinstance(child, QtWidgets.QPushButton):
+			self.connectButtonSignals(child, len(self.tiles)-1)
+
+	def connectButtonSignals(self, button, id):
+		button.pressed.connect(
+			partial(self.tilePressed.emit, id)
+		)
+
+		button.released.connect(
+			partial(self.tileReleased.emit, id)
+		)
 
 class PhoneButton(QtWidgets.QPushButton):
 	def __init__(self, phone, parent=None):
