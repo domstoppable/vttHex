@@ -11,6 +11,7 @@ extern "C" {
 
 void LRAArray::setup(int arrayCount){
 	this->arrayCount = arrayCount;
+	Wire.begin();
 	calibrate();
 }
 
@@ -46,7 +47,6 @@ bool LRAArray::isOk(uint8_t id){
 }
 
 void LRAArray::calibrate(){
-	Wire.begin();
 	for (uint8_t actuatorID = 0; actuatorID < MAX_ACTUATORS; actuatorID++) {
 		if(actuatorID >= arrayCount){
 			actuatorStatus[actuatorID] = -99;
@@ -57,16 +57,12 @@ void LRAArray::calibrate(){
 		uint8_t thisStatus = -99;
 
 		switchTo(actuatorID);
-		//if (!twi_writeTo(DRV2605_ADDR, &data, 0, 1, 1)) {
-		if(true){
-			thisStatus = driver.begin();
-			if (thisStatus == HAPTIC_SUCCESS) {
-				driver.setActuatorType(LRA);
-				driver.playScript(0);       // Reset/Init
-				driver.playScript(1);       // LRA Motor Init
-				driver.playScript(4);       // LRA Calibrate
-				driver.setMode(INACTIVE_MODE);
-			}
+		thisStatus = driver.begin();
+		if (thisStatus == HAPTIC_SUCCESS) {
+			driver.setActuatorType(LRA);
+			driver.playScript(0);       // Reset/Init
+			driver.playScript(4);       // LRA Calibrate
+			driver.setMode(INACTIVE_MODE);
 		}
 
 		if(DBG){
