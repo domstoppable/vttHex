@@ -145,3 +145,6 @@ static
 
 # Input files
 vttHex/assets/MBOPP/audio/
+
+# Gerbers
+hardware/*/output/
