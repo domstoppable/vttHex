@@ -78,14 +78,11 @@ class SignalPlayer():
 
 		self.intensitySeries = TimeSeries()
 		samples = int(len(frames)/2)
-		intensities = []
 		for i in range(samples):
 			start = i*2
 			window = paddedFrames[start:start+framesPerWindow]
 			intensity = audioop.rms(window, wav.getsampwidth())
 			intensity /= maxValue
-
-			intensities.append(intensity)
 
 			self.intensitySeries.addData(i*(1/wav.getframerate()), intensity)
 

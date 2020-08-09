@@ -28,7 +28,7 @@ class SerialComms():
 		self.lastCombination = (0,0,0)
 
 	def sendCalibrate(self):
-		msg = bytearray([CMD_HEADER, CMD_CALIBRATE, 255])
+		msg = bytearray([CMD_HEADER, CMD_CALIBRATE])
 		self._send(msg)
 
 	def sendPhoneState(self, phone, enabled):
@@ -79,7 +79,7 @@ class SerialComms():
 		self._send(msg)
 
 	def _send(self, msg):
-		print('Send:', bytesToReadable(msg))
+		#print('Send:', bytesToReadable(msg))
 		try:
 			self.serialObj.write(msg)
 		except Exception as exc:

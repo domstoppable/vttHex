@@ -1,14 +1,6 @@
 #include "HexGrid.h"
 #include "Display.h"
-
-#define CMD_HEADER            0x00
-#define CMD_CALIBRATE         0x01
-#define CMD_ACTUATOR_ENABLE   0x02
-#define CMD_ACTUATOR_DISABLE  0x03
-#define CMD_BASE_FREQUENCY    0x04
-#define CMD_INTENSITY         0x05
-#define CMD_COMBINED_SIGNAL   0x06
-#define CMD_STOP              0x07
+#include "protocol.h"
 
 #define CALIBRATE_BUTTON 10
 
@@ -23,6 +15,7 @@ void setup(){
 
 	delay(5000);
 	Serial.begin(115200);
+	Serial.setRxBufferSize(2048);
 	Serial.println("Initializing...");
 	display.showText("Initialize\n...");
 
@@ -43,6 +36,54 @@ void loop(){
 		delay(1000);
 		display.showText("Ready :)");
 	}
+
+	if(!flushToLatestCommand()){
+		Serial.println("eh");
+		return;
+	}
+	byte cmd = nextByte();
+	if(cmd == 255 || cmd == 0){
+
+	}else if(cmd == CMD_CALIBRATE){
+		Serial.println("Calibrate");
+		display.showText("Calibrate");
+		grid.calibrate();
+	}else if(cmd == CMD_ACTUATOR_ENABLE){
+		byte cellID = nextByte();
+		sprintf(msg, "%02d Enable", cellID);
+		display.showText(msg);
+		Serial.println(msg);
+		grid.enable(cellID, 255);
+	}else if(cmd == CMD_ACTUATOR_DISABLE){
+		byte cellID = nextByte();
+		sprintf(msg, "%02d Disable", cellID);
+		display.showText(msg);
+		Serial.println(msg);
+
+		grid.disable(cellID);
+	}else if(cmd == CMD_PITCH){
+		byte pitch = nextByte();
+		display.showText("Freq");
+		Serial.print("Frequency "); Serial.println(pitch);
+	}else if(cmd == CMD_COMBINED_SIGNAL){
+		byte phone = nextByte();
+		byte pitch = nextByte();
+		byte intensity = nextByte();
+
+		grid.enable(phone, intensity);
+
+		sprintf(msg, " %02d ON     %03d Pitch  %03d Volume ", phone, pitch, intensity);
+		display.showText(msg);
+		//Serial.println(msg);
+
+	}else if(cmd == CMD_STOP){
+		grid.disableAll();
+		display.showText("");
+	}else{
+		display.showText("???");
+		Serial.print("??? "); Serial.println(cmd);
+	}
+	/*
 
 	if(Serial.available() > 0){
 		byte header = serialReadBlocking();
@@ -71,7 +112,7 @@ void loop(){
 			display.showText(msg);
 			Serial.println(msg);
 			grid.disable(data);
-		}else if(cmd == CMD_BASE_FREQUENCY){
+		}else if(cmd == CMD_PITCH){
 			byte data = serialReadBlocking();
 			display.showText("Freq");
 			Serial.print("Frequency "); Serial.println(data);
@@ -96,16 +137,12 @@ void loop(){
 			Serial.print("??? "); Serial.println(cmd);
 		}
 	}
+	*/
 }
-
-byte serialReadBlocking(){
-	while(Serial.available() == 0){}
-
-	return Serial.read();
-}
-
+/*
 void flushSerialInput(){
 	while(Serial.available() > 0){
 		Serial.read();
 	}
 }
+*/
