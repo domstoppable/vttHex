@@ -53,8 +53,8 @@ class HexTile(QtWidgets.QWidget):
 			self.child.resize(self.size())
 
 class HexGrid(QtWidgets.QWidget):
-	tilePressed = QtCore.Signal(int)
-	tileReleased = QtCore.Signal(int)
+	tilePressed = QtCore.Signal(int, str)
+	tileReleased = QtCore.Signal(int, str)
 
 	def __init__(self, parent=None, rows=3, columns=3):
 		super().__init__(parent=parent)
@@ -123,11 +123,11 @@ class HexGrid(QtWidgets.QWidget):
 
 	def connectButtonSignals(self, button, id):
 		button.pressed.connect(
-			partial(self.tilePressed.emit, id)
+			partial(self.tilePressed.emit, id, button.text())
 		)
 
 		button.released.connect(
-			partial(self.tileReleased.emit, id)
+			partial(self.tileReleased.emit, id, button.text())
 		)
 
 class PhoneButton(QtWidgets.QPushButton):
@@ -155,7 +155,7 @@ class PhoneButton(QtWidgets.QPushButton):
 			)
 
 class PhoneGrid(HexGrid):
-	pressed = QtCore.Signal(object)
+	pressed = QtCore.Signal(str)
 
 	def __init__(self, parent=None):
 		columns = 6
@@ -170,9 +170,23 @@ class PhoneGrid(HexGrid):
 			self.addWidget(button)
 
 		self.resize(700, 650)
+		self.lastPhone = None
 
 	def setPhoneEnabled(self, phone, enabled):
-		self.buttons[phone].setActive(enabled)
+		phone = phone[:2]
+		if phone in self.buttons:
+			self.buttons[phone].setActive(enabled)
+
+	def setSinglePhone(self, phone):
+		if self.lastPhone is not None:
+			self.setPhoneEnabled(self.lastPhone, False)
+
+		self.setPhoneEnabled(phone, True)
+		self.lastPhone = phone
+
+	def clear(self):
+		if self.lastPhone is not None:
+			self.setPhoneEnabled(self.lastPhone, False)
 
 class MBOPPControls(QtWidgets.QWidget):
 	playClicked = QtCore.Signal(str)
@@ -279,27 +293,74 @@ class MBOPPControls(QtWidgets.QWidget):
 
 		return not None in (prosodyType, phrase, pitch, time)
 
+def log(x):
+	return math.log(x)
+
+def exp(x):
+	return math.exp(x)
+	return 10**x
+
+class LinearLogSliders(QtWidgets.QWidget):
+	def __init__(self, parent=None):
+		super().__init__(parent=parent)
+
+		self.setLayout(QtWidgets.QGridLayout())
+
+		self.titleLabel = QtWidgets.QLabel('-', self)
+		self.layout().addWidget(self.titleLabel, 0, 0, 1, -1, QtCore.Qt.AlignHCenter)
+		self.layout().addWidget(QtWidgets.QLabel('Linear', self), 1, 0, 1, 1, QtCore.Qt.AlignHCenter)
+		self.layout().addWidget(QtWidgets.QLabel('Log', self), 1, 1, 1, 1, QtCore.Qt.AlignHCenter)
+
+		self.linearSlider = QtWidgets.QSlider(self)
+		self.logSlider = QtWidgets.QSlider(self)
+
+		self.layout().addWidget(self.linearSlider, 2, 0, 1, 1)
+		self.layout().addWidget(self.logSlider, 2, 1, 1, 1)
+
+		self.linearSlider.sliderMoved.connect(self.onLinearSliderMoved)
+		self.logSlider.sliderMoved.connect(self.onLogSliderMoved)
+
+	def setText(self, text):
+		self.titleLabel.setText(text)
+
+	def onLinearSliderMoved(self, value):
+		self.logSlider.setValue(100*log(value+1))
+
+	def onLogSliderMoved(self, value):
+		self.linearSlider.setValue(exp(value/100))
+
+	def setRange(self, minimum, maximum):
+		self.linearSlider.setMinimum(minimum)
+		self.logSlider.setMinimum(int(log(minimum+1)*100))
+
+		self.linearSlider.setMaximum(maximum)
+		self.logSlider.setMaximum(math.ceil(log(maximum)*100))
+
+	def setLinearValue(self, value):
+		self.linearSlider.setValue(value)
+		self.logSlider.setValue(100*log(value+1))
+
+	def getLinearValue(self):
+		return self.linearSlider.value()
+
+	def getNormalizedLinearValue(self):
+		valueRange = self.linearSlider.maximum() - self.linearSlider.minimum()
+		return (self.linearSlider.value() - self.linearSlider.minimum()) / valueRange
+
 loader.registerCustomWidget(HexGrid)
 loader.registerCustomWidget(PhoneGrid)
 loader.registerCustomWidget(MBOPPControls)
+loader.registerCustomWidget(LinearLogSliders)
 
 def load(uiFile):
 	return loader.load(tools.findAsset(uiFile))
 
 
 if __name__ == '__main__':
-	def onPress(phone):
-		print('Pressed:', phone)
-
 	app = QtWidgets.QApplication()
-	#w = PhoneGrid([None] + list('abcdefghijklmnopqrstuvwxyzasdfasdf'))
-	#w.pressed.connect(onPress)
-	#w.show()
-
-	def onPlay(*args):
-		print('Play', *args)
-	w = MBOPPControls()
-	w.playClicked.connect(onPlay)
+	w = LinearLogSliders()
+	w.setText('asdf')
+	w.setRange(1, 1000)
 	w.show()
 	app.exec_()
 

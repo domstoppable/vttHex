@@ -4,11 +4,11 @@ void HexGrid::setup(){
 	actuators.setup(12);
 }
 
-void HexGrid::enable(uint8_t cellID){
+void HexGrid::enable(uint8_t cellID, uint8_t intensity){
 	if(currentCell != 255){
 		disable(currentCell);
 	}
-	_setValue(activationMap[cellID][0], activationMap[cellID][1], 255);
+	_setValue(activationMap[cellID][0], activationMap[cellID][1], intensity);
 	currentCell = cellID;
 }
 

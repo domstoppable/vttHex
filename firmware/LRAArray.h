@@ -19,9 +19,11 @@ class LRAArray{
 
 		void disableAll();
 
-		int arrayCount = 0;
 		Haptic_DRV2605 driver;
 		uint8_t actuatorStatus[MAX_ACTUATORS];
+
+	protected:
+		int arrayCount = 0;
 };
 
 #endif

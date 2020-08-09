@@ -17,7 +17,7 @@ const int activationMap[][2] = {
 class HexGrid{
 	public:
 		void setup();
-		void enable(uint8_t cellID);
+		void enable(uint8_t cellID, uint8_t intensity);
 		void disable(uint8_t cellID);
 		void calibrate();
 		void disableAll();

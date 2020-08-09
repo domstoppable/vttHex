@@ -3,7 +3,7 @@
 
 #include "Display.h"
 
-Display::Display() : Adafruit_SSD1306(128, 32){}
+Display::Display() : Adafruit_SSD1306(128, 64){}
 
 bool Display::setup(){
 	if(!begin(SSD1306_SWITCHCAPVCC, 0x3C)) {

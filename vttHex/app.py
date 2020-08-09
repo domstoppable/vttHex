@@ -12,23 +12,26 @@ class VttHexApp(QtWidgets.QApplication):
 	def __init__(self):
 		super().__init__()
 		self.buildWindow()
-		self.phonePlayerTimer = QtCore.QTimer()
-		self.phonePlayerTimer.setInterval(0)
-		self.phonePlayerTimer.timeout.connect(self.updatePhonePlayer)
+		self.signalPlayerTimer = QtCore.QTimer()
+		self.signalPlayerTimer.setInterval(5)
+		self.signalPlayerTimer.timeout.connect(self.updateSignalPlayer)
 
 		self.serialTimer = QtCore.QTimer()
 		self.serialTimer.setInterval(15)
 		self.serialTimer.timeout.connect(self.checkForSerialMessages)
 
-		self.phonePlayer = tools.PhonePlayer()
+		self.signalPlayer = tools.SignalPlayer()
 		self.lastTimestamp = None
 		self.enabledPhone = None
 		self.serial = None
 
 	def startSerial(self):
 		self.serial = serial.SerialComms()
-		self.serial.open('/dev/ttyUSB0', 115200)
-		self.serialTimer.start()
+		try:
+			self.serial.open('/dev/ttyUSB0', 115200)
+			self.serialTimer.start()
+		except Exception as exc:
+			print(exc)
 
 	def exec(self):
 		self.window.show()
@@ -41,72 +44,78 @@ class VttHexApp(QtWidgets.QApplication):
 		window.phoneGrid.tilePressed.connect(self.onTilePressed)
 		window.phoneGrid.tileReleased.connect(self.onTileReleased)
 
+		window.pitchSliders.setText('Pitch')
+		window.pitchSliders.setRange(1, 1000)
+
+		window.intensitySliders.setText('Intensity')
+		window.intensitySliders.setRange(0, 100)
+
 		self.window = window
 
 	def onPlayClicked(self, filename):
 		print('Play:', filename)
 
-		self.gridPath = f'MBOPP/audio/{filename}.TextGrid'
-		self.wavPath = f'MBOPP/audio/{filename}.wav'
-		self.phonePlayer.open(tools.findAsset(self.gridPath))
-		self.nowPlaying = QtMultimedia.QSound(tools.findAsset(self.wavPath))
+		wavPath = f'MBOPP/audio/{filename}.wav'
+		gridPath = f'MBOPP/audio/{filename}.TextGrid'
+		pitchPath = f'MBOPP/audio/{filename}.f0.csv'
+
+		self.signalPlayer.open(filename)
+		self.nowPlaying = QtMultimedia.QSound(tools.findAsset(wavPath))
 		QtCore.QTimer.singleShot(500, self.startPlaying)
 
 	def startPlaying(self):
-		self.startPhonePlayer()
+		self.startSignalPlayer()
 		self.nowPlaying.play()
 
-	def togglePhone(self, phone, enabled=True):
-		if self.enabledPhone is not None:
-			self.window.phoneGrid.setPhoneEnabled(self.enabledPhone, False)
-			self.serial.sendPhoneState(self.enabledPhone, False)
-
-		if phone is not None and phone not in ['sp', 'si']:
-			if self.serial is not None:
-				self.serial.sendPhoneState(phone, enabled)
-
-			self.window.phoneGrid.setPhoneEnabled(phone, enabled)
-			self.enabledPhone = phone if enabled else None
-		else:
-			self.enabledPhone = None
-
-	def startPhonePlayer(self):
+	def startSignalPlayer(self):
 		self.lastTimestamp = None
-		self.phonePlayerTimer.start()
+		self.signalPlayerTimer.start()
 		self.startTime = time.time()
 
-	def stopPhonePlayer(self):
-		self.phonePlayerTimer.stop()
-		self.togglePhone(None)
+	def stopSignalPlayer(self):
+		self.signalPlayerTimer.stop()
+
+		self.window.phoneGrid.clear()
+		self.window.intensitySliders.setLinearValue(0)
+		self.serial.sendStop()
 
 	def checkForSerialMessages(self):
 		lines = self.serial.readLines()
 		for l in lines:
 			print('RECV:', l)
 
-	def updatePhonePlayer(self):
+	def updateSignalPlayer(self):
 		now = time.time()
 		if self.lastTimestamp is None:
 			self.lastTimestamp = now
 			return
 
 		delta = now - self.lastTimestamp
-		actions = self.phonePlayer.update(delta)
-		for action in actions:
-			if action is None:
-				self.stopPhonePlayer()
-			else:
-				self.togglePhone(action['phone'], action['enable'])
+		signal = self.signalPlayer.update(delta)
+		(phone, pitch, intensity) = signal
+
+		if phone is None:
+			self.stopSignalPlayer()
+		else:
+			self.showSignal(phone, pitch, intensity)
+			self.serial.sendCombinedSignal(phone, pitch[0], intensity)
 
 		self.lastTimestamp = now
 
-	def onTilePressed(self, cellID):
-		self.serial.sendCellState(cellID, True)
-		print('Pressed', cellID)
+	def showSignal(self, phone, pitch, intensity):
+		self.window.phoneGrid.setSinglePhone(phone)
+		self.window.pitchSliders.setLinearValue(int(pitch[0]))
+		self.window.intensitySliders.setLinearValue(int(intensity*100))
 
-	def onTileReleased(self, cellID):
-		self.serial.sendCellState(cellID, False)
-		print('Released', cellID)
+	def onTilePressed(self, cellID, phone):
+		self.serial.sendCombinedSignal(
+			cellID,
+			self.window.pitchSliders.getLinearValue(),
+			self.window.intensitySliders.getLinearValue()/100
+		)
+
+	def onTileReleased(self, cellID, phone):
+		self.serial.sendStop()
 
 def run():
 	app = VttHexApp()

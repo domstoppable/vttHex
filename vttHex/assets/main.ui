@@ -26,7 +26,7 @@
         <height>100</height>
        </size>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1">
        <item>
         <widget class="MBOPPControls" name="mboppControls" native="true">
          <property name="minimumSize">
@@ -38,17 +38,16 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+        <widget class="QWidget" name="sliderBox" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="LinearLogSliders" name="pitchSliders" native="true"/>
+          </item>
+          <item>
+           <widget class="LinearLogSliders" name="intensitySliders" native="true"/>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -61,7 +60,7 @@
      <x>0</x>
      <y>0</y>
      <width>1085</width>
-     <height>30</height>
+     <height>34</height>
     </rect>
    </property>
   </widget>
@@ -78,6 +77,12 @@
    <class>PhoneGrid</class>
    <extends>QWidget</extends>
    <header>phonegrid.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LinearLogSliders</class>
+   <extends>QWidget</extends>
+   <header>linearlogsliders.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
