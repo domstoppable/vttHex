@@ -45,6 +45,10 @@ class TimeSeries:
 	def isDone(self):
 		return self.idx >= len(self.records)-1
 
+	def reset(self):
+		self.idx = 0
+		self.accumulatedTime = 0
+
 class SignalPlayer():
 	def open(self, filename):
 		textGridFile = findAsset(f'MBOPP/audio/{filename}.TextGrid')
@@ -89,12 +93,20 @@ class SignalPlayer():
 
 			self.intensitySeries.addData(i*(1/wav.getframerate()), intensity)
 
+	def reset(self):
+		self.phoneSeries.reset()
+		self.pitchSeries.reset()
+		self.intensitySeries.reset()
+
 	def update(self, delta):
 		phone = self.phoneSeries.update(delta).data
 		pitch = self.pitchSeries.update(delta).data
 		intensity = self.intensitySeries.update(delta).data
 
 		return [phone, pitch, intensity]
+
+	def isDone(self):
+		return self.phoneSeries.isDone() and self.pitchSeries.isDone() and self.intensitySeries.isDone()
 
 	def asSequence(self, period):
 		while not (self.phoneSeries.isDone() or self.pitchSeries.isDone() or self.intensitySeries.isDone()):

@@ -30,6 +30,8 @@ class VttHexApp(QtWidgets.QApplication):
 		self.paramChangeTimer.setSingleShot(True)
 		self.paramChangeTimer.timeout.connect(self.uploadSoundBite)
 
+		self.useBites = False
+
 	def startSerial(self):
 		self.serial = serial.SerialComms()
 		try:
@@ -64,28 +66,26 @@ class VttHexApp(QtWidgets.QApplication):
 
 	def uploadSoundBite(self):
 		filename = self.window.mboppControls.getFilename()
-		print('Upload:', filename)
-
 		wavPath = f'MBOPP/audio/{filename}.wav'
-		gridPath = f'MBOPP/audio/{filename}.TextGrid'
-		pitchPath = f'MBOPP/audio/{filename}.f0.csv'
+		self.nowPlaying = QtMultimedia.QSound(tools.findAsset(wavPath))
 
 		self.signalPlayer.open(filename)
-		samples = list(self.signalPlayer.asSequence(period=.005))
-		self.serial.sendFile(5, samples)
 
-		self.nowPlaying = QtMultimedia.QSound(tools.findAsset(wavPath))
+		if self.useBites:
+			print('Upload:', filename)
+			samples = list(self.signalPlayer.asSequence(period=.005))
+			self.serial.sendFile(5, samples)
 
 	def onPlayClicked(self):
 		self.nowPlaying.play()
-		self.serial.sendPlayBite()
-
-	def startPlaying(self):
 		self.startSignalPlayer()
-		self.nowPlaying.play()
+
+		if self.useBites:
+			self.serial.sendPlayBite()
 
 	def startSignalPlayer(self):
 		self.lastTimestamp = None
+		self.signalPlayer.reset()
 		self.signalPlayerTimer.start()
 		self.startTime = time.time()
 
@@ -111,16 +111,18 @@ class VttHexApp(QtWidgets.QApplication):
 		signal = self.signalPlayer.update(delta)
 		(phone, pitch, intensity) = signal
 
-		if phone is None:
+		if self.signalPlayer.isDone():
 			self.stopSignalPlayer()
 		else:
 			self.showSignal(phone, pitch, intensity)
-			self.serial.sendCombinedSignal(phone, pitch[0], intensity)
+			if not self.useBites:
+				self.serial.sendCombinedSignal(phone, pitch[0], intensity)
 
 		self.lastTimestamp = now
 
 	def showSignal(self, phone, pitch, intensity):
-		self.window.phoneGrid.setSinglePhone(phone)
+		if phone is not None:
+			self.window.phoneGrid.setSinglePhone(phone)
 		self.window.pitchSliders.setLinearValue(int(pitch[0]))
 		self.window.intensitySliders.setLinearValue(int(intensity*100))
 
