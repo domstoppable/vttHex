@@ -16,6 +16,7 @@ class LRAArray{
 		void setValue(uint8_t value);
 		void setValue(uint8_t id, uint8_t value);
 		bool isOk(uint8_t id);
+		void setDebugFunc(void (*func)(char*));
 
 		void disableAll();
 
@@ -24,6 +25,7 @@ class LRAArray{
 
 	protected:
 		int arrayCount = 0;
+		void (*debugFunc)(char*);
 };
 
 #endif

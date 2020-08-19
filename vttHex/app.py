@@ -28,7 +28,7 @@ class VttHexApp(QtWidgets.QApplication):
 	def startSerial(self):
 		self.serial = serial.SerialComms()
 		try:
-			self.serial.open('/dev/ttyUSB0', 115200)
+			self.serial.open('/dev/ttyUSB0')
 			self.serialTimer.start()
 		except Exception as exc:
 			print(exc)
@@ -41,6 +41,7 @@ class VttHexApp(QtWidgets.QApplication):
 	def buildWindow(self):
 		window = ui.load('main.ui')
 		window.mboppControls.playClicked.connect(self.onPlayClicked)
+		window.mboppControls.uploadClicked.connect(self.onUploadClicked)
 		window.phoneGrid.tilePressed.connect(self.onTilePressed)
 		window.phoneGrid.tileReleased.connect(self.onTileReleased)
 
@@ -52,7 +53,7 @@ class VttHexApp(QtWidgets.QApplication):
 
 		self.window = window
 
-	def onPlayClicked(self, filename):
+	def onUploadClicked(self, filename):
 		print('Play:', filename)
 
 		wavPath = f'MBOPP/audio/{filename}.wav'
@@ -60,8 +61,14 @@ class VttHexApp(QtWidgets.QApplication):
 		pitchPath = f'MBOPP/audio/{filename}.f0.csv'
 
 		self.signalPlayer.open(filename)
+		samples = list(self.signalPlayer.asSequence(period=.005))
+		self.serial.sendFile(5, samples)
+
 		self.nowPlaying = QtMultimedia.QSound(tools.findAsset(wavPath))
-		QtCore.QTimer.singleShot(500, self.startPlaying)
+
+	def onPlayClicked(self):
+		self.nowPlaying.play()
+		self.serial.sendPlayBite()
 
 	def startPlaying(self):
 		self.startSignalPlayer()

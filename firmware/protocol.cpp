@@ -9,6 +9,8 @@ uint8_t CMD_PAYLOAD_SIZES[NUM_COMMANDS] = {
 	1,
 	1,
 	3,
+	0,
+	3,
 	0
 };
 
@@ -18,6 +20,10 @@ uint8_t commandBuffer[MAX_CMD_SIZE];
 int bufferIdx = 0;
 
 bool flushToLatestCommand(){
+	if(Serial.available() == 0){
+		return false;
+	}
+
 	bufferIdx = 0;
 	commandBuffer[0] = 255;
 	int commands = 0;
@@ -39,11 +45,10 @@ bool flushToLatestCommand(){
 			commandBuffer[payloadIdx+1] = serialReadBlocking();
 		}
 		commands++;
+		if(cmd == CMD_SOUNDBITE){
+			return true;
+		}
 	}
-
-//	if(commands > 1){
-//		Serial.print("Commands skipped:"); Serial.println(commands-1);
-//	}
 
 	return true;
 }

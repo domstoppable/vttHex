@@ -189,7 +189,8 @@ class PhoneGrid(HexGrid):
 			self.setPhoneEnabled(self.lastPhone, False)
 
 class MBOPPControls(QtWidgets.QWidget):
-	playClicked = QtCore.Signal(str)
+	uploadClicked = QtCore.Signal(str)
+	playClicked = QtCore.Signal()
 
 	def __init__(self, parent=None):
 		super().__init__(parent=parent)
@@ -216,15 +217,19 @@ class MBOPPControls(QtWidgets.QWidget):
 		self.form.timeSlider.valueChanged.connect(self._onTimeChanged)
 
 		self.form.playButton.clicked.connect(self._onPlayClicked)
+		self.form.uploadButton.clicked.connect(self._onUploadClicked)
 
-	def _onPlayClicked(self):
+	def _onUploadClicked(self):
 		prosodyType = self.getProsodyType()
 		pitch = self.form.pitchSlider.value()
 		time = self.form.timeSlider.value()
 
 		sentenceInfo = self.form.phraseSelector.currentData()
 		filename = sentenceInfo['filename'].format(pitch=pitch, time=time)
-		self.playClicked.emit(filename)
+		self.uploadClicked.emit(filename)
+
+	def _onPlayClicked(self):
+		self.playClicked.emit()
 
 	def getConditionMode(self):
 		if self.form.pitchButton.isChecked():

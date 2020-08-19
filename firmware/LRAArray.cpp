@@ -47,6 +47,11 @@ bool LRAArray::isOk(uint8_t id){
 }
 
 void LRAArray::calibrate(){
+	if(debugFunc){
+		debugFunc("Calibrate");
+	}
+
+	char buffer[45] = "Init status ";
 	for (uint8_t actuatorID = 0; actuatorID < MAX_ACTUATORS; actuatorID++) {
 		if(actuatorID >= arrayCount){
 			actuatorStatus[actuatorID] = -99;
@@ -63,13 +68,13 @@ void LRAArray::calibrate(){
 			driver.playScript(0);       // Reset/Init
 			driver.playScript(4);       // LRA Calibrate
 			driver.setMode(INACTIVE_MODE);
+			buffer[12+actuatorID] = 'O';
+		}else{
+			buffer[12+actuatorID] = '-';
 		}
 
-		if(DBG){
-			Serial.print("Actuator init status #");
-			Serial.print(actuatorID);
-			Serial.print(" = ");
-			Serial.println(thisStatus);
+		if(debugFunc){
+			debugFunc(buffer);
 		}
 
 		actuatorStatus[actuatorID] = thisStatus;
@@ -81,4 +86,8 @@ void LRAArray::disableAll(){
 		setValue(i, 0);
 		driver.setMode(INACTIVE_MODE);
 	}
+}
+
+void LRAArray::setDebugFunc(void (*func)(char*)){
+	this->debugFunc = func;
 }

@@ -32,3 +32,7 @@ void HexGrid::calibrate(){
 void HexGrid::disableAll(){
 	actuators.disableAll();
 }
+
+void HexGrid::setDebugFunc(void (*func)(char*)){
+	actuators.setDebugFunc(func);
+}
