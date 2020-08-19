@@ -189,7 +189,7 @@ class PhoneGrid(HexGrid):
 			self.setPhoneEnabled(self.lastPhone, False)
 
 class MBOPPControls(QtWidgets.QWidget):
-	uploadClicked = QtCore.Signal(str)
+	parametersChanged = QtCore.Signal(str)
 	playClicked = QtCore.Signal()
 
 	def __init__(self, parent=None):
@@ -206,6 +206,8 @@ class MBOPPControls(QtWidgets.QWidget):
 
 		self._onProsodyTypeChanged()
 
+		self.form.phraseSelector.currentTextChanged.connect(self._onParametersChanged)
+
 		self.form.focusButton.clicked.connect(self._onProsodyTypeChanged)
 		self.form.phraseButton.clicked.connect(self._onProsodyTypeChanged)
 
@@ -217,19 +219,12 @@ class MBOPPControls(QtWidgets.QWidget):
 		self.form.timeSlider.valueChanged.connect(self._onTimeChanged)
 
 		self.form.playButton.clicked.connect(self._onPlayClicked)
-		self.form.uploadButton.clicked.connect(self._onUploadClicked)
 
-	def _onUploadClicked(self):
-		prosodyType = self.getProsodyType()
-		pitch = self.form.pitchSlider.value()
-		time = self.form.timeSlider.value()
-
-		sentenceInfo = self.form.phraseSelector.currentData()
-		filename = sentenceInfo['filename'].format(pitch=pitch, time=time)
-		self.uploadClicked.emit(filename)
-
-	def _onPlayClicked(self):
-		self.playClicked.emit()
+	def getProsodyType(self):
+		if self.form.focusButton.isChecked():
+			return 'focus'
+		elif self.form.phraseButton.isChecked():
+			return 'phrase'
 
 	def getConditionMode(self):
 		if self.form.pitchButton.isChecked():
@@ -238,6 +233,31 @@ class MBOPPControls(QtWidgets.QWidget):
 			return 'combined'
 		if self.form.timeButton.isChecked():
 			return 'time'
+
+	def isValid(self):
+		prosodyType = self.getProsodyType()
+		phrase = self.form.phraseSelector.currentText()
+		pitch = self.form.pitchSlider.value()
+		time = self.form.timeSlider.value()
+
+		return not None in (prosodyType, phrase, pitch, time)
+
+	def getFilename(self):
+		prosodyType = self.getProsodyType()
+		pitch = self.form.pitchSlider.value()
+		time = self.form.timeSlider.value()
+
+		sentenceInfo = self.form.phraseSelector.currentData()
+		if sentenceInfo is None:
+			return None
+
+		return sentenceInfo['filename'].format(pitch=pitch, time=time)
+
+	def _onParametersChanged(self):
+		self.parametersChanged.emit(self.getFilename())
+
+	def _onPlayClicked(self):
+		self.playClicked.emit()
 
 	def _onConditionTypeChanged(self):
 		mode = self.getConditionMode()
@@ -258,6 +278,8 @@ class MBOPPControls(QtWidgets.QWidget):
 		if mode == 'combined':
 			self.form.timeSlider.setValue(self.form.pitchSlider.value())
 
+		self._onParametersChanged()
+
 	def _onProsodyTypeChanged(self):
 		self.form.phraseSelector.clear()
 
@@ -268,35 +290,31 @@ class MBOPPControls(QtWidgets.QWidget):
 			for sentence in mbopp_data.phraseSentences:
 				self.form.phraseSelector.addItem(sentence['ID'] + ' - ' + sentence['desc'], sentence)
 
-	def getProsodyType(self):
-		if self.form.focusButton.isChecked():
-			return 'focus'
-		elif self.form.phraseButton.isChecked():
-			return 'phrase'
+		self._onParametersChanged()
 
 	def _onPitchChanged(self, pitch):
 		if self.form.pitchSlider.isEnabled():
 			pitch = findClosest(pitch, self.increments)
-			self.form.pitchSlider.setValue(pitch)
+			if self.form.pitchSlider.value() != pitch:
+				self.form.pitchSlider.setValue(pitch)
 
 			if self.getConditionMode() == 'combined':
-				self.form.timeSlider.setValue(pitch)
+				if self.form.timeSlider.value() != pitch:
+					self.form.timeSlider.setValue(pitch)
+
+		self._onParametersChanged()
 
 	def _onTimeChanged(self, time):
 		if self.form.timeSlider.isEnabled():
 			time = findClosest(time, self.increments)
-			self.form.timeSlider.setValue(time)
+			if self.form.timeSlider.value() != time:
+				self.form.timeSlider.setValue(time)
 
 			if self.getConditionMode() == 'combined':
-				self.form.pitchSlider.setValue(time)
+				if self.form.pitchSlider.value() != time:
+					self.form.pitchSlider.setValue(time)
 
-	def isValid(self):
-		prosodyType = self.getProsodyType()
-		phrase = self.form.phraseSelector.currentText()
-		pitch = self.form.pitchSlider.value()
-		time = self.form.timeSlider.value()
-
-		return not None in (prosodyType, phrase, pitch, time)
+		self._onParametersChanged()
 
 def log(x):
 	return math.log(x)
@@ -363,9 +381,7 @@ def load(uiFile):
 
 if __name__ == '__main__':
 	app = QtWidgets.QApplication()
-	w = LinearLogSliders()
-	w.setText('asdf')
-	w.setRange(1, 1000)
+	w = MBOPPControls()
 	w.show()
 	app.exec_()
 

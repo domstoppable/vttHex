@@ -25,6 +25,11 @@ class VttHexApp(QtWidgets.QApplication):
 		self.enabledPhone = None
 		self.serial = None
 
+		self.paramChangeTimer = QtCore.QTimer()
+		self.paramChangeTimer.setInterval(250)
+		self.paramChangeTimer.setSingleShot(True)
+		self.paramChangeTimer.timeout.connect(self.uploadSoundBite)
+
 	def startSerial(self):
 		self.serial = serial.SerialComms()
 		try:
@@ -36,12 +41,13 @@ class VttHexApp(QtWidgets.QApplication):
 	def exec(self):
 		self.window.show()
 		self.startSerial()
+		self.paramChangeTimer.start()
 		super().exec_()
 
 	def buildWindow(self):
 		window = ui.load('main.ui')
 		window.mboppControls.playClicked.connect(self.onPlayClicked)
-		window.mboppControls.uploadClicked.connect(self.onUploadClicked)
+		window.mboppControls.parametersChanged.connect(self.onParametersChanged)
 		window.phoneGrid.tilePressed.connect(self.onTilePressed)
 		window.phoneGrid.tileReleased.connect(self.onTileReleased)
 
@@ -53,8 +59,12 @@ class VttHexApp(QtWidgets.QApplication):
 
 		self.window = window
 
-	def onUploadClicked(self, filename):
-		print('Play:', filename)
+	def onParametersChanged(self, filename):
+		self.paramChangeTimer.start()
+
+	def uploadSoundBite(self):
+		filename = self.window.mboppControls.getFilename()
+		print('Upload:', filename)
 
 		wavPath = f'MBOPP/audio/{filename}.wav'
 		gridPath = f'MBOPP/audio/{filename}.TextGrid'
