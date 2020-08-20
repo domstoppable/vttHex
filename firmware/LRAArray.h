@@ -17,6 +17,8 @@ class LRAArray{
 		void setValue(uint8_t id, uint8_t value);
 		bool isOk(uint8_t id);
 		void setDebugFunc(void (*func)(char*));
+		void disableMux(uint8_t muxID);
+		void sendThenDisable(uint8_t id, uint8_t value);
 
 		void disableAll();
 

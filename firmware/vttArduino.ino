@@ -37,7 +37,6 @@ void displayDebugMessage(char* msg){
 char msg[45];
 void loop(){
 	if(digitalRead(CALIBRATE_BUTTON) == LOW){
-		Serial.println("CALIBRATE");
 		grid.calibrate();
 		display.showText("Ready :)");
 	}

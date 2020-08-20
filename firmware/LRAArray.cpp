@@ -32,13 +32,31 @@ void LRAArray::setValue(uint8_t value){
 	if(value == 0){
 		driver.setMode(INACTIVE_MODE);
 	}
-
 }
 
-void LRAArray::setValue(uint8_t id, uint8_t value){
+void LRAArray::sendThenDisable(uint8_t id, uint8_t value) {
+	uint8_t muxID = (id / 8);
+	id = id % 8;
+
+	Wire.beginTransmission(TCA_ADDR + muxID);
+	Wire.write(1 << id);
+	Wire.endTransmission();
+
+	setValue(value);
+
+	disableMux(muxID);
+}
+
+void LRAArray::disableMux(uint8_t muxID) {
+	Wire.beginTransmission(TCA_ADDR + muxID);
+	Wire.write(0);
+	Wire.endTransmission();
+}
+
+
+void LRAArray::setValue(uint8_t id, uint8_t value) {
 	if(isOk(id)){
-		switchTo(id);
-		setValue(value);
+		sendThenDisable(id, value);
 	}
 }
 
@@ -48,7 +66,7 @@ bool LRAArray::isOk(uint8_t id){
 
 void LRAArray::calibrate(){
 	if(debugFunc){
-		debugFunc("Calibrate");
+		debugFunc("Init status");
 	}
 
 	char buffer[45] = "Init status ";
@@ -64,20 +82,26 @@ void LRAArray::calibrate(){
 		switchTo(actuatorID);
 		thisStatus = driver.begin();
 		if (thisStatus == HAPTIC_SUCCESS) {
+			buffer[12+actuatorID] = 'O';
+			if(debugFunc){
+				debugFunc(buffer);
+			}
+
 			driver.setActuatorType(LRA);
 			driver.playScript(0);       // Reset/Init
 			driver.playScript(4);       // LRA Calibrate
 			driver.setMode(INACTIVE_MODE);
-			buffer[12+actuatorID] = 'O';
 		}else{
+
 			buffer[12+actuatorID] = '-';
+			if(debugFunc){
+				debugFunc(buffer);
+			}
 		}
 
-		if(debugFunc){
-			debugFunc(buffer);
-		}
 
 		actuatorStatus[actuatorID] = thisStatus;
+		disableMux(actuatorID/8);
 	}
 }
 
