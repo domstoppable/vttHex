@@ -1,7 +1,7 @@
 #include "HexGrid.h"
 
 void HexGrid::setup(){
-	actuators.setup(12);
+	actuators.setup(12, 0, 0);
 }
 
 void HexGrid::enable(uint8_t cellID, uint8_t intensity){
@@ -18,9 +18,6 @@ void HexGrid::disable(uint8_t cellID){
 }
 
 void HexGrid::_setValue(uint8_t idA, uint8_t idB, uint8_t value){
-	idA /= 4;
-	idB /= 4;
-
 	actuators.setValue(idA, value);
 	actuators.setValue(idB, value);
 }

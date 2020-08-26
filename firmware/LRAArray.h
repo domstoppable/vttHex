@@ -8,17 +8,24 @@
 #include "Arduino.h"
 #include "Haptic_DRV2605.h"
 
+typedef struct {
+	uint8_t muxAddress;
+	uint8_t deviceID;
+} MuxedActuator;
+
 class LRAArray{
 	public:
-		void setup(int arrayCount);
+		void setup(uint8_t arrayCount, uint8_t startMux, uint8_t startIdx);
 		void calibrate();
 		void switchTo(uint8_t id);
 		void setValue(uint8_t value);
 		void setValue(uint8_t id, uint8_t value);
 		bool isOk(uint8_t id);
 		void setDebugFunc(void (*func)(char*));
-		void disableMux(uint8_t muxID);
+		void disableMuxForActuator(uint8_t id);
 		void sendThenDisable(uint8_t id, uint8_t value);
+
+		MuxedActuator toMuxed(uint8_t logicalID);
 
 		void disableAll();
 
@@ -26,7 +33,10 @@ class LRAArray{
 		uint8_t actuatorStatus[MAX_ACTUATORS];
 
 	protected:
-		int arrayCount = 0;
+		uint8_t arrayCount = 0;
+		uint8_t startMux = 0;
+		uint8_t startIdx = 0;
+
 		void (*debugFunc)(char*);
 };
 

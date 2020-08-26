@@ -9,18 +9,29 @@ extern "C" {
 }
 */
 
-void LRAArray::setup(int arrayCount){
+MuxedActuator LRAArray::toMuxed(uint8_t logicalID) {
+	MuxedActuator muxedActuator = {
+		TCA_ADDR + startMux + (startIdx+logicalID)/8,
+		(startIdx+logicalID)%8,
+	};
+
+	return muxedActuator;
+}
+
+void LRAArray::setup(uint8_t arrayCount, uint8_t startMux, uint8_t startIdx){
 	this->arrayCount = arrayCount;
+	this->startMux = startMux;
+	this->startIdx = startIdx;
+
 	Wire.begin();
 	calibrate();
 }
 
 void LRAArray::switchTo(uint8_t id) {
-	uint8_t tcaID = (id / 8);
-	id = id % 8;
+	MuxedActuator muxedActuator = toMuxed(id);
 
-	Wire.beginTransmission(TCA_ADDR + tcaID);
-	Wire.write(1 << id);
+	Wire.beginTransmission(muxedActuator.muxAddress);
+	Wire.write(1 << muxedActuator.deviceID);
 	Wire.endTransmission();
 }
 
@@ -35,24 +46,18 @@ void LRAArray::setValue(uint8_t value){
 }
 
 void LRAArray::sendThenDisable(uint8_t id, uint8_t value) {
-	uint8_t muxID = (id / 8);
-	id = id % 8;
-
-	Wire.beginTransmission(TCA_ADDR + muxID);
-	Wire.write(1 << id);
-	Wire.endTransmission();
-
+	switchTo(id);
 	setValue(value);
-
-	disableMux(muxID);
+	disableMuxForActuator(id);
 }
 
-void LRAArray::disableMux(uint8_t muxID) {
-	Wire.beginTransmission(TCA_ADDR + muxID);
+void LRAArray::disableMuxForActuator(uint8_t id) {
+	MuxedActuator muxedActuator = toMuxed(id);
+
+	Wire.beginTransmission(muxedActuator.muxAddress);
 	Wire.write(0);
 	Wire.endTransmission();
 }
-
 
 void LRAArray::setValue(uint8_t id, uint8_t value) {
 	if(isOk(id)){
@@ -99,9 +104,8 @@ void LRAArray::calibrate(){
 			}
 		}
 
-
 		actuatorStatus[actuatorID] = thisStatus;
-		disableMux(actuatorID/8);
+		disableMuxForActuator(actuatorID);
 	}
 }
 
