@@ -77,6 +77,7 @@ class SignalPlayer():
 		else:
 			zero = 128
 			maxValue = 255
+
 		frames = wav.readframes(wav.getnframes())
 		framesPerWindow = int(wav.getframerate() * windowSize * wav.getsampwidth())
 

@@ -144,7 +144,7 @@ media
 static
 
 # Input files
-vttHex/assets/MBOPP/audio/
+software/vttHex/assets/MBOPP/audio/
 
 # Gerbers
 hardware/*/output/
