@@ -21,7 +21,6 @@ class LRAArray{
 		void setValue(uint8_t value);
 		void setValue(uint8_t id, uint8_t value);
 		bool isOk(uint8_t id);
-		void setDebugFunc(void (*func)(char*));
 		void disableMuxForActuator(uint8_t id);
 		void sendThenDisable(uint8_t id, uint8_t value);
 
@@ -36,8 +35,6 @@ class LRAArray{
 		uint8_t arrayCount = 0;
 		uint8_t startMux = 0;
 		uint8_t startIdx = 0;
-
-		void (*debugFunc)(char*);
 };
 
 #endif

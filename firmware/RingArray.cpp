@@ -12,14 +12,11 @@ float angleDelta(float a, float b){
 }
 
 void RingArray::setup(){
-	actuators.setup(actuatorCount, 1, 4);
+//	actuators.setup(actuatorCount, 1, 4);
+	actuators.setup(actuatorCount, 0, 0);
 }
 
-void RingArray::setDebugFunc(void (*func)(char*)){
-	actuators.setDebugFunc(func);
-}
-
-void RingArray::update(long delta){
+void RingArray::update(unsigned long delta){
 	if(!enabled) return;
 
 	theta += (delta / 1000.0f) / 60.0f * rpm;

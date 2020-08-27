@@ -1,6 +1,8 @@
 #include "LRAArray.h"
 #include "Wire.h"
 
+#include "Logger.h"
+
 #define DBG true
 
 /*
@@ -70,9 +72,7 @@ bool LRAArray::isOk(uint8_t id){
 }
 
 void LRAArray::calibrate(){
-	if(debugFunc){
-		debugFunc("Init status");
-	}
+	Logger::getGlobal()->info("Init status");
 
 	char buffer[45] = "Init status ";
 	for (uint8_t actuatorID = 0; actuatorID < MAX_ACTUATORS; actuatorID++) {
@@ -88,9 +88,7 @@ void LRAArray::calibrate(){
 		thisStatus = driver.begin();
 		if (thisStatus == HAPTIC_SUCCESS) {
 			buffer[12+actuatorID] = 'O';
-			if(debugFunc){
-				debugFunc(buffer);
-			}
+			Logger::getGlobal()->info(buffer);
 
 			driver.setActuatorType(LRA);
 			driver.playScript(0);       // Reset/Init
@@ -99,9 +97,7 @@ void LRAArray::calibrate(){
 		}else{
 
 			buffer[12+actuatorID] = '-';
-			if(debugFunc){
-				debugFunc(buffer);
-			}
+			Logger::getGlobal()->info(buffer);
 		}
 
 		actuatorStatus[actuatorID] = thisStatus;
@@ -114,8 +110,4 @@ void LRAArray::disableAll(){
 		setValue(i, 0);
 		driver.setMode(INACTIVE_MODE);
 	}
-}
-
-void LRAArray::setDebugFunc(void (*func)(char*)){
-	this->debugFunc = func;
 }

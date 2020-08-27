@@ -7,8 +7,7 @@ class RingArray {
 	public:
 		void setup();
 		void calibrate();
-		void setDebugFunc(void (*func)(char*));
-		void update(long delta);
+		void update(unsigned long delta);
 
 		bool enabled;
 		int rpm = 0;

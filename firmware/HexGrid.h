@@ -21,7 +21,6 @@ class HexGrid{
 		void disable(uint8_t cellID);
 		void calibrate();
 		void disableAll();
-		void setDebugFunc(void (*func)(char*));
 
 	protected:
 		LRAArray actuators;
