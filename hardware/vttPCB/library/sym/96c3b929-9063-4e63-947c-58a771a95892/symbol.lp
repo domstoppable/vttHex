@@ -1,5 +1,5 @@
 (librepcb_symbol 96c3b929-9063-4e63-947c-58a771a95892
- (name "ESP32")
+ (name "ESP32-DevKit")
  (description "")
  (keywords "")
  (author "Dominic Canare")
