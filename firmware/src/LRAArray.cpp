@@ -96,7 +96,7 @@ void LRAArray::calibrate(){
 
 			driver.setActuatorType(LRA);
 			driver.playScript(0);       // Reset/Init
-			driver.playScript(4);       // LRA Calibrate
+			driver.writeRegScript(calibrate_mplus_0934w);
 			driver.setMode(INACTIVE_MODE);
 		}else{
 
