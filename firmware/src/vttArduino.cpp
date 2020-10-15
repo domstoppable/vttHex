@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "VTTDevice.h"
 
 VTTDevice vtt;

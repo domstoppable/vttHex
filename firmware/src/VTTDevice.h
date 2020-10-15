@@ -11,8 +11,10 @@
 #include "protocol.h"
 #include "SoundBite.h"
 #include "RingArray.h"
+#include "LoopTimer.h"
 
 #define CALIBRATE_BUTTON 32
+#define BUTTON_2 33
 #define ACTUATOR_COUNT 3
 
 class CombinedLogger: public Logger {
@@ -39,6 +41,7 @@ class VTTDevice {
 		LoopTimer loopTimer;
 
 		HexGrid grid;
+//		RingArray ring;
 		SoundBite soundBite;
 
 		Display display;

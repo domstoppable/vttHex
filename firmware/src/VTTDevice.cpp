@@ -12,15 +12,21 @@ void VTTDevice::setup(){
 
 	Logger::setGlobal(new CombinedLogger(&display));
 	grid.setup();
+	//ring.setup();
 
 	pinMode(CALIBRATE_BUTTON, INPUT_PULLUP);
+	pinMode(BUTTON_2, INPUT_PULLUP);
 
 	Logger::getGlobal()->info("Ready :)");
 }
 
 void VTTDevice::update(){
+	unsigned long timeDelta = loopTimer.update();
+	//ring.update(timeDelta);
+
 	if(digitalRead(CALIBRATE_BUTTON) == LOW){
 		grid.calibrate();
+		//ring.calibrate();
 		Logger::getGlobal()->info("Ready :)");
 	}
 
@@ -57,11 +63,13 @@ void VTTDevice::update(){
 
 		if(phone != 255){
 			grid.enable(phone, intensity);
+			//ring.enable(pitch, (float)intensity/255.0f);
 			sprintf(msg, " %02d ON     %03d Pitch  %03d Volume ", phone, pitch, intensity);
 			display.showText(msg);
 		}
 	}else if(cmd == CMD_STOP){
 		grid.disableAll();
+		//ring.disable();
 		display.showText("");
 	}else if(cmd == CMD_SOUNDBITE){
 		uint8_t period = nextByte();
@@ -101,6 +109,7 @@ void VTTDevice::playBite(){
 		Sample sample = soundBite.samples[sampleIdx];
 		if(sample != lastSample){
 			grid.enable(sample.phone, sample.intensity);
+			//ring.enable(sample.pitch, (float)sample.intensity/255.0f);
 
 			sprintf(msg, " %02d ON     %03d Pitch  %03d Volume ", sample.phone, sample.pitch, sample.intensity);
 			display.showText(msg);
@@ -108,5 +117,6 @@ void VTTDevice::playBite(){
 		}
 	}
 	grid.disableAll();
+	//ring.disable();
 	Logger::getGlobal()->debug("/SoundBite");
 }

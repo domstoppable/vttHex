@@ -47,7 +47,7 @@ void LRAArray::setValue(uint8_t value){
 	}
 }
 
-void LRAArray::sendThenDisable(uint8_t id, uint8_t value) {
+void LRAArray::sendThenDisableMux(uint8_t id, uint8_t value) {
 	switchTo(id);
 	setValue(value);
 	disableMuxForActuator(id);
@@ -57,13 +57,17 @@ void LRAArray::disableMuxForActuator(uint8_t id) {
 	MuxedActuator muxedActuator = toMuxed(id);
 
 	Wire.beginTransmission(muxedActuator.muxAddress);
-	Wire.write(0);
+	Wire.write(0x00);
 	Wire.endTransmission();
 }
 
 void LRAArray::setValue(uint8_t id, uint8_t value) {
 	if(isOk(id)){
-		sendThenDisable(id, value);
+//		Serial.print("Send then disable mux");
+//		Serial.print(id);
+//		Serial.print(' ');
+//		Serial.println(value);
+		sendThenDisableMux(id, value);
 	}
 }
 
@@ -106,8 +110,31 @@ void LRAArray::calibrate(){
 }
 
 void LRAArray::disableAll(){
-	for(uint8_t i = 0; i<this->arrayCount; i++){
-		setValue(i, 0);
+	uint8_t id = 0;
+	for(id = 0; id+7<this->arrayCount; id+=8){
+//		Serial.print("Disable mux for ");
+//		Serial.println(id);
+		MuxedActuator muxedActuator = toMuxed(id);
+
+		Wire.beginTransmission(muxedActuator.muxAddress);
+		Wire.write(0xFF);
+		Wire.endTransmission();
+
 		driver.setMode(INACTIVE_MODE);
+		disableMuxForActuator(id);
 	}
+
+	MuxedActuator lastMux = toMuxed(id);
+	uint8_t addressBits = 0;
+	for(uint8_t i=0; i+id<this->arrayCount; i++){
+		addressBits += 1 << i;
+	}
+//	Serial.print("Disable mux for ");
+//	Serial.println(addressBits);
+	Wire.beginTransmission(lastMux.muxAddress);
+	Wire.write(addressBits);
+	Wire.endTransmission();
+
+	driver.setMode(INACTIVE_MODE);
+	disableMuxForActuator(id);
 }

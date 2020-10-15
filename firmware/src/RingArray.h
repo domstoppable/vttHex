@@ -8,14 +8,17 @@ class RingArray {
 		void setup();
 		void calibrate();
 		void update(unsigned long delta);
+		void enable();
+		void enable(int rpm, float intensity);
+		void disable();
 
-		bool enabled;
-		int rpm = 0;
-		uint8_t intensity = 0;
+		bool enabled = false;
+		int rpm = 60;
+		float intensity = 1.0f;
+		float theta = 0;
 
 	protected:
 		LRAArray actuators;
-		float theta = 0;
 		uint8_t actuatorCount = 4;
 };
 

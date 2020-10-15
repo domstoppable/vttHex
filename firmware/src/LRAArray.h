@@ -22,7 +22,7 @@ class LRAArray{
 		void setValue(uint8_t id, uint8_t value);
 		bool isOk(uint8_t id);
 		void disableMuxForActuator(uint8_t id);
-		void sendThenDisable(uint8_t id, uint8_t value);
+		void sendThenDisableMux(uint8_t id, uint8_t value);
 
 		MuxedActuator toMuxed(uint8_t logicalID);
 
