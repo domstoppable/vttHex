@@ -16,7 +16,7 @@ CMD_PLAY_BITE        = 0x09
 
 phoneIndexLookup = {phone:idx for (idx,phone) in enumerate(tools.phoneLayout)}
 
-minIntensity = 200
+minIntensity = 0
 
 class SerialComms():
 	def open(self, port, baud=115200):

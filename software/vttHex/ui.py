@@ -324,6 +324,8 @@ def exp(x):
 	return 10**x
 
 class LinearLogSliders(QtWidgets.QWidget):
+	linearValueChanged = QtCore.Signal(int)
+
 	def __init__(self, parent=None):
 		super().__init__(parent=parent)
 
@@ -347,6 +349,7 @@ class LinearLogSliders(QtWidgets.QWidget):
 		self.titleLabel.setText(text)
 
 	def onLinearSliderMoved(self, value):
+		self.linearValueChanged.emit(value)
 		self.logSlider.setValue(100*log(value+1))
 
 	def onLogSliderMoved(self, value):

@@ -31,6 +31,12 @@ class VttHexApp(QtWidgets.QApplication):
 		self.paramChangeTimer.timeout.connect(self.uploadSoundBite)
 
 		self.useBites = False
+		self.lastCellID = None
+		self.stopIntensityTimer = QtCore.QTimer()
+		self.stopIntensityTimer.setSingleShot(True)
+		self.stopIntensityTimer.setInterval(1000)
+		self.stopIntensityTimer.timeout.connect(self.onTileReleased)
+
 
 	def startSerial(self):
 		self.serial = serial.SerialComms()
@@ -58,8 +64,15 @@ class VttHexApp(QtWidgets.QApplication):
 
 		window.intensitySliders.setText('Intensity')
 		window.intensitySliders.setRange(0, 100)
+		window.intensitySliders.linearValueChanged.connect(self.onIntensitySliderChanged)
 
 		self.window = window
+
+	def onIntensitySliderChanged(self, value):
+		if self.lastCellID is not None:
+			self.onTilePressed(self.lastCellID)
+			self.stopIntensityTimer.start()
+
 
 	def onParametersChanged(self, filename):
 		self.paramChangeTimer.start()
@@ -126,14 +139,15 @@ class VttHexApp(QtWidgets.QApplication):
 		self.window.pitchSliders.setLinearValue(int(pitch[0]))
 		self.window.intensitySliders.setLinearValue(int(intensity*100))
 
-	def onTilePressed(self, cellID, phone):
+	def onTilePressed(self, cellID):
+		self.lastCellID = cellID
 		self.serial.sendCombinedSignal(
 			cellID,
 			self.window.pitchSliders.getLinearValue(),
 			self.window.intensitySliders.getLinearValue()/100
 		)
 
-	def onTileReleased(self, cellID, phone):
+	def onTileReleased(self, cellID=None, phone=None):
 		self.serial.sendStop()
 
 def run():
