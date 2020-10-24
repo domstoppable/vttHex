@@ -13,7 +13,7 @@
 #include "RingArray.h"
 #include "LoopTimer.h"
 
-#define CALIBRATE_BUTTON 32
+#define BUTTON_1 32
 #define BUTTON_2 33
 #define ACTUATOR_COUNT 3
 
@@ -47,6 +47,7 @@ class VTTDevice {
 		Display display;
 
 		char msg[45];
+		uint8_t testID = 0;
 
 	public:
 		void setup();

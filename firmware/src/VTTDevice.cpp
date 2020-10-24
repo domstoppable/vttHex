@@ -14,7 +14,7 @@ void VTTDevice::setup(){
 	grid.setup();
 	//ring.setup();
 
-	pinMode(CALIBRATE_BUTTON, INPUT_PULLUP);
+	pinMode(BUTTON_1, INPUT_PULLUP);
 	pinMode(BUTTON_2, INPUT_PULLUP);
 
 	Logger::getGlobal()->info("Ready :)");
@@ -24,10 +24,22 @@ void VTTDevice::update(){
 	unsigned long timeDelta = loopTimer.update();
 	//ring.update(timeDelta);
 
-	if(digitalRead(CALIBRATE_BUTTON) == LOW){
-		grid.calibrate();
+	if(digitalRead(BUTTON_1) == LOW){
+		sprintf(msg, "T %02d", testID);
+		Logger::getGlobal()->debug(msg);
+		grid.testActuator(testID);
+
+
+		//grid.calibrate();
 		//ring.calibrate();
-		Logger::getGlobal()->info("Ready :)");
+		//Logger::getGlobal()->info("Ready :)");
+
+	}
+	if(digitalRead(BUTTON_2) == LOW){
+		testID = (testID + 1) % 12;
+		sprintf(msg, "TEST %02d", testID);
+		Logger::getGlobal()->debug(msg);
+		grid.testActuator(testID);
 	}
 
 	if(!flushToLatestCommand()){

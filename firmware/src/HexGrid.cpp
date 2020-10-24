@@ -1,7 +1,13 @@
 #include "HexGrid.h"
 
 void HexGrid::setup(){
-	actuators.setup(4, 0, 0);
+	actuators.setup(12, 0, 0);
+}
+
+void HexGrid::testActuator(uint8_t actuatorID){
+	actuators.setValue(actuatorID, 255);
+	delay(1000);
+	actuators.setValue(actuatorID, 0);
 }
 
 void HexGrid::enable(uint8_t cellID, uint8_t intensity){
