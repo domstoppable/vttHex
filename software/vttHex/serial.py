@@ -1,5 +1,6 @@
 import time
 import serial
+import socket
 
 from . import tools
 
@@ -14,25 +15,19 @@ CMD_STOP             = 0x07
 CMD_SOUNDBITE        = 0x08
 CMD_PLAY_BITE        = 0x09
 
-phoneIndexLookup = {phone:idx for (idx,phone) in enumerate(tools.phoneLayout)}
+minIntensity = 144
 
-minIntensity = 0
-
-class SerialComms():
-	def open(self, port, baud=115200):
-		self.serialObj = serial.Serial()
-		self.serialObj.port = port
-		self.serialObj.baudrate = baud
-
-		self.serialObj.open()
+class StreamComms():
+	def __init__(self, stream=None):
 		self.lastCombination = (0,0,0)
+		self.stream = stream
 
 	def sendFile(self, period, samples):
 		lenAsBytes = len(samples).to_bytes(length=2, byteorder='little')
 		msg = bytearray([ CMD_HEADER, CMD_SOUNDBITE, period, *lenAsBytes ])
 		self._send(msg)
 		for sample in samples:
-			sampleAsBytes = self._formatSignalAsBytes(sample[0], sample[1][0], sample[2])
+			sampleAsBytes = tools.formatSignalAsBytes(sample[0], sample[1][0], sample[2])
 
 			self._send(sampleAsBytes)
 
@@ -45,7 +40,7 @@ class SerialComms():
 		self._send(msg)
 
 	def sendPhoneState(self, phone, enabled):
-		self.sendCellState(phoneIndexLookup[phone], enabled)
+		self.sendCellState(tools.phoneIndexLookup[phone], enabled)
 
 	def sendCellState(self, cellID, enabled):
 		msg = bytearray([
@@ -65,26 +60,9 @@ class SerialComms():
 		msg = bytearray([
 			CMD_HEADER,
 			CMD_COMBINED_SIGNAL,
-			*self._formatSignalAsBytes(phoneOrCellID, pitch, intensity)
+			*tools.formatSignalAsBytes(phoneOrCellID, pitch, intensity)
 		])
 		self._send(msg)
-
-	def _formatSignalAsBytes(self, phoneOrCellID, pitch, intensity):
-		if isinstance(phoneOrCellID, str):
-			phoneOrCellID = phoneOrCellID[:2]
-			if phoneOrCellID in phoneIndexLookup:
-				cellID = phoneIndexLookup[phoneOrCellID[:2]]
-			else:
-				cellID = 255
-		elif phoneOrCellID is None:
-			cellID = 255
-		else:
-			cellID = phoneOrCellID
-
-		pitch = int(255 * (pitch / 1000))
-		intensity = int((255-minIntensity) * intensity + minIntensity)
-
-		return bytearray([ cellID, pitch, intensity ])
 
 	def sendStop(self):
 		self.lastCombination = (0,0,0)
@@ -96,16 +74,45 @@ class SerialComms():
 
 	def _send(self, msg):
 		try:
-			self.serialObj.write(msg)
+			self.stream.write(msg)
 		except Exception as exc:
 			print('EXCEPTION', exc)
 
 	def readLines(self):
 		lines = []
-		while self.serialObj.inWaiting() > 0:
-			lines.append(self.serialObj.readline().decode()[:-2])
+		while self.stream.inWaiting() > 0:
+			lines.append(self.stream.readline().decode()[:-2])
 
 		return lines
+
+class SerialComms(StreamComms):
+	def open(self, port, baud=115200):
+		self.serialObj = serial.Serial()
+		self.serialObj.port = port
+		self.serialObj.baudrate = baud
+		self.serialObj.open()
+
+		self.stream = self.serialObj
+
+class TcpComms(SerialComms):
+	def open(self, host, port=1234):
+		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.socket.connect((host, port))
+		self.socket.setblocking(False)
+
+		self.stream = self.socket
+
+	def readLines(self):
+		return []
+
+	def _send(self, msg):
+		try:
+			self.stream.sendall(msg)
+		except Exception as exc:
+			print('EXCEPTION', exc)
+
+
+
 
 def bytesToReadable(byteArray):
 	readable = ''

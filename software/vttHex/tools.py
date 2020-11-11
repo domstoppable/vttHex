@@ -8,6 +8,8 @@ from praatio import tgio
 phoneLayout = ['B', 'D', 'G', 'HH', 'DH', None, 'P', 'T', 'K', 'TH', 'F', None, 'M', 'N', 'SH', 'S', 'V', 'W', 'Y', 'NG', 'CH', 'ZH', 'Z', 'L', 'R', 'ER', 'JH', 'AH', 'AO', 'AA', 'AW', 'UW', 'UH', 'OW', 'OY', 'AX', 'IY', 'EY', 'IH', 'EH', 'AE', 'AY', ]
 vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IY','OW','OY']
 
+phoneIndexLookup = {phone:idx for (idx,phone) in enumerate(phoneLayout)}
+
 def findAsset(*resourceParts):
 	resource = '/'.join(['assets'] + list(resourceParts))
 	return pkg_resources.resource_filename(__name__, resource)
@@ -50,8 +52,16 @@ class TimeSeries:
 		self.accumulatedTime = 0
 
 class SignalPlayer():
-	def open(self, filename):
-		textGridFile = findAsset(f'MBOPP/audio/{filename}.TextGrid')
+	def open(self, filename, folder=None):
+		if folder is None:
+			textGridFile = findAsset(f'MBOPP/audio/{filename}.TextGrid')
+			pitchFile = findAsset(f'MBOPP/audio/{filename}.f0.csv')
+			wavFile = findAsset(f'MBOPP/audio/{filename}.wav')
+		else:
+			textGridFile = folder/'grids'/(filename + '.TextGrid')
+			pitchFile = folder/(filename + '.f0.csv')
+			wavFile = folder/(filename + '.wav')
+
 		textgrid = tgio.openTextgrid(textGridFile)
 
 		phonegrid = textgrid.tierDict['phones'].entryList
@@ -61,7 +71,6 @@ class SignalPlayer():
 			self.phoneSeries.addData(start, label)
 		self.phoneSeries.addData(stop, None)
 
-		pitchFile = findAsset(f'MBOPP/audio/{filename}.f0.csv')
 		self.pitchSeries = TimeSeries()
 		with open(pitchFile) as csvFile:
 			for line in csvFile.readlines():
@@ -69,8 +78,7 @@ class SignalPlayer():
 				self.pitchSeries.addData(timestamp, (pitch, confidence))
 
 		windowSize = 0.050
-		wavFile = findAsset(f'MBOPP/audio/{filename}.wav')
-		wav = wave.open(wavFile)
+		wav = wave.open(str(wavFile))
 		if wav.getsampwidth() == 2:
 			zero = 0
 			maxValue = 2**15
@@ -112,3 +120,25 @@ class SignalPlayer():
 	def asSequence(self, period):
 		while not (self.phoneSeries.isDone() or self.pitchSeries.isDone() or self.intensitySeries.isDone()):
 			yield self.update(period)
+
+
+
+def formatSignalAsBytes(phoneOrCellID, pitch, intensity):
+	if isinstance(phoneOrCellID, str):
+		phoneOrCellID = phoneOrCellID[:2]
+		if phoneOrCellID in phoneIndexLookup:
+			cellID = phoneIndexLookup[phoneOrCellID[:2]]
+		else:
+			cellID = 255
+	elif phoneOrCellID is None:
+		cellID = 255
+	else:
+		cellID = phoneOrCellID
+
+	if isinstance(pitch, tuple):
+		pitch = pitch[0]
+
+	pitch = int(255 * (pitch / 1000))
+	intensity = int(255*intensity)
+
+	return bytearray([ cellID, pitch, intensity ])

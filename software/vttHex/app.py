@@ -38,13 +38,21 @@ class VttHexApp(QtWidgets.QApplication):
 		self.stopIntensityTimer.timeout.connect(self.onTileReleased)
 
 
-	def startSerial(self):
-		self.serial = serial.SerialComms()
-		try:
-			self.serial.open('/dev/ttyUSB0')
-			self.serialTimer.start()
-		except Exception as exc:
-			print(exc)
+	def startSerial(self, useTCP=True):
+		if not useTCP:
+			self.serial = serial.SerialComms()
+			try:
+				self.serial.open('/dev/ttyUSB0')
+				self.serialTimer.start()
+			except Exception as exc:
+				print(exc)
+		else:
+			self.serial = serial.TcpComms()
+			try:
+				self.serial.open('192.168.0.107', 1234)
+				self.serialTimer.start()
+			except Exception as exc:
+				print(exc)
 
 	def exec(self):
 		self.window.show()
