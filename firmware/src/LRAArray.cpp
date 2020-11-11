@@ -63,10 +63,6 @@ void LRAArray::disableMuxForActuator(uint8_t id) {
 
 void LRAArray::setValue(uint8_t id, uint8_t value) {
 	if(isOk(id)){
-//		Serial.print("Send then disable mux");
-//		Serial.print(id);
-//		Serial.print(' ');
-//		Serial.println(value);
 		sendThenDisableMux(id, value);
 	}
 }
@@ -75,7 +71,7 @@ bool LRAArray::isOk(uint8_t id){
 	return actuatorStatus[id] == HAPTIC_SUCCESS;
 }
 
-void LRAArray::calibrate(){
+void LRAArray::calibrate(bool fast){
 	Logger::getGlobal()->info("Init status");
 
 	char buffer[45] = "Init status ";
@@ -85,7 +81,6 @@ void LRAArray::calibrate(){
 			continue;
 		}
 
-		uint8_t data;
 		uint8_t thisStatus = -99;
 
 		switchTo(actuatorID);
@@ -96,7 +91,26 @@ void LRAArray::calibrate(){
 
 			driver.setActuatorType(LRA);
 			driver.playScript(0);       // Reset/Init
-			driver.writeRegScript(calibrate_mplus_0934w);
+			if(fast){
+				driver.writeRegScript(default_mplus_0934w);
+				setValue(actuatorID, 255);
+				delay(100);
+				setValue(actuatorID, 0);
+			}else{
+				driver.writeRegScript(calibrate_mplus_0934w);
+				char str[45];
+				uint8_t feedbackControl = driver.readReg(DRV2605_REG_FEEDBACK);
+				sprintf(str, "Feedback control %d", feedbackControl);
+				Logger::getGlobal()->info(str);
+
+				uint8_t calComp = driver.readReg(DRV2605_REG_AUTOCALCOMP);
+				sprintf(str, "calComp          %d", calComp);
+				Logger::getGlobal()->info(str);
+
+				uint8_t calBemf = driver.readReg(DRV2605_REG_AUTOCALEMP);
+				sprintf(str, "calBemf          %d", calBemf);
+				Logger::getGlobal()->info(str);
+			}
 			driver.setMode(INACTIVE_MODE);
 		}else{
 
@@ -112,8 +126,6 @@ void LRAArray::calibrate(){
 void LRAArray::disableAll(){
 	uint8_t id = 0;
 	for(id = 0; id+7<this->arrayCount; id+=8){
-//		Serial.print("Disable mux for ");
-//		Serial.println(id);
 		MuxedActuator muxedActuator = toMuxed(id);
 
 		Wire.beginTransmission(muxedActuator.muxAddress);
@@ -129,8 +141,6 @@ void LRAArray::disableAll(){
 	for(uint8_t i=0; i+id<this->arrayCount; i++){
 		addressBits += 1 << i;
 	}
-//	Serial.print("Disable mux for ");
-//	Serial.println(addressBits);
 	Wire.beginTransmission(lastMux.muxAddress);
 	Wire.write(addressBits);
 	Wire.endTransmission();
