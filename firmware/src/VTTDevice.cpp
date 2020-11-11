@@ -65,7 +65,7 @@ void VTTDevice::setup(){
 		Serial.read();
 	}
 
-	commandStreams[0].configure(&Serial, &grid, &display);
+	commandStreams[0].configure(&Serial, &grid, &display, soundBites);
 
 	char msg[45];
 	sprintf(msg, "Ready :)\n%s.local\n%s", hostname, ipAsChars);
@@ -81,7 +81,7 @@ void VTTDevice::update(){
 		Logger::getGlobal()->debug("New client");
 		WiFiClient* clientPtr = new WiFiClient();
 		*clientPtr = client;
-		commandStreams[1].configure(clientPtr, &grid, &display);
+		commandStreams[1].configure(clientPtr, &grid, &display, soundBites);
 		Logger::getGlobal()->debug("New TCP client");
 	}
 

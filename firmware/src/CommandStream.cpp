@@ -10,8 +10,8 @@ uint8_t CMD_PAYLOAD_SIZES[NUM_COMMANDS] = {
 	1,
 	3,
 	0,
-	8,
-	0
+	9,
+	1
 };
 
 void CommandStream::update(){
@@ -61,6 +61,7 @@ void CommandStream::update(){
 		//ring.disable();
 		display->showText("");
 	}else if(cmd == CMD_SOUNDBITE){
+		uint8_t id = nextByte();
 		uint32_t period = 0;
 		for(int i=0; i<4; i++){
 			uint8_t b = nextByte();
@@ -75,15 +76,15 @@ void CommandStream::update(){
 		sprintf(msg, "S-Bite in  %03d samples %03d period", sampleCount, period);
 		Logger::getGlobal()->debug(msg);
 
-		soundBite.init(period, sampleCount);
+		soundBites[id].init(period, sampleCount);
 		for(int i=0; i<sampleCount; i++){
-			soundBite.samples[i].phone = readBlocking();
-			soundBite.samples[i].pitch = readBlocking();
-			soundBite.samples[i].intensity = readBlocking();
+			soundBites[id].samples[i].phone = readBlocking();
+			soundBites[id].samples[i].pitch = readBlocking();
+			soundBites[id].samples[i].intensity = readBlocking();
 		}
 	}else if(cmd == CMD_PLAY_BITE){
 		stream->println("Play SoundBite");
-		playBite();
+		playBite(nextByte());
 	}else{
 		Logger::getGlobal()->debug("???");
 		stream->println(cmd);
@@ -145,18 +146,18 @@ byte CommandStream::nextByte(){
 	}
 }
 
-void CommandStream::playBite(){
+void CommandStream::playBite(uint8_t id){
 	char msg[45];
 	long startTime = millis();
 	long now = startTime;
 
 	long sampleIdx = 0;
 	Sample lastSample;
-	while(sampleIdx < soundBite.sampleCount){
+	while(sampleIdx < soundBites[id].sampleCount){
 		long delta = millis() - startTime;
-		sampleIdx = int(delta / soundBite.period);
+		sampleIdx = int(delta / soundBites[id].period);
 
-		Sample sample = soundBite.samples[sampleIdx];
+		Sample sample = soundBites[id].samples[sampleIdx];
 		if(sample != lastSample){
 			grid->enable(sample.phone, sample.intensity + 144);
 			//ring.enable(sample.pitch, (float)sample.intensity/255.0f);
@@ -168,5 +169,6 @@ void CommandStream::playBite(){
 	}
 	grid->disableAll();
 	//ring.disable();
-	Logger::getGlobal()->debug("/SoundBite");
+	sprintf(msg, "/SoundBite %d", id);
+	Logger::getGlobal()->debug(msg);
 }
