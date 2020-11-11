@@ -8,10 +8,12 @@
 
 #include "HexGrid.h"
 #include "Display.h"
-#include "protocol.h"
+#include "CommandStream.h"
 #include "SoundBite.h"
 #include "RingArray.h"
 #include "LoopTimer.h"
+
+#include <LinkedList.h>
 
 #define BUTTON_1 32
 #define BUTTON_2 33
@@ -42,7 +44,7 @@ class VTTDevice {
 
 		HexGrid grid;
 //		RingArray ring;
-		SoundBite soundBite;
+//		SoundBite soundBite;
 
 		Display display;
 
@@ -54,8 +56,9 @@ class VTTDevice {
 		void update();
 
 	protected:
-		void playBite();
+		//void playBite(SoundBite* bite);
 		void displayDebugMessage(char* msg);
+		LinkedList<CommandStream*> commandStreams = LinkedList<CommandStream*>();
 
 };
 
