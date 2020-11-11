@@ -4,12 +4,16 @@
 #include "WIFI_Credentials.h"
 
 #include <WiFi.h>
-//#include <ESPmDNS.h>
+#include <ESPmDNS.h>
 
 WiFiServer server;
 WiFiClient client;
 
+char hostname[] = "vtt00";
+
 void VTTDevice::setup(){
+	char ipAsChars[16] = "---.---.---.---";
+
 	display.setup();
 	display.showText("   Vibey\nTranscribey\n\n   v2.0");
 	WiFi.begin(WIFI_SSID, WIFI_KEY);
@@ -44,16 +48,13 @@ void VTTDevice::setup(){
 
 		int ipStrLength = ip.toString().length()+1;
 
-		char ipAsChars[ipStrLength];
 		ip.toString().toCharArray(ipAsChars, ipStrLength);
 
 		Logger::getGlobal()->info(ipAsChars);
 
-/*
-		if (!MDNS.begin("vtt00")) {
-			Serial.println("Error setting up MDNS responder!");
+		if (!MDNS.begin(hostname)) {
+			Logger::getGlobal()->error("Error setting up MDNS responder!");
 		}
-*/
 		delay(2000);
 	}
 
@@ -66,7 +67,9 @@ void VTTDevice::setup(){
 
 	commandStreams[0].configure(&Serial, &grid, &display);
 
-	Logger::getGlobal()->info("Ready :)");
+	char msg[45];
+	sprintf(msg, "Ready :)\n%s.local\n%s", hostname, ipAsChars);
+	Logger::getGlobal()->info(msg);
 }
 
 void VTTDevice::update(){
