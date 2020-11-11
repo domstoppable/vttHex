@@ -16,7 +16,7 @@
 #define CMD_SOUNDBITE         0x08
 #define CMD_PLAY_BITE         0x09
 
-#define MAX_CMD_SIZE 65536
+#define MAX_CMD_SIZE 1024
 #define NUM_COMMANDS 10
 
 extern uint8_t CMD_PAYLOAD_SIZES[NUM_COMMANDS];
@@ -24,11 +24,13 @@ extern uint8_t commandBuffer[MAX_CMD_SIZE];
 
 class CommandStream {
 public:
-	HexGrid* grid;
-	Display* display;
-	Stream* stream;
+	HexGrid* grid = nullptr;
+	Display* display = nullptr;
+	Stream* stream = nullptr;
 
-	CommandStream(Stream* stream, HexGrid* hexGrid, Display* display){
+	CommandStream(){}
+
+	void configure(Stream* stream, HexGrid* hexGrid, Display* display){
 		this->stream = stream;
 		this->grid = hexGrid;
 		this->display = display;
@@ -50,7 +52,6 @@ private:
 	byte readBlocking();
 	void flush();
 	void playBite();
-
 };
 
 #endif

@@ -13,8 +13,6 @@
 #include "RingArray.h"
 #include "LoopTimer.h"
 
-#include <LinkedList.h>
-
 #define BUTTON_1 32
 #define BUTTON_2 33
 #define ACTUATOR_COUNT 3
@@ -58,8 +56,7 @@ class VTTDevice {
 	protected:
 		//void playBite(SoundBite* bite);
 		void displayDebugMessage(char* msg);
-		LinkedList<CommandStream*> commandStreams = LinkedList<CommandStream*>();
-
+		CommandStream commandStreams[2];
 };
 
 #endif

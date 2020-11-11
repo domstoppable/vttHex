@@ -15,11 +15,13 @@ uint8_t CMD_PAYLOAD_SIZES[NUM_COMMANDS] = {
 };
 
 void CommandStream::update(){
-	if(!flushToLatestCommand()){
+	if(stream == nullptr){
 		return;
 	}
 
-	Logger::getGlobal()->debug(".");
+	if(!flushToLatestCommand()){
+		return;
+	}
 
 	char msg[45];
 	byte cmd = nextByte();
@@ -62,22 +64,13 @@ void CommandStream::update(){
 		uint32_t period = 0;
 		for(int i=0; i<4; i++){
 			uint8_t b = nextByte();
-			Serial.print("Byte: ");
-			Serial.println(b);
 			period += b << (i*8);
 		}
-		Serial.print("Period = ");
-		Serial.println(period);
-
 		uint32_t sampleCount = 0;
 		for(int i=0; i<4; i++){
 			uint8_t b = nextByte();
-			Serial.print("Byte: ");
-			Serial.println(b);
 			sampleCount += b << (i*8);
 		}
-		Serial.print("Sample count = ");
-		Serial.println(sampleCount);
 
 		sprintf(msg, "S-Bite in  %03d samples %03d period", sampleCount, period);
 		Logger::getGlobal()->debug(msg);

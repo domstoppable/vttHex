@@ -4,13 +4,10 @@
 #include "WIFI_Credentials.h"
 
 #include <WiFi.h>
-#include <ESPmDNS.h>
+//#include <ESPmDNS.h>
 
 WiFiServer server;
 WiFiClient client;
-
-CommandStream* commandStreams[10];
-int commandStreamCount = 0;
 
 void VTTDevice::setup(){
 	display.setup();
@@ -52,9 +49,11 @@ void VTTDevice::setup(){
 
 		Logger::getGlobal()->info(ipAsChars);
 
+/*
 		if (!MDNS.begin("vtt00")) {
 			Serial.println("Error setting up MDNS responder!");
 		}
+*/
 		delay(2000);
 	}
 
@@ -64,7 +63,8 @@ void VTTDevice::setup(){
 	while(Serial.available() > 0){
 		Serial.read();
 	}
-	commandStreams.add(new CommandStream(&Serial, &grid, &display));
+
+	commandStreams[0].configure(&Serial, &grid, &display);
 
 	Logger::getGlobal()->info("Ready :)");
 }
@@ -78,8 +78,8 @@ void VTTDevice::update(){
 		Logger::getGlobal()->debug("New client");
 		WiFiClient* clientPtr = new WiFiClient();
 		*clientPtr = client;
-		commandStreams.add(new CommandStream(clientPtr, &grid, &display));
-		Logger::getGlobal()->debug("Client ok");
+		commandStreams[1].configure(clientPtr, &grid, &display);
+		Logger::getGlobal()->debug("New TCP client");
 	}
 
 	if(digitalRead(BUTTON_1) == LOW){
@@ -99,7 +99,7 @@ void VTTDevice::update(){
 		grid.testActuator(testID);
 	}
 
-	for(int i=0; i<commandStreams.size(); i++){
-		commandStreams.get(i)->update();
+	for(int i=0; i<2; i++){
+		commandStreams[i].update();
 	}
 }
