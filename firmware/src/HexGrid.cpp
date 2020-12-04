@@ -1,7 +1,23 @@
 #include "HexGrid.h"
 
+#include "LRAArray.h"
+
+#define EN_R 23
+#define EN_G 19
+#define EN_B 16
+
+#define RS0 33
+#define RS1 32
+
+#define GS0 5
+#define GS1 18
+
+#define BS0 27
+#define BS1 14
+
 void HexGrid::setup(){
-	actuators.setup(12, 0, 0);
+	actuators.setup(EN_R, EN_G, EN_B, RS0, RS1, GS0, GS1, BS0, BS1);
+	actuators.calibrate(true);
 }
 
 void HexGrid::testActuator(uint8_t actuatorID){

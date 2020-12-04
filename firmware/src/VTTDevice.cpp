@@ -27,10 +27,6 @@ void VTTDevice::setup(){
 	Logger::setGlobal(GlobalLogger);
 
 	grid.setup();
-	//ring.setup();
-
-	pinMode(BUTTON_1, INPUT_PULLUP);
-	pinMode(BUTTON_2, INPUT_PULLUP);
 
 	long startWait = millis();
 	Logger::getGlobal()->info("Waiting for wifi...");
@@ -83,23 +79,6 @@ void VTTDevice::update(){
 		*clientPtr = client;
 		commandStreams[1].configure(clientPtr, &grid, &display, soundBites);
 		Logger::getGlobal()->debug("New TCP client");
-	}
-
-	if(digitalRead(BUTTON_1) == LOW){
-		sprintf(msg, "T %02d", testID);
-		Logger::getGlobal()->debug(msg);
-		grid.testActuator(testID);
-
-		grid.calibrate();
-		//ring.calibrate();
-		//Logger::getGlobal()->info("Ready :)");
-
-	}
-	if(digitalRead(BUTTON_2) == LOW){
-		testID = (testID + 1) % 12;
-		sprintf(msg, "TEST %02d", testID);
-		Logger::getGlobal()->debug(msg);
-		grid.testActuator(testID);
 	}
 
 	for(int i=0; i<2; i++){

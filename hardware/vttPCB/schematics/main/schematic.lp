@@ -1380,14 +1380,6 @@
    (to (junction 9f2f920d-a67b-4134-9f85-78aff8cc6366))
   )
  )
- (netsegment d684825c-e8eb-43d9-98f2-e941368911ba
-  (net 5bf77fa2-ac76-4a64-87da-e6634d447217)
-  (junction ad22f0fb-bb6a-49fa-be32-1e1cd690d113 (position -78.74 10.16))
-  (line e55b5fc3-1ef8-4214-bdc3-56a39bf0a17e (width 0.15875)
-   (from (symbol 5fd456a4-2bb2-469e-8262-180939f07229) (pin 130ad078-547b-4844-9a94-4131428dc2ff))
-   (to (junction ad22f0fb-bb6a-49fa-be32-1e1cd690d113))
-  )
- )
  (netsegment d6f7f393-e3a5-49e1-9307-e034a6a47138
   (net 9bae391e-ce88-404e-83c9-2d661849241c)
   (junction 5b69a21e-0298-430b-874c-a6ab976110ff (position 22.86 45.72))

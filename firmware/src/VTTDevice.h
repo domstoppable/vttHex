@@ -10,12 +10,7 @@
 #include "Display.h"
 #include "CommandStream.h"
 #include "SoundBite.h"
-#include "RingArray.h"
 #include "LoopTimer.h"
-
-#define BUTTON_1 32
-#define BUTTON_2 33
-#define ACTUATOR_COUNT 3
 
 class CombinedLogger: public Logger {
 	protected:
