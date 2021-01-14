@@ -35,7 +35,7 @@ void CommandStream::update(){
 		sprintf(msg, "%02d Enable", cellID);
 		Logger::getGlobal()->debug(msg);
 
-		grid->enable(cellID, 255);
+		grid->enable(cellID, 255, 0);
 	}else if(cmd == CMD_ACTUATOR_DISABLE){
 		byte cellID = nextByte();
 		sprintf(msg, "%02d Disable", cellID);
@@ -51,7 +51,7 @@ void CommandStream::update(){
 		byte intensity = nextByte();
 
 		if(phone != 255){
-			grid->enable(phone, intensity);
+			grid->enable(phone, intensity, pitch);
 			//ring.enable(pitch, (float)intensity/255.0f);
 			sprintf(msg, " %02d ON     %03d Pitch  %03d Volume ", phone, pitch, intensity);
 			display->showText(msg);
@@ -159,7 +159,7 @@ void CommandStream::playBite(uint8_t id){
 
 		Sample sample = soundBites[id].samples[sampleIdx];
 		if(sample != lastSample){
-			grid->enable(sample.phone, sample.intensity + 144);
+			grid->enable(sample.phone, sample.intensity, sample.intensity);
 			//ring.enable(sample.pitch, (float)sample.intensity/255.0f);
 
 			sprintf(msg, " %02d ON     %03d Pitch  %03d Volume ", sample.phone, sample.pitch, sample.intensity);

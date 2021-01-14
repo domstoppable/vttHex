@@ -14,11 +14,16 @@ const int activationMap[][2] = {
 	{ 4, 8}, { 8, 8}, { 8, 0}, { 0, 0}, { 0, 4}, { 4, 4},
 };
 
+typedef struct {
+	int driver;
+	int channel;
+} DriverChannelPair;
+
 class HexGrid{
 	public:
 		void setup();
 		void testActuator(uint8_t actuatorID);
-		void enable(uint8_t cellID, uint8_t intensity);
+		void enable(uint8_t cellID, uint8_t intensity, uint8_t pitch);
 		void disable(uint8_t cellID);
 		void calibrate();
 		void disableAll();
@@ -28,6 +33,7 @@ class HexGrid{
 		uint8_t currentCell = 255;
 
 		void _setValue(uint8_t idA, uint8_t idB, uint8_t value);
+
 };
 
 #endif

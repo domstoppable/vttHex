@@ -64,19 +64,19 @@ void MuxedDriver::calibrate(bool fast){
 	if (status.ok()) {
 		Serial.println("\t** init ok! **\n");
 		hapticDriver.writeRegScript(default_jinlong_G1040003D);
-			for(int i=0; i<8; i++){
-				if(!fast){
-					if(setChannel(i)){
-						doFullCalibration();
-					}
-				}else{
-					if(setValue(i, 255)){
-						delay(150);
-						setValue(i, 0);
-						delay(100);
-					}
+		for(int i=0; i<8; i++){
+			if(!fast){
+				if(setChannel(i)){
+					doFullCalibration();
+				}
+			}else{
+				if(setValue(i, 255)){
+					delay(150);
+					setValue(i, 0);
+					delay(100);
 				}
 			}
+		}
 
 		status = checkStatus();
 	}else{

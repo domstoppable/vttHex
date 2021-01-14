@@ -5,13 +5,13 @@
 #include "Arduino.h"
 #include "MuxedDriver.h"
 
-
 class LRAArray {
 	public:
 		void setup();
 
 		void calibrate(bool fast=true);
 		void setValue(int id, int value);
+		void setDriverChannelValue(int driverID, int channelID, int value);
 
 		void disableAll();
 
@@ -24,7 +24,6 @@ class LRAArray {
 		int busPositions[5] = { -1, -1, -1, -1, -1 };
 
 		void switchToDriver(int driverID);
-		void setDriverChannel(int driverID, int channelID);
 };
 
 #endif

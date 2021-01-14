@@ -88,14 +88,17 @@ void LRAArray::setValue(int id, int value) {
 	if(id < 12){
 		int driverID = id / 4;
 		int channelID = id % 4;
-
-		switchToDriver(driverID);
-		drivers[driverID].setValue(channelID, value);
+		setDriverChannelValue(driverID, channelID, value);
 	}
 }
 
+void LRAArray::setDriverChannelValue(int driverID, int channelID, int value){
+	switchToDriver(driverID);
+	drivers[driverID].setValue(channelID, value);
+}
+
 void LRAArray::disableAll(){
-	for(int id=0; id<16; id++){
-		setValue(id, 0);
+	for(int channelID=0; channelID<5; channelID++){
+		setDriverChannelValue(channelID, 0, 0);
 	}
 }
