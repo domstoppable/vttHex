@@ -8,20 +8,23 @@
 
 class LRAArray {
 	public:
-		void setup(int enPin0, int enPin1, int enPin2, int adPin0_0, int adPin0_1, int adPin1_0, int adPin1_1, int adPin2_0, int adPin2_1);
+		void setup();
 
 		void calibrate(bool fast=true);
 		void setValue(int id, int value);
 
 		void disableAll();
 
-		//Haptic_DRV2605 hapticDriver;
+		Haptic_DRV2605 hapticDriver;
 
 	protected:
-		MuxedDriver drivers[3];
+		MuxedDriver drivers[5];
+
+		int addressPins[3] = {-1, -1, -1};
+		int busPositions[5] = { -1, -1, -1, -1, -1 };
 
 		void switchToDriver(int driverID);
-		//void setDriverChannel(int driverID, int channelID);
+		void setDriverChannel(int driverID, int channelID);
 };
 
 #endif

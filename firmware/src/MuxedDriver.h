@@ -5,46 +5,45 @@
 #include "Arduino.h"
 #include "Haptic_DRV2605.h"
 
+
+typedef struct {
+	uint8_t raw;
+
+	uint8_t deviceID;
+	bool diagResult;
+	bool overTemp;
+	bool overCurrent;
+
+	bool ok(){
+		//return raw != 255 && deviceID == 7 && diagResult == false && overTemp == false && overCurrent == false;
+		return raw != 255;
+	}
+} DeviceStatus;
 class MuxedDriver {
 	public:
-		void setup();
-		void setup(int driverEnablePin);
-		void setup(int driverEnablePin, int muxAddressPin0);
-		void setup(int driverEnablePin, int muxAddressPin0, int muxAddressPin1);
-		void setup(int driverEnablePin, int muxAddressPin0, int muxAddressPin1, int muxAddressPin2);
+		void setup(
+			int muxAddressPin0, int muxAddressPin1, int muxAddressPin2,
+			int posOfChannel0, int posOfChannel1, int posOfChannel2, int posOfChannel3
+		);
 
 		void setEnabled(bool enabled);
-		void setValue(int channelID, uint8_t value);
+		bool setValue(int channelID, uint8_t value);
 
 		void calibrate(bool fast);
 
-	protected:
-		int driverEnablePin;
-		int muxAddressPins[3];
+		DeviceStatus checkStatus();
 
-		void setChannel(int channelID);
+	protected:
 
 		Haptic_DRV2605 hapticDriver;
+
+		int muxAddressPins[3] = { -1, -1, -1 };
+		int channelPositions[8] = { -1, -1, -1, -1, -1, -1, -1, -1 };
+
+		bool setChannel(int channelID);
+		bool doFullCalibration();
 };
 
-
-const struct scr_type calibrate_mplus_0934w[] = {
-	{DRV2605_REG_MODE,          0x80}, //! DRV2605 - reset
-	{ACTUATOR_SCRIPT_DELAY,     0x50}, //! DRV2605 - delay 50mSec for Reset? no spec?
-
-	{DRV2605_REG_MODE,          0x07}, //! DRV2605 - Calibrate Mode!
-
-	{DRV2605_REG_GO,            0x01}, //! DRV2605 - trigger a calibrate cycle
-	{ACTUATOR_SCRIPT_DELAY,     0xFF}, //! DRV2605 - delay 0.25 sec
-	{ACTUATOR_SCRIPT_DELAY,     0xFF}, //! DRV2605 - delay 0.25 sec
-	{ACTUATOR_SCRIPT_DELAY,     0xFF}, //! DRV2605 - delay 0.25 sec
-	{ACTUATOR_SCRIPT_DELAY,     0xFF}, //! DRV2605 - delay 0.25 sec
-	{ACTUATOR_SCRIPT_DELAY,     0xFF}, //! DRV2605 - delay 0.25 sec (1.25 sec max)
-
-	{DRV2605_REG_MODE,          0x01}, //! DRV2605 - calibrate
-
-	{ACTUATOR_SCRIPT_END,       0x00}  //! DRV2605 - end of script flag
-};
 
 const struct scr_type default_mplus_0934w[] = {
 	{DRV2605_REG_MODE,          0x80}, //! DRV2605 - reset
@@ -64,11 +63,11 @@ const struct scr_type default_mplus_0934w[] = {
 	{DRV2605_REG_AUTOCALCOMP,   0x0C},
 	{DRV2605_REG_AUTOCALEMP,    0x6C},
 
-	{DRV2605_REG_MODE,          0x00}, //! DRV2605 - calibrate
+	{DRV2605_REG_MODE,          0x05}, // Realtime playback mode
 	{ACTUATOR_SCRIPT_END,       0x00}  //! DRV2605 - end of script flag
 };
 
-const struct scr_type calibrate_jinlong_G1040003D_base[] = {
+const struct scr_type default_jinlong_G1040003D[] = {
 	{DRV2605_REG_MODE,          0x80}, //! DRV2605 - reset
 	{ACTUATOR_SCRIPT_DELAY,     0x50}, //! DRV2605 - delay 50mSec for Reset? no spec?
 
@@ -80,6 +79,13 @@ const struct scr_type calibrate_jinlong_G1040003D_base[] = {
 	{DRV2605_REG_CONTROL2,      0xF5}, //! DRV2605 - sample_time = 3, balnk =1, idiss = 1
 	{DRV2605_REG_CONTROL3,      0x88}, //! DRV2605 - LRA closed loop
 	{DRV2605_REG_CONTROL4,      0x30}, //! DRV2605 - Autocal time = 3 (1.2 seconds!)
+
+	{DRV2605_REG_LIBRARY,       0x06}, //! DRV2605 - Library 6 is LRA
+
+	{DRV2605_REG_AUTOCALCOMP,   0x0C},
+	{DRV2605_REG_AUTOCALEMP,    0x6C},
+
+	{DRV2605_REG_MODE,          0x05}, // Realtime playback mode
 
 	{ACTUATOR_SCRIPT_END,       0x00}  //! DRV2605 - end of script flag
 };

@@ -9,13 +9,13 @@
 WiFiServer server;
 WiFiClient client;
 
-char hostname[] = "vtt00";
+char hostname[] = "vt00";
 
 void VTTDevice::setup(){
-	char ipAsChars[16] = "---.---.---.---";
+	char ipAsChars[32] = "No wifi\0";
 
 	display.setup();
-	display.showText("   Vibey\nTranscribey\n\n   v2.0");
+	display.showText("   Vibey\nTranscribey\n   v2.6");
 	WiFi.begin(WIFI_SSID, WIFI_KEY);
 
 	Serial.begin(115200);
@@ -29,9 +29,9 @@ void VTTDevice::setup(){
 	grid.setup();
 
 	long startWait = millis();
-	Logger::getGlobal()->info("Waiting for wifi...");
+	Logger::getGlobal()->info("Trying wifi...");
 	while(WiFi.status() != WL_CONNECTED) {
-		if(millis() - startWait > 30000){
+		if(millis() - startWait > 3000){
 			break;
 		}
 	}
@@ -42,10 +42,7 @@ void VTTDevice::setup(){
 		Logger::getGlobal()->info("Wifi ok!");
 		IPAddress ip = WiFi.localIP();
 
-		int ipStrLength = ip.toString().length()+1;
-
-		ip.toString().toCharArray(ipAsChars, ipStrLength);
-
+		sprintf(ipAsChars, "  %d.%d.\n    %d.%d", ip[0], ip[1], ip[2], ip[3]);
 		Logger::getGlobal()->info(ipAsChars);
 
 		if (!MDNS.begin(hostname)) {
@@ -64,14 +61,11 @@ void VTTDevice::setup(){
 	commandStreams[0].configure(&Serial, &grid, &display, soundBites);
 
 	char msg[45];
-	sprintf(msg, "Ready :)\n%s.local\n%s", hostname, ipAsChars);
+	sprintf(msg, "  Ready :)\n%s.local\n%s", hostname, ipAsChars);
 	Logger::getGlobal()->info(msg);
 }
 
 void VTTDevice::update(){
-	//unsigned long timeDelta = loopTimer.update();
-	//ring.update(timeDelta);
-
 	WiFiClient client = server.available();
 	if(client){
 		Logger::getGlobal()->debug("New client");
