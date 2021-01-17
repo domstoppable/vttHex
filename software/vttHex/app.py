@@ -30,7 +30,7 @@ class VttHexApp(QtWidgets.QApplication):
 		self.paramChangeTimer.setSingleShot(True)
 		self.paramChangeTimer.timeout.connect(self.uploadSoundBite)
 
-		self.useBites = False
+		self.useBites = True
 		self.lastCellID = None
 		self.stopIntensityTimer = QtCore.QTimer()
 		self.stopIntensityTimer.setSingleShot(True)
@@ -38,7 +38,7 @@ class VttHexApp(QtWidgets.QApplication):
 		self.stopIntensityTimer.timeout.connect(self.onTileReleased)
 
 
-	def startSerial(self, useTCP=True):
+	def startSerial(self, useTCP=False):
 		if not useTCP:
 			self.serial = serial.SerialComms()
 			try:
@@ -69,6 +69,7 @@ class VttHexApp(QtWidgets.QApplication):
 
 		window.pitchSliders.setText('Pitch')
 		window.pitchSliders.setRange(1, 1000)
+		window.pitchSliders.linearValueChanged.connect(self.onIntensitySliderChanged)
 
 		window.intensitySliders.setText('Intensity')
 		window.intensitySliders.setRange(0, 100)

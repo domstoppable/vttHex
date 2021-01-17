@@ -54,7 +54,7 @@ class TimeSeries:
 class SignalPlayer():
 	def open(self, filename, folder=None):
 		if folder is None:
-			textGridFile = findAsset(f'MBOPP/audio/{filename}.TextGrid')
+			textGridFile = findAsset(f'MBOPP/audio/grids/{filename}.TextGrid')
 			pitchFile = findAsset(f'MBOPP/audio/{filename}.f0.csv')
 			wavFile = findAsset(f'MBOPP/audio/{filename}.wav')
 		else:

@@ -9,6 +9,9 @@ verify_ssl = true
 praatio = "*"
 pyside2 = "*"
 pyserial = "*"
+praat-textgrids = "*"
+tqdm = "*"
+vtthex = {path = "."}
 
 [requires]
 python_version = "3.8"

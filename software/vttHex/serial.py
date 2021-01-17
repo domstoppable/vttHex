@@ -23,16 +23,16 @@ class StreamComms():
 		self.stream = stream
 
 	def sendFile(self, period, samples):
-		lenAsBytes = len(samples).to_bytes(length=2, byteorder='little')
-		msg = bytearray([ CMD_HEADER, CMD_SOUNDBITE, period, *lenAsBytes ])
+		lenAsBytes = len(samples).to_bytes(length=4, byteorder='little')
+		periodAsBytes = period.to_bytes(length=4, byteorder='little')
+		msg = bytearray([ CMD_HEADER, CMD_SOUNDBITE, 0, *periodAsBytes, *lenAsBytes ])
 		self._send(msg)
 		for sample in samples:
 			sampleAsBytes = tools.formatSignalAsBytes(sample[0], sample[1][0], sample[2])
-
 			self._send(sampleAsBytes)
 
 	def sendPlayBite(self):
-		msg = bytearray([ CMD_HEADER, CMD_PLAY_BITE ])
+		msg = bytearray([ CMD_HEADER, CMD_PLAY_BITE, 0 ])
 		self._send(msg)
 
 	def sendCalibrate(self):
