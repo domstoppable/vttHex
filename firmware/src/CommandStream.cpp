@@ -52,21 +52,21 @@ void CommandStream::update(){
 
 		if(phone != 255){
 			grid->enable(phone, intensity, pitch);
-			//ring.enable(pitch, (float)intensity/255.0f);
 			sprintf(msg, " %02d ON     %03d Pitch  %03d Volume ", phone, pitch, intensity);
 			display->showText(msg);
 		}
 	}else if(cmd == CMD_STOP){
 		grid->disableAll();
-		//ring.disable();
 		display->showText("");
 	}else if(cmd == CMD_SOUNDBITE){
 		uint8_t id = nextByte();
+
 		uint32_t period = 0;
 		for(int i=0; i<4; i++){
 			uint8_t b = nextByte();
 			period += b << (i*8);
 		}
+
 		uint32_t sampleCount = 0;
 		for(int i=0; i<4; i++){
 			uint8_t b = nextByte();
@@ -82,8 +82,10 @@ void CommandStream::update(){
 			soundBites[id].samples[i].pitch = readBlocking();
 			soundBites[id].samples[i].intensity = readBlocking();
 		}
+		stream->println("Bite received");
 	}else if(cmd == CMD_PLAY_BITE){
 		stream->println("Play SoundBite");
+		display->showText("Play clip");
 		playBite(nextByte());
 	}else{
 		Logger::getGlobal()->debug("???");
@@ -159,16 +161,17 @@ void CommandStream::playBite(uint8_t id){
 
 		Sample sample = soundBites[id].samples[sampleIdx];
 		if(sample != lastSample){
-			grid->enable(sample.phone, sample.intensity, sample.intensity);
-			//ring.enable(sample.pitch, (float)sample.intensity/255.0f);
+			grid->enable(sample.phone, sample.intensity, sample.pitch);
 
+			/*
 			sprintf(msg, " %02d ON     %03d Pitch  %03d Volume ", sample.phone, sample.pitch, sample.intensity);
 			display->showText(msg);
+			*/
 			lastSample = sample;
 		}
 	}
 	grid->disableAll();
-	//ring.disable();
+
 	sprintf(msg, "/SoundBite %d", id);
-	Logger::getGlobal()->debug(msg);
+	stream->println(msg);
 }

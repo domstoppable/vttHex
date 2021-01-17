@@ -84,7 +84,7 @@ void LRAArray::calibrate(bool fast){
 	}
 }
 
-void LRAArray::setValue(int id, int value) {
+void LRAArray::setValue(int id, uint8_t value) {
 	if(id < 12){
 		int driverID = id / 4;
 		int channelID = id % 4;
@@ -92,7 +92,12 @@ void LRAArray::setValue(int id, int value) {
 	}
 }
 
-void LRAArray::setDriverChannelValue(int driverID, int channelID, int value){
+void LRAArray::setDriverChannelValue(int driverID, int channelID, uint8_t value){
+	if(value > 0){
+		value = (int)((255.0f-mintensity) * (value/255.0f) + mintensity);
+	}
+	value = max((uint8_t)0, min(value, (uint8_t)254));
+
 	switchToDriver(driverID);
 	drivers[driverID].setValue(channelID, value);
 }

@@ -10,8 +10,8 @@ class LRAArray {
 		void setup();
 
 		void calibrate(bool fast=true);
-		void setValue(int id, int value);
-		void setDriverChannelValue(int driverID, int channelID, int value);
+		void setValue(int id, uint8_t value);
+		void setDriverChannelValue(int driverID, int channelID, uint8_t value);
 
 		void disableAll();
 
@@ -22,6 +22,7 @@ class LRAArray {
 
 		int addressPins[3] = {-1, -1, -1};
 		int busPositions[5] = { -1, -1, -1, -1, -1 };
+		int mintensity = 144;
 
 		void switchToDriver(int driverID);
 };
