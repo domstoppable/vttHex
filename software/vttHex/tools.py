@@ -3,7 +3,6 @@ import pkg_resources
 import wave, audioop
 import math
 
-from praatio import tgio
 
 phoneLayout = ['B', 'D', 'G', 'HH', 'DH', None, 'P', 'T', 'K', 'TH', 'F', None, 'M', 'N', 'SH', 'S', 'V', 'W', 'Y', 'NG', 'CH', 'ZH', 'Z', 'L', 'R', 'ER', 'JH', 'AH', 'AO', 'AA', 'AW', 'UW', 'UH', 'OW', 'OY', 'AX', 'IY', 'EY', 'IH', 'EH', 'AE', 'AY', ]
 vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IY','OW','OY']
@@ -39,7 +38,7 @@ class TimeSeries:
 		done = False
 		actions = []
 
-		while self.idx < len(self.records)-1 and self.accumulatedTime >= self.records[self.idx].time:
+		while self.idx < len(self.records)-1 and self.accumulatedTime >= self.records[self.idx+1].time:
 			self.idx += 1
 
 		return self.records[self.idx]
@@ -53,6 +52,8 @@ class TimeSeries:
 
 class SignalPlayer():
 	def open(self, filename, folder=None):
+		from praatio import tgio
+
 		if folder is None:
 			textGridFile = findAsset(f'MBOPP/audio/grids/{filename}.TextGrid')
 			pitchFile = findAsset(f'MBOPP/audio/{filename}.f0.csv')
@@ -118,6 +119,7 @@ class SignalPlayer():
 		return self.phoneSeries.isDone() and self.pitchSeries.isDone() and self.intensitySeries.isDone()
 
 	def asSequence(self, period):
+		yield(self.update(0))
 		while not (self.phoneSeries.isDone() or self.pitchSeries.isDone() or self.intensitySeries.isDone()):
 			yield self.update(period)
 
