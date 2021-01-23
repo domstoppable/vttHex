@@ -73,9 +73,6 @@ void CommandStream::update(){
 			sampleCount += b << (i*8);
 		}
 
-		sprintf(msg, "S-Bite in  %03d samples %03d period", sampleCount, period);
-		Logger::getGlobal()->debug(msg);
-
 		soundBites[id].init(period, sampleCount);
 		for(int i=0; i<sampleCount; i++){
 			soundBites[id].samples[i].phone = readBlocking();
@@ -83,6 +80,10 @@ void CommandStream::update(){
 			soundBites[id].samples[i].intensity = readBlocking();
 		}
 		stream->println("Bite received");
+
+		sprintf(msg, "S-Bite in  %03d samples %03d period", sampleCount, period);
+		Logger::getGlobal()->debug(msg);
+
 	}else if(cmd == CMD_PLAY_BITE){
 		stream->println("Play SoundBite");
 		display->showText("Play clip");
@@ -150,23 +151,35 @@ byte CommandStream::nextByte(){
 
 void CommandStream::playBite(uint8_t id){
 	char msg[45];
-	long startTime = millis();
-	long now = startTime;
+	long now = millis();
+	long startTime = now;
 
 	long sampleIdx = 0;
 	Sample lastSample;
+	lastSample.phone = 255;
+	lastSample.intensity = 0;
+	lastSample.pitch = 0;
+
 	while(sampleIdx < soundBites[id].sampleCount){
-		long delta = millis() - startTime;
+		now = millis();
+
+		long delta = now - startTime;
+		delta *= 0.75f;
 		sampleIdx = int(delta / soundBites[id].period);
+		if(sampleIdx >= soundBites[id].sampleCount){
+			break;
+		}
 
 		Sample sample = soundBites[id].samples[sampleIdx];
 		if(sample != lastSample){
+			if(sample.phone != lastSample.phone){
+				if(sample.phone != 255){
+					char msg[45] = "";
+					sprintf(msg, "Play clip\n% 3d", sample.phone);
+					display->showText(msg);
+				}
+			}
 			grid->enable(sample.phone, sample.intensity, sample.pitch);
-
-			/*
-			sprintf(msg, " %02d ON     %03d Pitch  %03d Volume ", sample.phone, sample.pitch, sample.intensity);
-			display->showText(msg);
-			*/
 			lastSample = sample;
 		}
 	}
