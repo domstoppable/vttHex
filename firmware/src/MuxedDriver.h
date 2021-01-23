@@ -42,6 +42,7 @@ class MuxedDriver {
 
 		bool setChannel(int channelID);
 		bool doFullCalibration();
+		bool setGoAndWait(long timeout=3000l);
 };
 
 

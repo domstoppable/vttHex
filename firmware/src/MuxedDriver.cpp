@@ -57,69 +57,65 @@ bool MuxedDriver::setValue(int channelID, uint8_t value){
 
 void MuxedDriver::calibrate(bool fast){
 	char buffer[255];
+	uint8_t result = 0;
 
 	Wire.begin();
 
-	DeviceStatus status = checkStatus();
-	if (status.ok()) {
-		Serial.println("\t** init ok! **\n");
-		hapticDriver.writeRegScript(default_jinlong_G1040003D);
-		for(int i=0; i<8; i++){
+	hapticDriver.writeRegScript(default_jinlong_G1040003D);
+	for(int i=0; i<8; i++){
+		if(setChannel(i)){
 			if(!fast){
-				if(setChannel(i)){
-					doFullCalibration();
-				}
+				doFullCalibration();
 			}else{
 				if(setValue(i, 255)){
-					delay(150);
+					delay(250);
 					setValue(i, 0);
-					delay(100);
+					delay(150);
 				}
+				/*
+					// this doesn't work when driving actuators through a mux
+					DeviceStatus status = checkStatus();
+					if(status.ok()){
+						result += 1 << i;
+					}
+				*/
 			}
 		}
-
-		status = checkStatus();
-	}else{
-		Serial.println("\t** init fail! **\n");
 	}
 }
 
 DeviceStatus MuxedDriver::checkStatus(){
 	DeviceStatus status;
+	hapticDriver.writeReg(DRV2605_REG_MODE, DRV2605_MODE_DIAGNOS);
+	setGoAndWait();
 	status.raw = hapticDriver.readReg(DRV2605_REG_STATUS);
+
+	hapticDriver.writeReg(DRV2605_REG_MODE, DRV2605_MODE_REALTIME);
+	hapticDriver.setRealtimeValue(0);
+	hapticDriver.writeReg(DRV2605_REG_MODE, DRV2605_MODE_STANDBY);
+
 	status.deviceID = (status.raw & 0b11100000 ) >> 5;
-	status.diagResult = (status.raw & 0b100) >> 2;
+	status.diagResult = (status.raw & 0b1000) >> 3;
 	status.overTemp = (status.raw & 0b10) >> 1;
 	status.overCurrent = (status.raw & 0b1);
 
-	Serial.print("*** Device status: ");
-	Serial.println(status.raw);
-	Serial.print("*  Device ID   : ");
-	Serial.println(status.deviceID);
-	Serial.print("*  diagResult  : ");
-	Serial.println(status.diagResult);
-	Serial.print("*  overTemp    : ");
-	Serial.println(status.overTemp);
-	Serial.print("*  overCurrent : ");
-	Serial.println(status.overCurrent);
+	Serial.printf("*** Device status: %d ", status.raw);
+	Serial.println(status.raw, BIN);
+	Serial.printf("*  Device ID   : %d\n", status.deviceID);
+	Serial.printf("*  diagResult  : %d\n", status.diagResult);
+	Serial.printf("*  overTemp    : %d\n", status.overTemp);
+	Serial.printf("*  overCurrent : %d\n", status.overCurrent);
+
+	hapticDriver.writeReg(DRV2605_REG_MODE, DRV2605_MODE_REALTIME);
 
 	return status;
 }
 
 bool MuxedDriver::doFullCalibration(){
-	hapticDriver.writeReg(DRV2605_REG_MODE, 0x07);
-	hapticDriver.writeReg(DRV2605_REG_GO, 0x01);
+	hapticDriver.writeReg(DRV2605_REG_MODE, DRV2605_MODE_AUTOCAL);
+	setGoAndWait();
 
-	// wait for go bit to clear
-	long startTime = millis();
-	while (hapticDriver.readReg(DRV2605_REG_GO) & 0x01) {
-		if(millis() - startTime > 3000){
-			Serial.println("TIMEOUT");
-			return false;
-		}
-		yield();
-	}
-	hapticDriver.writeReg(DRV2605_REG_MODE, 0x05);
+	hapticDriver.writeReg(DRV2605_REG_MODE, DRV2605_MODE_REALTIME);
 
 	char buffer[255];
 	Serial.println("Reading results");
@@ -135,6 +131,22 @@ bool MuxedDriver::doFullCalibration(){
 	sprintf(buffer, "\t\t  calBemf          = %d", calBemf);
 	Logger::getGlobal()->info(buffer);
 	Logger::getGlobal()->info("");
+
+	return true;
+}
+
+
+bool MuxedDriver::setGoAndWait(long timeout){
+	hapticDriver.writeReg(DRV2605_REG_GO, 0x01);
+
+	long startTime = millis();
+	while (hapticDriver.readReg(DRV2605_REG_GO) == 0x01) {
+		if(timeout > 0l && (millis()-startTime > timeout)){
+			Serial.println("TIMEOUT");
+			return false;
+		}
+		yield();
+	}
 
 	return true;
 }
