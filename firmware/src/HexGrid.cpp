@@ -45,7 +45,7 @@ void HexGrid::disable(uint8_t cellID){
 
 void HexGrid::_setValue(uint8_t idA, uint8_t idB, uint8_t value){
 	if(idA != idB){
-		value *= 0.5f;
+		value *= 0.75f;
 	}
 	actuators.setValue(idA, value);
 	actuators.setValue(idB, value);
