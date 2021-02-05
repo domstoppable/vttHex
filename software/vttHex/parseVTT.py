@@ -94,12 +94,13 @@ def loadVTTFile(filename):
 
 if __name__ == '__main__':
 	import sys
-	vttFile = loadVTTFile(sys.argv[1])
-
-	print(f'File version  : {vttFile.fileVersion}')
-	print(f'Flags         : {vttFile.flags}')
-	print(f'Sample count  : {len(vttFile.samples)}')
-	print(f'Sample period : {vttFile.samplePeriod}')
-	print(f'Written text  : {vttFile.writtenText}')
-	print(f'Phonetic text : {vttFile.phoneticText}')
-	print(f'Preview       : {vttFile.getPhoneticSampleString()}')
+	for filename in sys.argv[1:]:
+		vttFile = loadVTTFile(filename)
+		print(f'{filename}')
+		print(f'	File version  : {vttFile.fileVersion}')
+		print(f'	Flags         : {vttFile.flags}')
+		print(f'	Sample count  : {len(vttFile.samples)}')
+		print(f'	Sample period : {vttFile.samplePeriod}')
+		print(f'	Written text  : {vttFile.writtenText}')
+		print(f'	Phonetic text : {vttFile.phoneticText}')
+		print(f'	Preview       : {vttFile.getPhoneticSampleString()}')
