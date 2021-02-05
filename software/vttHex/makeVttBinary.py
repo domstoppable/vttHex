@@ -34,17 +34,16 @@ Format
 # run with python3 makeVttBinary ./*.wav
 # expects .wav, .f0.csv, in same folder, .TextGrid in `grids/` subfolder
 
-def asSequence(phoneSeries, pitchSeries, intensitySeries, period):
-	while not (phoneSeries.isDone() or pitchSeries.isDone() or intensitySeries.isDone()):
-		yield update(period)
+#def asSequence(phoneSeries, pitchSeries, intensitySeries, period):
+#	while not (phoneSeries.isDone() or pitchSeries.isDone() or intensitySeries.isDone()):
+#		yield update(period)
 
-progressBar = tqdm(sys.argv[1:])
-for arg in progressBar:
-	inFile = pathlib.Path(arg)
+def makeVttBinary(inFile):
+	inFile = pathlib.Path(inFile)
 	folder = inFile.parent
 
 	name = inFile.stem
-	progressBar.set_description(name)
+	#progressBar.set_description(name)
 
 	# check for constituent files
 	wavFile = pathlib.Path(folder/(name+'.wav'))
@@ -58,7 +57,7 @@ for arg in progressBar:
 			filesOk = False
 
 	if not filesOk:
-		continue
+		return
 
 	# Load text data
 	tg = tgio.openTextgrid(str(textGridFile))
@@ -69,7 +68,7 @@ for arg in progressBar:
 		transcriptions[tierName] = ' '.join(textParts)
 
 	# Load time-series data
-	period = 5 # milliseconds
+	period = 1 # milliseconds
 
 	signalPlayer = SignalPlayer()
 	signalPlayer.open(name, folder)
@@ -111,3 +110,10 @@ for arg in progressBar:
 	# Write file
 	with open(name + '.vtt', 'wb') as outputFile:
 		outputFile.write(packedData)
+
+
+if __name__ == '__main__':
+	from multiprocessing import Pool
+
+	with Pool() as pool:
+		pool.map(makeVttBinary, sys.argv[1:])
