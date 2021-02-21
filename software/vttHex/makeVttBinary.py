@@ -46,7 +46,7 @@ def makeVttBinary(inFile):
 	#progressBar.set_description(name)
 
 	# check for constituent files
-	wavFile = pathlib.Path(folder/(name+'.wav'))
+	wavFile = inFile
 	pitchFile = pathlib.Path(folder/(name+'.f0.csv'))
 	textGridFile = pathlib.Path(folder/'grids'/(name+'.TextGrid'))
 

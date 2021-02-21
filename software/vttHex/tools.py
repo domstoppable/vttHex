@@ -58,10 +58,14 @@ class SignalPlayer():
 			textGridFile = findAsset(f'MBOPP/audio/grids/{filename}.TextGrid')
 			pitchFile = findAsset(f'MBOPP/audio/{filename}.f0.csv')
 			wavFile = findAsset(f'MBOPP/audio/{filename}.wav')
+			if not wavFile.exists():
+				wavFile = findAsset(f'MBOPP/audio/{filename}.WAV')
 		else:
 			textGridFile = folder/'grids'/(filename + '.TextGrid')
 			pitchFile = folder/(filename + '.f0.csv')
 			wavFile = folder/(filename + '.wav')
+			if not wavFile.exists():
+				wavFile = folder/(filename + '.WAV')
 
 		textgrid = tgio.openTextgrid(textGridFile)
 

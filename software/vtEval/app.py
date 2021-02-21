@@ -7,7 +7,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 from . import ui
 from .participant import Participant
 
-class VtEvalApp():
+class VtEvalController():
 	def __init__(self):
 		self.app = QtWidgets.QApplication()
 		self.setupGui()
@@ -24,18 +24,18 @@ class VtEvalApp():
 		self.setupGui()
 		self.mainWindow.show()
 
-	def onEvalRequested(self, facilitator, pid, condition, evalName):
+	def onEvalRequested(self, evalName, facilitator, participant, condition, device):
 		proc = subprocess.Popen(
 			[
 				sys.executable, '-m', f'vtEval.{evalName.lower()}',
 				'--facilitator', facilitator,
-				'--pid', pid,
-				'--condition', condition.lower()
+				'--pid', participant.id,
+				'--condition', condition,
+				'--device', device.systemLocation(),
 			],
 			text=True
 		)
 
-		print(f'{facilitator} is running {pid}\'s {condition} for {evalName}')
 		execDialog = ui.ExecutionDialog(proc=proc, textDescription=evalName, parent=self.mainWindow)
 		execDialog.exec_()
 
@@ -44,5 +44,5 @@ class VtEvalApp():
 		self.app.exec_()
 
 def run():
-	app = VtEvalApp()
+	app = VtEvalController()
 	app.exec_()

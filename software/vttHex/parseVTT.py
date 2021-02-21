@@ -1,6 +1,7 @@
 import struct
 import pathlib
-import tools
+
+from . import tools
 
 fixedHeaderFormat = '3s' # magic bytes
 fixedHeaderFormat += 'B' # file format version
@@ -14,15 +15,25 @@ fixedHeaderFields = ('magicBytes', 'version', 'flags', 'writtenTextSize', 'phone
 sampleFields = ('phone', 'pitch', 'intensity')
 
 class VTTFile:
-	def __init__(self, fileVersion, flags, samplePeriod, writtenText, phoneticText, rawSamples):
+	def __init__(self, fileVersion, flags, samplePeriod, writtenText, phoneticText, rawSamples, filepath=None):
 		self.fileVersion = fileVersion
 		self.flags = flags
 		self.samplePeriod = samplePeriod
 		self.writtenText = writtenText
 		self.phoneticText = phoneticText
-		self.samples = []
-		for idx in range(0, len(rawSamples), 3):
-			self.samples.append(dict(zip(sampleFields, rawSamples[idx:idx+3])))
+		self.sampleCount = int(len(rawSamples)/3)
+		self.samples = rawSamples
+		self.filepath = filepath
+
+		self.sampleDicts = None
+
+	def getSamplesAsDicts(self):
+		if self.sampleDicts is None:
+			self.sampleDicts = []
+			for idx in range(0, len(rawSamples), 3):
+				self.sampleDicts.append(dict(zip(sampleFields, rawSamples[idx:idx+3])))
+
+		return self.sampleDicts
 
 	def getPhoneticSampleString(self):
 		phones = self.getPhoneticSamples()
@@ -43,14 +54,17 @@ class VTTFile:
 
 		return result.strip()
 
+	def getDuration(self):
+		return self.sampleCount * self.samplePeriod
+
 	def getPhoneticSamples(self):
-		return [x['phone'] for x in self.samples]
+		return [x['phone'] for x in self.getSamplesAsDicts()]
 
 	def getPitchSamples(self):
-		return [x['pitch'] for x in self.samples]
+		return [x['pitch'] for x in self.getSamplesAsDicts()]
 
 	def getIntensitySamples(self):
-		return [x['intensity'] for x in self.samples]
+		return [x['intensity'] for x in self.getSamplesAsDicts()]
 
 
 class StructBuffer:
@@ -86,11 +100,12 @@ def loadVTTBytes(bytes):
 	)
 
 def loadVTTFile(filename):
-	bytes = pathlib.Path(filename).read_bytes()
-	return loadVTTBytes(bytes)
+	filepath = pathlib.Path(filename)
+	bytes = filepath.read_bytes()
+	vtt = loadVTTBytes(bytes)
+	vtt.filepath = filepath
 
-
-
+	return vtt
 
 if __name__ == '__main__':
 	import sys

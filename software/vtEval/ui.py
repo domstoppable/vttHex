@@ -5,6 +5,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 
 from .participant import Participant
 from . import subprocs
+from . import serial
 
 def centerWindow(window):
 	screenCenter = QtWidgets.QDesktopWidget().availableGeometry().center()
@@ -13,7 +14,7 @@ def centerWindow(window):
 
 class MainWindow(QtWidgets.QWidget):
 	resetRequested = QtCore.Signal()
-	evalRequested = QtCore.Signal(str, str, str, str)
+	evalRequested = QtCore.Signal(str, str, Participant, str, serial.SerialInfo)
 
 	def __init__(self, parent=None):
 		super().__init__(parent=parent)
@@ -41,6 +42,9 @@ class MainWindow(QtWidgets.QWidget):
 		self.participantBox.itemAdded.connect(self.onParticipantAdded)
 		self.participantBox.selectionChanged.connect(self.onParticipantSelected)
 		form.layout().addRow('Participant', self.participantBox)
+
+		self.serialBox = SerialSelector(parent=self)
+		form.layout().addRow('Device', self.serialBox)
 
 		self.conditionBox = RadioList(['Pre-test', 'Post-test'])
 		form.layout().addRow('Condition', self.conditionBox)
@@ -106,16 +110,20 @@ class MainWindow(QtWidgets.QWidget):
 
 			self.evalButtons.addOptions(orderedEvals)
 
-			print('fix tab order')
+			self.setTabOrder(self.facilitatorBox, self.participantBox)
+			self.setTabOrder(self.participantBox, self.serialBox)
+			self.setTabOrder(self.serialBox, self.conditionBox)
 			self.setTabOrder(self.conditionBox, self.evalButtons)
 			self.setTabOrder(self.evalButtons, self.resetButton)
+			self.setTabOrder(self.resetButton, self.facilitatorBox)
 
 	def onEvalClicked(self, evalName):
+		device = self.serialBox.currentData()
 		facilitator = self.facilitatorBox.currentText()
 		participant = self.participantBox.currentData()
 		condition = self.conditionBox.text()
 
-		values = [facilitator, participant, condition]
+		values = [device, facilitator, participant, condition]
 		if '' in values or None in values:
 			QtWidgets.QMessageBox.warning(self, 'Run Eval', 'You are missing a selection :(')
 			return
@@ -131,13 +139,15 @@ class MainWindow(QtWidgets.QWidget):
 							<tr><td>Participant </td><td><strong>{participant}</strong></td></tr>
 							<tr><td>Condition </td><td><strong>{condition}</strong></td></tr>
 							<tr><td>Evaluation </td><td><strong>{evalName}</strong></td></tr>
+							<tr><td colspan="2">&nbsp;</td></tr>
+							<tr><td>Device </td><td><strong>{device}</strong></td></tr>
 						</table>
 					</html>
 				''',
 				buttons=QtWidgets.QMessageBox.StandardButton.Abort|QtWidgets.QMessageBox.StandardButton.Ok
 			)
 			if confirmed == QtWidgets.QMessageBox.StandardButton.Ok:
-				self.evalRequested.emit(facilitator, participant.id, condition, evalName)
+				self.evalRequested.emit(evalName, facilitator, participant, condition, device)
 
 	def show(self):
 		super().show()
@@ -161,26 +171,25 @@ class MainWindow(QtWidgets.QWidget):
 
 		return facilitators
 
-class ComboWithAddButton(QtWidgets.QWidget):
-	itemAdded = QtCore.Signal(object)
+class ComboWithButton(QtWidgets.QWidget):
+	buttonClicked = QtCore.Signal()
 	selectionChanged = QtCore.Signal(object)
 
-	def __init__(self, addNewDialogClass, options=[], parent=None):
+	def __init__(self, options=[], buttonText='?', parent=None):
 		super().__init__(parent=parent)
-		self.addNewDialogClass = addNewDialogClass
 
 		self.setLayout(QtWidgets.QHBoxLayout())
 
 		self.combo = QtWidgets.QComboBox(self)
-		self.combo.currentIndexChanged.connect(lambda idx: self.selectionChanged.emit(self.combo.itemData(idx)))
 		self.resort(options)
+		self.combo.currentIndexChanged.connect(lambda idx: self.selectionChanged.emit(self.combo.itemData(idx)))
 
-		self.addButton = QtWidgets.QToolButton(parent=self)
-		self.addButton.setText('+')
-		self.addButton.clicked.connect(self.getNewValue)
+		self.button = QtWidgets.QToolButton(parent=self)
+		self.button.setText(buttonText)
+		self.button.clicked.connect(lambda checked: self.buttonClicked.emit())
 
 		self.layout().addWidget(self.combo)
-		self.layout().addWidget(self.addButton)
+		self.layout().addWidget(self.button)
 
 		self.layout().setStretch(0, 1)
 		self.layout().setStretch(1, 0)
@@ -188,26 +197,13 @@ class ComboWithAddButton(QtWidgets.QWidget):
 
 		self.setFocusProxy(self.combo)
 
-	def getNewValue(self, _=None):
-		dialog = self.addNewDialogClass()
-		dialogResult = dialog.exec_()
-
-		if dialogResult == QtWidgets.QDialog.Accepted:
-			data = dialog.getValue()
-
-			self.combo.addItem(repr(data), data)
-			self.combo.setCurrentIndex(self.combo.count()-1)
-			self.itemAdded.emit(data)
-
-			self.resort()
-
 	def resort(self, items=None):
 		if items is None:
 			items = []
-			for i in range(1, self.combo.count()):
+			for i in range(0, self.combo.count()):
 				items.append(self.combo.itemData(i))
 
-		items = sorted(items)
+		items = sorted(items, key=lambda item:str(item))
 		selected = self.combo.currentData()
 		self.combo.clear()
 
@@ -221,6 +217,45 @@ class ComboWithAddButton(QtWidgets.QWidget):
 
 	def currentData(self):
 		return self.combo.currentData()
+
+class SerialSelector(ComboWithButton):
+	def __init__(self, parent=None):
+		super().__init__(options=serial.availablePorts(), buttonText='↺', parent=parent)
+
+		self.buttonClicked.connect(self.refresh)
+		self.selectPreferred()
+
+	def refresh(self):
+		self.resort(serial.availablePorts())
+		if self.combo.currentIndex() < 0:
+			self.selectPreferred()
+
+	def selectPreferred(self):
+		for idx in range(self.combo.count()):
+			info = self.combo.itemData(idx)
+			if hasattr(info, 'isPreferred') and info.isPreferred():
+				self.combo.setCurrentIndex(idx)
+class ComboWithAddButton(ComboWithButton):
+	itemAdded = QtCore.Signal(object)
+
+	def __init__(self, addNewDialogClass, options=[], parent=None):
+		super().__init__(options=options, buttonText='+', parent=parent)
+		self.addNewDialogClass = addNewDialogClass
+
+		self.buttonClicked.connect(self.getNewValue)
+
+	def getNewValue(self):
+		dialog = self.addNewDialogClass()
+		dialogResult = dialog.exec_()
+
+		if dialogResult == QtWidgets.QDialog.Accepted:
+			data = dialog.getValue()
+
+			self.combo.addItem(repr(data), data)
+			self.combo.setCurrentIndex(self.combo.count()-1)
+			self.itemAdded.emit(data)
+
+			self.resort()
 
 class AddNewParticipantDialog(QtWidgets.QDialog):
 	def __init__(self, parent=None):
@@ -273,7 +308,7 @@ class AddNewParticipantDialog(QtWidgets.QDialog):
 			self.pidBox.undo()
 
 	def getValue(self):
-		return Participant(int(self.pidBox.text()), self.nameBox.text())
+		return Participant(self.pidBox.text(), self.nameBox.text())
 
 class EvalConfirmation(QtWidgets.QDialog):
 	def __init__(self, parent=None):
@@ -282,7 +317,7 @@ class EvalConfirmation(QtWidgets.QDialog):
 class RadioList(QtWidgets.QWidget):
 	def __init__(self, options=[], parent=None):
 		super().__init__(parent=parent)
-		self.setLayout(QtWidgets.QVBoxLayout())
+		self.setLayout(QtWidgets.QHBoxLayout())
 
 		self.group = QtWidgets.QButtonGroup()
 
