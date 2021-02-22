@@ -10,9 +10,9 @@ from PySide2 import QtCore, QtGui, QtWidgets
 
 from vtEval.vtEvalApp import *
 from vtEval import serial
-from vttHex.parseVTT import loadVTTFile
 
 instructions = '''<html>
+	<h1>Phoneme Evaluation</h1>
 	<p>Amet magni dolor ea repellat illo quis expedita sint. Omnis ea eum perspiciatis culpa maiores voluptatem repudiandae perspiciatis. Adipisci delectus voluptate dolorem aut qui hic sunt dolor. Autem dolores doloribus autem exercitationem dicta molestiae quibusdam. Ab in provident iure eveniet voluptatum voluptatum aut.</p>
 	<p>Eius provident magni voluptas tenetur reprehenderit qui consequatur. Ipsa nihil cupiditate id qui. Consequatur unde fugiat tenetur est harum provident deleniti.</p>
 	<p>In harum delectus eligendi pariatur vero ab. Reprehenderit porro optio dicta rem quibusdam quidem fugiat et. Voluptatem dolorum sequi enim non molestiae consequatur velit. Quis modi dolorum vero sint facilis. Ab quam repellat velit voluptatem earum. Nisi sint voluptatem esse iusto voluptas.</p>
@@ -57,51 +57,6 @@ phoneToHumanMap = {
 	'Y' : 'aYa',
 	'Z' : 'aZa',
 }
-
-def nowStamp():
-	now = datetime.datetime.now()
-	return now.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (now.microsecond / 10000))
-
-class DataLogger:
-	def __init__(self, arguments):
-		self.arguments = arguments
-
-		now = nowStamp().replace(':', '-')
-		nameBits = [now, arguments['pid'], arguments['condition'], 'phonemes', arguments['facilitator']]
-		path = Path(f'data/' + '_'.join(nameBits) + '.csv')
-		path.parent.mkdir(parents=True, exist_ok=True)
-		self.dataFile = path.open('w')
-		self.csvWriter = csv.DictWriter(
-			self.dataFile,
-			fieldnames=['timestamp', 'pid', 'condition', 'facilitator', 'event', 'item', 'selection', 'stimulus', 'stimfile'],
-			extrasaction='ignore'
-		)
-		self.csvWriter.writeheader()
-
-	def logWidgetCompletion(self, finishedWidget):
-		record = dict(self.arguments)
-
-		record['timestamp'] = nowStamp()
-		record['event'] = 'finished'
-		record['item'] = finishedWidget.name
-		if hasattr(finishedWidget, 'selection') and hasattr(finishedWidget, 'stimulus'):
-			record['selection'] = finishedWidget.selection
-			record['stimulus'] = finishedWidget.stimulus.id
-			record['stimfile'] = finishedWidget.stimulus.vtt.filepath.name
-
-		self.csvWriter.writerow(record)
-		self.dataFile.flush()
-
-	def close(self):
-		self.dataFile.close()
-
-class Stimulus:
-	def __init__(self, file, id):
-		self.vtt = loadVTTFile(file)
-		self.id = id
-
-	def __repr__(self):
-		return f'<{self.__class__.__name__} id={self.id} file={self.file}>'
 
 class AFCWidget(StateWidget):
 	stimulusBraced = QtCore.Signal(object)
@@ -160,7 +115,6 @@ class AFCWidget(StateWidget):
 	def onChoiceMade(self, option):
 		self.selection = option
 		self.finished.emit()
-
 class PhonemeEvalApp(VtEvalApp):
 	def __init__(self):
 		super().__init__('Phoneme Evaluation')

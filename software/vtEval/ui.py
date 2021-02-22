@@ -375,7 +375,7 @@ class ExecutionDialog(QtWidgets.QDialog):
 		self.setMinimumSize(200, 200)
 		self.resize(400, 200)
 
-		self.label = QtWidgets.QLabel(text=f'<html>⏳ Running {textDescription}…', parent=self)
+		self.label = QtWidgets.QLabel(text=f'<html>⏳ Running {textDescription} evaluation…', parent=self)
 		self.label.setAlignment(QtCore.Qt.AlignCenter)
 
 		self.layout().addWidget(self.label)

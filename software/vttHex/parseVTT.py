@@ -30,8 +30,8 @@ class VTTFile:
 	def getSamplesAsDicts(self):
 		if self.sampleDicts is None:
 			self.sampleDicts = []
-			for idx in range(0, len(rawSamples), 3):
-				self.sampleDicts.append(dict(zip(sampleFields, rawSamples[idx:idx+3])))
+			for idx in range(0, len(self.samples), 3):
+				self.sampleDicts.append(dict(zip(sampleFields, self.samples[idx:idx+3])))
 
 		return self.sampleDicts
 
