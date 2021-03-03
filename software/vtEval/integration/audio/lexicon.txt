@@ -1,0 +1,8 @@
+Ba	B AA1
+Da	D AA1
+Ga	G AA1
+Ka	K AA1
+Ma	M AA1
+Na	N AA1
+Pa	P AA1
+Ta	T AA1

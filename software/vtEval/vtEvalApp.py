@@ -157,12 +157,15 @@ class DataLogger:
 		self.dataFile = path.open('w')
 		self.csvWriter = csv.DictWriter(
 			self.dataFile,
-			fieldnames=['timestamp', 'pid', 'condition', 'facilitator', 'event', 'item', 'selection', 'stimulus', 'stimfile'],
+			fieldnames=self.getFieldNames(),
 			extrasaction='ignore'
 		)
 		self.csvWriter.writeheader()
 
-	def logWidgetCompletion(self, finishedWidget):
+	def getFieldNames(self):
+		return ['timestamp', 'pid', 'condition', 'facilitator', 'event', 'item', 'selection', 'stimulus', 'stimfile']
+
+	def buildRecord(self, finishedWidget):
 		record = dict(self.arguments)
 
 		record['timestamp'] = nowStamp()
@@ -173,6 +176,10 @@ class DataLogger:
 			record['stimulus'] = finishedWidget.stimulus.id
 			record['stimfile'] = finishedWidget.stimulus.vtt.filepath.name
 
+		return record
+
+	def logWidgetCompletion(self, finishedWidget):
+		record = self.buildRecord(finishedWidget)
 		print('log', record)
 
 		self.csvWriter.writerow(record)
