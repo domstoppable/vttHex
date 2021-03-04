@@ -147,11 +147,11 @@ class ButtonPromptWidget(PromptWidget):
 		QtCore.QTimer.singleShot(self.enabledDelaySeconds*1000, lambda: self.button.setDisabled(False))
 
 class DataLogger:
-	def __init__(self, arguments):
+	def __init__(self, arguments, evalType):
 		self.arguments = arguments
 
 		now = nowStamp().replace(':', '-')
-		nameBits = [now, arguments['pid'], arguments['condition'], 'prosody', arguments['facilitator']]
+		nameBits = [now, arguments['pid'], arguments['condition'], evalType, arguments['facilitator']]
 		path = Path(f'data/' + '_'.join(nameBits) + '.csv')
 		path.parent.mkdir(parents=True, exist_ok=True)
 		self.dataFile = path.open('w')

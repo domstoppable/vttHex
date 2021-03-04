@@ -150,7 +150,7 @@ class PhonemeEvalApp(VtEvalApp):
 			stack += vowelStack + [breakWidget] + consonantStack
 
 		self.widgetStack = stack
-		self.dataLogger = DataLogger(arguments)
+		self.dataLogger = DataLogger(arguments, 'phonemes')
 
 	def _loadStimuliFromFolder(self, path, pattern):
 		uniqueSet = set()

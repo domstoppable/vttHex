@@ -176,7 +176,7 @@ class ProsodyEvalApp(VtEvalApp):
 		else:
 			self.widgetStack += phraseStack + [breakWidget] + focusStack
 
-		self.dataLogger = DataLogger(arguments)
+		self.dataLogger = DataLogger(arguments, 'prosody')
 
 	def buildSubStack(self, name):
 		stack = []

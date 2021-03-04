@@ -178,7 +178,7 @@ class IntegrationEvalApp(VtEvalApp):
 		breakWidget = ButtonPromptWidget('break', '<center>Time for a break!<br/><br/>Press the button below when you are ready to continue.</center>')
 
 		self.widgetStack += tactileAuditoryStack
-		self.dataLogger = IntegrationDataLogger(arguments)
+		self.dataLogger = IntegrationDataLogger(arguments, 'integration')
 
 	def prepareStimulus(self, stimulus):
 		self.device.sendFile(stimulus.vtt)
