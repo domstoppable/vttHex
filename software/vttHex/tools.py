@@ -9,6 +9,16 @@ vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IY','OW','OY']
 
 phoneIndexLookup = {phone:idx for (idx,phone) in enumerate(phoneLayout)}
 
+
+def mel(f):
+	# O’Shaughnessy, D. (1987). Speech Communication: Human and Machine. Addison-Wesley Publishing Company.
+	return 1127 * math.log(1+(f/700))
+
+pitchMinHz = 30
+pitchMaxHz = 260
+pitchMinMel = mel(pitchMinHz)
+pitchMaxMel = mel(pitchMaxHz)
+
 def findAsset(*resourceParts):
 	resource = '/'.join(['assets'] + list(resourceParts))
 	return pkg_resources.resource_filename(__name__, resource)
@@ -127,8 +137,6 @@ class SignalPlayer():
 		while not (self.phoneSeries.isDone() or self.pitchSeries.isDone() or self.intensitySeries.isDone()):
 			yield self.update(period)
 
-
-
 def formatSignalAsBytes(phoneOrCellID, pitch, intensity):
 	if isinstance(phoneOrCellID, str):
 		phoneOrCellID = phoneOrCellID[:2]
@@ -144,7 +152,18 @@ def formatSignalAsBytes(phoneOrCellID, pitch, intensity):
 	if isinstance(pitch, tuple):
 		pitch = pitch[0]
 
-	pitch = int(255 * (pitch / 1000))
+	# clamp pitch to 30-260 Hz
+	pitch = max(pitchMinHz, min(pitchMaxHz, pitch))
+	# convert to mel
+	pitch = mel(pitch)
+	# normalize range to 0-1
+	pitch = (pitch-pitchMinMel)/(pitchMaxMel-pitchMinMel)
+	# convert to byte
+	pitch = int(pitch*255)
+	# and clamp
+	pitch = max(0, min(255, pitch))
+
+
 	intensity = int(255*intensity)
 
 	return bytearray([ cellID, pitch, intensity ])
