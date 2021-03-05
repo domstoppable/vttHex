@@ -19,17 +19,20 @@ void HexGrid::enable(uint8_t cellID, uint8_t intensity, uint8_t pitch){
 	currentCell = cellID;
 
 	// pitch/intensity array
-	int overlaps = 3;
-	int actuatorIdxA = min(2, (int)(pitch/255.0f * overlaps));
-	int overlapWidth = 255 / overlaps;
+	int actuatorCount = 4;
+	int actuatorIdxA = min(2, (int)(pitch/255.0f * (actuatorCount-1)));
+	int overlapWidth = 255 / (actuatorCount-1);
+
+	float distanceFromFirstNode = ((float)(pitch % overlapWidth) / (float)overlapWidth);
+	float values[] = {
+		255.0f*(1.0f-distanceFromFirstNode),
+		255.0f*distanceFromFirstNode,
+	};
 
 	for(int i=0; i<2; i++){
 		int actuatorIdx = actuatorIdxA+i;
 
-		float actuatorHotspot = 255.0f * (actuatorIdx)/3.0f;
-		float distanceFromHotspot = abs(pitch - actuatorHotspot);
-		float relativeValue = ((float)intensity) * (1.0f - (distanceFromHotspot / overlapWidth));
-		uint8_t clampedValue = min(255.0f, max(0.0f, relativeValue));
+		uint8_t clampedValue = min(255.0f, max(0.0f, values[i]));
 
 		int driverID = (actuatorIdx % 2) + 3;
 		int channelID = (actuatorIdx / 2);
