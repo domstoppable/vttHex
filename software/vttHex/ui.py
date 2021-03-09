@@ -342,7 +342,7 @@ class LinearLogSliders(QtWidgets.QWidget):
 		self.layout().addWidget(self.linearSlider, 2, 0, 1, 1)
 		self.layout().addWidget(self.logSlider, 2, 1, 1, 1)
 
-		self.linearSlider.sliderMoved.connect(self.onLinearSliderMoved)
+		self.linearSlider.valueChanged.connect(self.onLinearSliderMoved)
 		self.logSlider.sliderMoved.connect(self.onLogSliderMoved)
 
 	def setText(self, text):
