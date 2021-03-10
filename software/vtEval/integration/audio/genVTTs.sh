@@ -24,6 +24,8 @@ function doConversions(){
 	genLabs
 	genGrids wav
 	genLoudness wav
-	geF0s wav
+	genF0s wav
+
+	genVTT wav
 	echo "DONE!"
 }
