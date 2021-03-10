@@ -152,7 +152,9 @@ class PhonemeEvalApp(VtEvalApp):
 		self.widgetStack = stack
 		self.dataLogger = DataLogger(arguments, 'phonemes')
 
-	def _loadStimuliFromFolder(self, path, pattern):
+	def _loadStimuliFromFolder(self, pattern):
+		path = stimPath/'vtt'
+
 		uniqueSet = set()
 		stims = []
 
@@ -171,14 +173,12 @@ class PhonemeEvalApp(VtEvalApp):
 		return (stims, sorted(list(uniqueSet)))
 
 	def loadConsonants(self):
-		path = stimPath/'consonants'/'vtt'
 		pattern = re.compile(r'[MW][1-5]A(.{1,2})A7M')
-		(self.consonants, self.consonantSet) = self._loadStimuliFromFolder(path, pattern)
+		(self.consonants, self.consonantSet) = self._loadStimuliFromFolder(pattern)
 
 	def loadVowels(self):
-		path = stimPath/'vowels'/'vtt'
 		pattern = re.compile(r'[mw][0-9]{2}(.*)')
-		(self.vowels, self.vowelSet) = self._loadStimuliFromFolder(path, pattern)
+		(self.vowels, self.vowelSet) = self._loadStimuliFromFolder(pattern)
 
 	def prepareStimulus(self, stimulus):
 		self.device.sendFile(stimulus.vtt)

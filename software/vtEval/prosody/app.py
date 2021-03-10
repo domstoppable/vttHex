@@ -180,7 +180,7 @@ class ProsodyEvalApp(VtEvalApp):
 
 	def buildSubStack(self, name):
 		stack = []
-		stimSets = self.loadStimuliFromFolder(stimPath/name/'vtt', name, 25, 75)
+		stimSets = self.loadStimuliFromFolder(name, 25, 75)
 		choices = ['early', 'late']
 
 		for i,stimSet in enumerate(stimSets):
@@ -206,8 +206,10 @@ class ProsodyEvalApp(VtEvalApp):
 
 		return stimWidget
 
-	def loadStimuliFromFolder(self, path, prefix, earlyLevel, lateLevel):
+	def loadStimuliFromFolder(self, prefix, earlyLevel, lateLevel):
 		stimSets = {}
+
+		path = stimPath/'vtt'
 
 		pattern = re.compile(rf'{prefix}(\d\d?)_.*')
 
