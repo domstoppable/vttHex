@@ -68,7 +68,7 @@ class VttHexApp(QtWidgets.QApplication):
 		window.phoneGrid.tileReleased.connect(self.onTileReleased)
 
 		window.pitchSliders.setText('Pitch')
-		window.pitchSliders.setRange(1, 1000)
+		window.pitchSliders.setRange(30, 260)
 		window.pitchSliders.linearValueChanged.connect(self.onIntensitySliderChanged)
 
 		window.intensitySliders.setText('Intensity')
@@ -150,10 +150,14 @@ class VttHexApp(QtWidgets.QApplication):
 
 	def onTilePressed(self, cellID):
 		self.lastCellID = cellID
+
+		pitch = self.window.pitchSliders.getLinearValue()
+		intensity = self.window.intensitySliders.getNormalizedLinearValue()
+
 		self.serial.sendCombinedSignal(
 			cellID,
-			self.window.pitchSliders.getLinearValue(),
-			self.window.intensitySliders.getLinearValue()/100
+			pitch,
+			intensity
 		)
 
 	def onTileReleased(self, cellID=None, phone=None):
