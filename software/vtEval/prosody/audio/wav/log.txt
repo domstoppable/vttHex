@@ -1,0 +1,1095 @@
+2021-03-09 18:53:18.356546: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-03-09 18:53:18.356591: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2021-03-09 18:53:19.089169: I tensorflow/compiler/jit/xla_cpu_device.cc:41] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-03-09 18:53:19.089580: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcuda.so.1
+2021-03-09 18:53:19.120214: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:941] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-03-09 18:53:19.120634: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:0a:00.0 name: GeForce RTX 2070 SUPER computeCapability: 7.5
+coreClock: 1.815GHz coreCount: 40 deviceMemorySize: 7.79GiB deviceMemoryBandwidth: 417.29GiB/s
+2021-03-09 18:53:19.120690: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-03-09 18:53:19.120725: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublas.so.11'; dlerror: libcublas.so.11: cannot open shared object file: No such file or directory
+2021-03-09 18:53:19.120754: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublasLt.so.11'; dlerror: libcublasLt.so.11: cannot open shared object file: No such file or directory
+2021-03-09 18:53:19.120785: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcufft.so.10'; dlerror: libcufft.so.10: cannot open shared object file: No such file or directory
+2021-03-09 18:53:19.120815: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcurand.so.10'; dlerror: libcurand.so.10: cannot open shared object file: No such file or directory
+2021-03-09 18:53:19.120846: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcusolver.so.10'; dlerror: libcusolver.so.10: cannot open shared object file: No such file or directory
+2021-03-09 18:53:19.120874: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcusparse.so.11'; dlerror: libcusparse.so.11: cannot open shared object file: No such file or directory
+2021-03-09 18:53:19.120905: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-03-09 18:53:19.120913: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1757] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-03-09 18:53:19.121107: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-03-09 18:53:19.121782: I tensorflow/compiler/jit/xla_gpu_device.cc:99] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-03-09 18:53:19.121800: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1261] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-03-09 18:53:19.121806: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1267]      
+2021-03-09 18:53:19.944917: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:116] None of the MLIR optimization passes are enabled (registered 2)
+2021-03-09 18:53:19.945267: I tensorflow/core/platform/profile_utils/cpu_utils.cc:112] CPU Frequency: 3593195000 Hz
+True
+duration of sound is 2.3700226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 173ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus10_pitch0_time0.f0.csv
+duration of sound is 2.013265306122449
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 121ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus10_pitch100_time100.f0.csv
+duration of sound is 2.2264625850340134
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 131ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus10_pitch25_time25.f0.csv
+duration of sound is 2.0558049886621315
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus10_pitch75_time75.f0.csv
+duration of sound is 1.5100226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus11_pitch0_time0.f0.csv
+duration of sound is 1.4853968253968255
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus11_pitch100_time100.f0.csv
+duration of sound is 1.4759183673469387
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus11_pitch25_time25.f0.csv
+duration of sound is 1.4685714285714286
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus11_pitch75_time75.f0.csv
+duration of sound is 1.9050113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus12_pitch0_time0.f0.csv
+duration of sound is 1.9198639455782314
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus12_pitch100_time100.f0.csv
+duration of sound is 1.8777324263038548
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus12_pitch25_time25.f0.csv
+duration of sound is 1.8846938775510205
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus12_pitch75_time75.f0.csv
+duration of sound is 1.7550113378684806
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus13_pitch0_time0.f0.csv
+duration of sound is 1.6799319727891155
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus13_pitch100_time100.f0.csv
+duration of sound is 1.713265306122449
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus13_pitch25_time25.f0.csv
+duration of sound is 1.6770975056689343
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus13_pitch75_time75.f0.csv
+duration of sound is 1.5600226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus14_pitch0_time0.f0.csv
+duration of sound is 1.7190476190476192
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus14_pitch100_time100.f0.csv
+duration of sound is 1.5785034013605441
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 50ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus14_pitch25_time25.f0.csv
+duration of sound is 1.655827664399093
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus14_pitch75_time75.f0.csv
+duration of sound is 1.8250113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus15_pitch0_time0.f0.csv
+duration of sound is 1.6984353741496598
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus15_pitch100_time100.f0.csv
+duration of sound is 1.7407256235827664
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus15_pitch25_time25.f0.csv
+duration of sound is 1.6834693877551021
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus15_pitch75_time75.f0.csv
+duration of sound is 1.8600226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus16_pitch0_time0.f0.csv
+duration of sound is 1.8907256235827665
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus16_pitch100_time100.f0.csv
+duration of sound is 1.7537868480725625
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus16_pitch25_time25.f0.csv
+duration of sound is 1.7808616780045352
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus16_pitch75_time75.f0.csv
+duration of sound is 1.9300226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus17_pitch0_time0.f0.csv
+duration of sound is 1.7502267573696144
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus17_pitch100_time100.f0.csv
+duration of sound is 1.868548752834467
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus17_pitch25_time25.f0.csv
+duration of sound is 1.7797278911564627
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus17_pitch75_time75.f0.csv
+duration of sound is 1.7400226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus18_pitch0_time0.f0.csv
+duration of sound is 1.5043310657596372
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus18_pitch100_time100.f0.csv
+duration of sound is 1.6528571428571428
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus18_pitch25_time25.f0.csv
+duration of sound is 1.538344671201814
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus18_pitch75_time75.f0.csv
+duration of sound is 2.2700226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus19_pitch0_time0.f0.csv
+duration of sound is 2.2885034013605443
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus19_pitch100_time100.f0.csv
+duration of sound is 2.249433106575964
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus19_pitch25_time25.f0.csv
+duration of sound is 2.256802721088435
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus19_pitch75_time75.f0.csv
+duration of sound is 1.7550113378684806
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus1_pitch0_time0.f0.csv
+duration of sound is 1.6529931972789116
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus1_pitch100_time100.f0.csv
+duration of sound is 1.7079138321995464
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus1_pitch25_time25.f0.csv
+duration of sound is 1.658140589569161
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus1_pitch75_time75.f0.csv
+duration of sound is 1.9000226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus20_pitch0_time0.f0.csv
+duration of sound is 1.9203174603174604
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus20_pitch100_time100.f0.csv
+duration of sound is 1.8961224489795918
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus20_pitch25_time25.f0.csv
+duration of sound is 1.9066666666666667
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus20_pitch75_time75.f0.csv
+duration of sound is 1.8500226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus21_pitch0_time0.f0.csv
+duration of sound is 1.8221088435374149
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus21_pitch100_time100.f0.csv
+duration of sound is 1.7824716553287983
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus21_pitch25_time25.f0.csv
+duration of sound is 1.7731292517006803
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus21_pitch75_time75.f0.csv
+duration of sound is 1.8300226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus22_pitch0_time0.f0.csv
+duration of sound is 1.8668707482993196
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus22_pitch100_time100.f0.csv
+duration of sound is 1.8092290249433107
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus22_pitch25_time25.f0.csv
+duration of sound is 1.82578231292517
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus22_pitch75_time75.f0.csv
+duration of sound is 2.445011337868481
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 83ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus23_pitch0_time0.f0.csv
+duration of sound is 2.5612018140589567
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 88ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus23_pitch100_time100.f0.csv
+duration of sound is 2.451360544217687
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 79ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus23_pitch25_time25.f0.csv
+duration of sound is 2.50984126984127
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 81ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus23_pitch75_time75.f0.csv
+duration of sound is 1.6650113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus24_pitch0_time0.f0.csv
+duration of sound is 1.8265306122448979
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus24_pitch100_time100.f0.csv
+duration of sound is 1.6873242630385488
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus24_pitch25_time25.f0.csv
+duration of sound is 1.767278911564626
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus24_pitch75_time75.f0.csv
+duration of sound is 1.753310657596372
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus25_pitch0_time0.f0.csv
+duration of sound is 1.8762131519274377
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus25_pitch100_time100.f0.csv
+duration of sound is 1.7579818594104308
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus25_pitch25_time25.f0.csv
+duration of sound is 1.8218820861678005
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus25_pitch75_time75.f0.csv
+duration of sound is 1.7100226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus26_pitch0_time0.f0.csv
+duration of sound is 1.4359183673469387
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 49ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus26_pitch100_time100.f0.csv
+duration of sound is 1.615873015873016
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus26_pitch25_time25.f0.csv
+duration of sound is 1.4824489795918367
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 53ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus26_pitch75_time75.f0.csv
+duration of sound is 1.8150113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus27_pitch0_time0.f0.csv
+duration of sound is 1.6818367346938776
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus27_pitch100_time100.f0.csv
+duration of sound is 1.7339455782312925
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus27_pitch25_time25.f0.csv
+duration of sound is 1.6713832199546486
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus27_pitch75_time75.f0.csv
+duration of sound is 1.9250113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus28_pitch0_time0.f0.csv
+duration of sound is 1.8598412698412699
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus28_pitch100_time100.f0.csv
+duration of sound is 1.905873015873016
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus28_pitch25_time25.f0.csv
+duration of sound is 1.8734467120181406
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus28_pitch75_time75.f0.csv
+duration of sound is 2.2300226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus29_pitch0_time0.f0.csv
+duration of sound is 1.9806349206349205
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus29_pitch100_time100.f0.csv
+duration of sound is 2.1420861678004535
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus29_pitch25_time25.f0.csv
+duration of sound is 2.0196371882086166
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus29_pitch75_time75.f0.csv
+duration of sound is 1.8950113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus2_pitch0_time0.f0.csv
+duration of sound is 1.5540589569160999
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus2_pitch100_time100.f0.csv
+duration of sound is 1.7663718820861678
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus2_pitch25_time25.f0.csv
+duration of sound is 1.6064625850340135
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus2_pitch75_time75.f0.csv
+duration of sound is 2.1200226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus30_pitch0_time0.f0.csv
+duration of sound is 2.0217913832199548
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus30_pitch100_time100.f0.csv
+duration of sound is 2.073514739229025
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus30_pitch25_time25.f0.csv
+duration of sound is 2.026145124716553
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus30_pitch75_time75.f0.csv
+duration of sound is 1.3950113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus31_pitch0_time0.f0.csv
+duration of sound is 1.4941043083900227
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus31_pitch100_time100.f0.csv
+duration of sound is 1.3521768707482993
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus31_pitch25_time25.f0.csv
+duration of sound is 1.3860997732426303
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 50ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus31_pitch75_time75.f0.csv
+duration of sound is 2.0100226757369613
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus32_pitch0_time0.f0.csv
+duration of sound is 1.943310657596372
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus32_pitch100_time100.f0.csv
+duration of sound is 1.9238775510204082
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus32_pitch25_time25.f0.csv
+duration of sound is 1.9161904761904762
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus32_pitch75_time75.f0.csv
+duration of sound is 1.5200226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus33_pitch0_time0.f0.csv
+duration of sound is 1.6809750566893424
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus33_pitch100_time100.f0.csv
+duration of sound is 1.4965532879818595
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus33_pitch25_time25.f0.csv
+duration of sound is 1.5715192743764173
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 54ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus33_pitch75_time75.f0.csv
+duration of sound is 1.7900226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus34_pitch0_time0.f0.csv
+duration of sound is 1.5665986394557823
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus34_pitch100_time100.f0.csv
+duration of sound is 1.6590022675736962
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus34_pitch25_time25.f0.csv
+duration of sound is 1.553265306122449
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus34_pitch75_time75.f0.csv
+duration of sound is 2.2450113378684806
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 76ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus35_pitch0_time0.f0.csv
+duration of sound is 2.2740589569161
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus35_pitch100_time100.f0.csv
+duration of sound is 2.223560090702948
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus35_pitch25_time25.f0.csv
+duration of sound is 2.2404761904761905
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 87ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus35_pitch75_time75.f0.csv
+duration of sound is 1.8200226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus36_pitch0_time0.f0.csv
+duration of sound is 1.6545578231292517
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus36_pitch100_time100.f0.csv
+duration of sound is 1.7451700680272109
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus36_pitch25_time25.f0.csv
+duration of sound is 1.6643990929705215
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus36_pitch75_time75.f0.csv
+duration of sound is 2.1600226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus37_pitch0_time0.f0.csv
+duration of sound is 2.0324489795918366
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus37_pitch100_time100.f0.csv
+duration of sound is 2.109795918367347
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus37_pitch25_time25.f0.csv
+duration of sound is 2.0464172335600908
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus37_pitch75_time75.f0.csv
+duration of sound is 1.8250113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus38_pitch0_time0.f0.csv
+duration of sound is 1.6198639455782313
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus38_pitch100_time100.f0.csv
+duration of sound is 1.7480272108843538
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus38_pitch25_time25.f0.csv
+duration of sound is 1.6485487528344671
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus38_pitch75_time75.f0.csv
+duration of sound is 1.9800226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 82ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus39_pitch0_time0.f0.csv
+duration of sound is 2.190861678004535
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 86ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus39_pitch100_time100.f0.csv
+duration of sound is 2.017936507936508
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus39_pitch25_time25.f0.csv
+duration of sound is 2.121655328798186
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus39_pitch75_time75.f0.csv
+duration of sound is 1.8900226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus40_pitch0_time0.f0.csv
+duration of sound is 1.8866666666666667
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus40_pitch100_time100.f0.csv
+duration of sound is 1.8807709750566894
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus40_pitch25_time25.f0.csv
+duration of sound is 1.8794557823129252
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus40_pitch75_time75.f0.csv
+duration of sound is 2.1200226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus41_pitch0_time0.f0.csv
+duration of sound is 1.8601587301587301
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus41_pitch100_time100.f0.csv
+duration of sound is 2.025328798185941
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus41_pitch25_time25.f0.csv
+duration of sound is 1.8956462585034013
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus41_pitch75_time75.f0.csv
+duration of sound is 1.8300226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus42_pitch0_time0.f0.csv
+duration of sound is 1.8181632653061224
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus42_pitch100_time100.f0.csv
+duration of sound is 1.8156916099773244
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus42_pitch25_time25.f0.csv
+duration of sound is 1.8098185941043083
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus42_pitch75_time75.f0.csv
+duration of sound is 2.2450113378684806
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus43_pitch0_time0.f0.csv
+duration of sound is 2.0550566893424036
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus43_pitch100_time100.f0.csv
+duration of sound is 2.169092970521542
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus43_pitch25_time25.f0.csv
+duration of sound is 2.0765079365079364
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus43_pitch75_time75.f0.csv
+duration of sound is 1.6150113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus44_pitch0_time0.f0.csv
+duration of sound is 1.447437641723356
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus44_pitch100_time100.f0.csv
+duration of sound is 1.5576643990929706
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus44_pitch25_time25.f0.csv
+duration of sound is 1.474172335600907
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus44_pitch75_time75.f0.csv
+duration of sound is 1.7550113378684806
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus46_pitch0_time0.f0.csv
+duration of sound is 1.7033786848072563
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus46_pitch100_time100.f0.csv
+duration of sound is 1.716530612244898
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus46_pitch25_time25.f0.csv
+duration of sound is 1.6901133786848073
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus46_pitch75_time75.f0.csv
+duration of sound is 1.8500226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus47_pitch0_time0.f0.csv
+duration of sound is 1.9561678004535148
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus47_pitch100_time100.f0.csv
+duration of sound is 1.858390022675737
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus47_pitch25_time25.f0.csv
+duration of sound is 1.9099092970521543
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus47_pitch75_time75.f0.csv
+duration of sound is 1.9200226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus48_pitch0_time0.f0.csv
+duration of sound is 1.872312925170068
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus48_pitch100_time100.f0.csv
+duration of sound is 1.872108843537415
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus48_pitch25_time25.f0.csv
+duration of sound is 1.849546485260771
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus48_pitch75_time75.f0.csv
+duration of sound is 1.8100226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus49_pitch0_time0.f0.csv
+duration of sound is 1.9603628117913832
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus49_pitch100_time100.f0.csv
+duration of sound is 1.825827664399093
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus49_pitch25_time25.f0.csv
+duration of sound is 1.9024489795918367
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus49_pitch75_time75.f0.csv
+duration of sound is 2.1400226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus50_pitch0_time0.f0.csv
+duration of sound is 1.9156235827664398
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus50_pitch100_time100.f0.csv
+duration of sound is 2.068639455782313
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus50_pitch25_time25.f0.csv
+duration of sound is 1.9571201814058956
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus50_pitch75_time75.f0.csv
+duration of sound is 1.6900226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus5_pitch0_time0.f0.csv
+duration of sound is 1.4453061224489796
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus5_pitch100_time100.f0.csv
+duration of sound is 1.5553061224489797
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 54ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus5_pitch25_time25.f0.csv
+duration of sound is 1.453718820861678
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 53ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus5_pitch75_time75.f0.csv
+duration of sound is 2.1600226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus6_pitch0_time0.f0.csv
+duration of sound is 1.9362358276643992
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus6_pitch100_time100.f0.csv
+duration of sound is 2.0714285714285716
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus6_pitch25_time25.f0.csv
+duration of sound is 1.962312925170068
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus6_pitch75_time75.f0.csv
+duration of sound is 2.3400226757369613
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 77ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus7_pitch0_time0.f0.csv
+duration of sound is 2.0007256235827664
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus7_pitch100_time100.f0.csv
+duration of sound is 2.1688208616780047
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus7_pitch25_time25.f0.csv
+duration of sound is 2.023061224489796
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus7_pitch75_time75.f0.csv
+duration of sound is 2.065011337868481
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus8_pitch0_time0.f0.csv
+duration of sound is 1.939795918367347
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus8_pitch100_time100.f0.csv
+duration of sound is 1.991700680272109
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus8_pitch25_time25.f0.csv
+duration of sound is 1.9366666666666668
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus8_pitch75_time75.f0.csv
+duration of sound is 1.6450113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus9_pitch0_time0.f0.csv
+duration of sound is 1.5933106575963718
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus9_pitch100_time100.f0.csv
+duration of sound is 1.6107256235827665
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus9_pitch25_time25.f0.csv
+duration of sound is 1.585736961451247
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/focus9_pitch75_time75.f0.csv
+duration of sound is 1.5250113378684806
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 54ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase10_pitch0_time0.f0.csv
+duration of sound is 1.2703401360544218
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 49ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase10_pitch100_time100.f0.csv
+duration of sound is 1.4208163265306122
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 50ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase10_pitch25_time25.f0.csv
+duration of sound is 1.29718820861678
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 50ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase10_pitch75_time75.f0.csv
+duration of sound is 1.8650113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase13_pitch0_time0.f0.csv
+duration of sound is 2.0811791383219953
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase13_pitch100_time100.f0.csv
+duration of sound is 1.8941043083900226
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase13_pitch25_time25.f0.csv
+duration of sound is 1.9998185941043083
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase13_pitch75_time75.f0.csv
+duration of sound is 1.9050113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase14_pitch0_time0.f0.csv
+duration of sound is 1.99718820861678
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase14_pitch100_time100.f0.csv
+duration of sound is 1.9151927437641723
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase14_pitch25_time25.f0.csv
+duration of sound is 1.9613605442176871
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase14_pitch75_time75.f0.csv
+duration of sound is 1.7100226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase15_pitch0_time0.f0.csv
+duration of sound is 1.8012925170068028
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase15_pitch100_time100.f0.csv
+duration of sound is 1.713809523809524
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase15_pitch25_time25.f0.csv
+duration of sound is 1.75718820861678
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase15_pitch75_time75.f0.csv
+duration of sound is 1.5600226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase16_pitch0_time0.f0.csv
+duration of sound is 1.2499092970521541
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 46ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase16_pitch100_time100.f0.csv
+duration of sound is 1.4550113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase16_pitch25_time25.f0.csv
+duration of sound is 1.3028344671201815
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 48ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase16_pitch75_time75.f0.csv
+duration of sound is 1.6050113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase18_pitch0_time0.f0.csv
+duration of sound is 1.7396825396825397
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase18_pitch100_time100.f0.csv
+duration of sound is 1.6177324263038548
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase18_pitch25_time25.f0.csv
+duration of sound is 1.6834013605442177
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase18_pitch75_time75.f0.csv
+duration of sound is 1.7350113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase19_pitch0_time0.f0.csv
+duration of sound is 1.8379591836734694
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase19_pitch100_time100.f0.csv
+duration of sound is 1.7249433106575964
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase19_pitch25_time25.f0.csv
+duration of sound is 1.7763492063492063
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase19_pitch75_time75.f0.csv
+duration of sound is 2.0836054421768706
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase1_pitch0_time0.f0.csv
+duration of sound is 1.8063038548752834
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase1_pitch100_time100.f0.csv
+duration of sound is 1.983922902494331
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase1_pitch25_time25.f0.csv
+duration of sound is 1.8480272108843538
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase1_pitch75_time75.f0.csv
+duration of sound is 1.4200226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase20_pitch0_time0.f0.csv
+duration of sound is 1.5356009070294785
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase20_pitch100_time100.f0.csv
+duration of sound is 1.4291383219954648
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase20_pitch25_time25.f0.csv
+duration of sound is 1.4863945578231292
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase20_pitch75_time75.f0.csv
+duration of sound is 1.9700226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase21_pitch0_time0.f0.csv
+duration of sound is 1.8845578231292517
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase21_pitch100_time100.f0.csv
+duration of sound is 1.9200226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase21_pitch25_time25.f0.csv
+duration of sound is 1.8784126984126983
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase21_pitch75_time75.f0.csv
+duration of sound is 1.8750113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase22_pitch0_time0.f0.csv
+duration of sound is 1.69875283446712
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase22_pitch100_time100.f0.csv
+duration of sound is 1.7805668934240362
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase22_pitch25_time25.f0.csv
+duration of sound is 1.6988208616780045
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase22_pitch75_time75.f0.csv
+duration of sound is 1.7250113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase23_pitch0_time0.f0.csv
+duration of sound is 1.318888888888889
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase23_pitch100_time100.f0.csv
+duration of sound is 1.591315192743764
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase23_pitch25_time25.f0.csv
+duration of sound is 1.3925396825396825
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase23_pitch75_time75.f0.csv
+duration of sound is 1.7950113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase24_pitch0_time0.f0.csv
+duration of sound is 1.6063038548752835
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase24_pitch100_time100.f0.csv
+duration of sound is 1.7134240362811792
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase24_pitch25_time25.f0.csv
+duration of sound is 1.6238548752834467
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase24_pitch75_time75.f0.csv
+duration of sound is 1.7250113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase25_pitch0_time0.f0.csv
+duration of sound is 1.5068027210884354
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase25_pitch100_time100.f0.csv
+duration of sound is 1.6305895691609977
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase25_pitch25_time25.f0.csv
+duration of sound is 1.5253514739229026
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 51ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase25_pitch75_time75.f0.csv
+duration of sound is 1.5750113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase26_pitch0_time0.f0.csv
+duration of sound is 1.3842630385487529
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase26_pitch100_time100.f0.csv
+duration of sound is 1.4847845804988662
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase26_pitch25_time25.f0.csv
+duration of sound is 1.392358276643991
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 53ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase26_pitch75_time75.f0.csv
+duration of sound is 1.7350113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase27_pitch0_time0.f0.csv
+duration of sound is 1.5717460317460317
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase27_pitch100_time100.f0.csv
+duration of sound is 1.635827664399093
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase27_pitch25_time25.f0.csv
+duration of sound is 1.5644444444444445
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase27_pitch75_time75.f0.csv
+duration of sound is 1.4900226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 53ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase29_pitch0_time0.f0.csv
+duration of sound is 1.4953061224489796
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase29_pitch100_time100.f0.csv
+duration of sound is 1.4626757369614511
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 50ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase29_pitch25_time25.f0.csv
+duration of sound is 1.4664399092970521
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 54ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase29_pitch75_time75.f0.csv
+duration of sound is 1.4336054421768707
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 51ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase2_pitch0_time0.f0.csv
+duration of sound is 1.4964172335600907
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase2_pitch100_time100.f0.csv
+duration of sound is 1.4140136054421768
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 49ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase2_pitch25_time25.f0.csv
+duration of sound is 1.445487528344671
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 49ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase2_pitch75_time75.f0.csv
+duration of sound is 1.5000226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 51ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase30_pitch0_time0.f0.csv
+duration of sound is 1.4071428571428573
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 53ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase30_pitch100_time100.f0.csv
+duration of sound is 1.4314739229024944
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 50ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase30_pitch25_time25.f0.csv
+duration of sound is 1.3890249433106576
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 50ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase30_pitch75_time75.f0.csv
+duration of sound is 1.8650113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase31_pitch0_time0.f0.csv
+duration of sound is 1.812358276643991
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase31_pitch100_time100.f0.csv
+duration of sound is 1.825328798185941
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase31_pitch25_time25.f0.csv
+duration of sound is 1.8029478458049886
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase31_pitch75_time75.f0.csv
+duration of sound is 1.8500226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase32_pitch0_time0.f0.csv
+duration of sound is 1.6262358276643991
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase32_pitch100_time100.f0.csv
+duration of sound is 1.7591836734693878
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase32_pitch25_time25.f0.csv
+duration of sound is 1.650408163265306
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase32_pitch75_time75.f0.csv
+duration of sound is 1.7900226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase33_pitch0_time0.f0.csv
+duration of sound is 1.6659410430839001
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase33_pitch100_time100.f0.csv
+duration of sound is 1.7360090702947846
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase33_pitch25_time25.f0.csv
+duration of sound is 1.676439909297052
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase33_pitch75_time75.f0.csv
+duration of sound is 1.7950113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase34_pitch0_time0.f0.csv
+duration of sound is 1.6567120181405897
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase34_pitch100_time100.f0.csv
+duration of sound is 1.7299092970521541
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase34_pitch25_time25.f0.csv
+duration of sound is 1.6636054421768707
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase34_pitch75_time75.f0.csv
+duration of sound is 2.1100226757369613
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase35_pitch0_time0.f0.csv
+duration of sound is 2.3075056689342404
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 77ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase35_pitch100_time100.f0.csv
+duration of sound is 2.1258049886621313
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase35_pitch25_time25.f0.csv
+duration of sound is 2.2226530612244897
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase35_pitch75_time75.f0.csv
+duration of sound is 1.7800226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase36_pitch0_time0.f0.csv
+duration of sound is 1.8764172335600906
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase36_pitch100_time100.f0.csv
+duration of sound is 1.7809523809523808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase36_pitch25_time25.f0.csv
+duration of sound is 1.830204081632653
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase36_pitch75_time75.f0.csv
+duration of sound is 1.5450113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 54ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase37_pitch0_time0.f0.csv
+duration of sound is 1.5826984126984127
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase37_pitch100_time100.f0.csv
+duration of sound is 1.5351473922902494
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase37_pitch25_time25.f0.csv
+duration of sound is 1.5531065759637188
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 53ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase37_pitch75_time75.f0.csv
+duration of sound is 1.5600226757369615
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase38_pitch0_time0.f0.csv
+duration of sound is 1.3247845804988663
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 46ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase38_pitch100_time100.f0.csv
+duration of sound is 1.4750340136054423
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 51ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase38_pitch25_time25.f0.csv
+duration of sound is 1.3637868480725623
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 48ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase38_pitch75_time75.f0.csv
+duration of sound is 1.5850113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase39_pitch0_time0.f0.csv
+duration of sound is 1.6323356009070296
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase39_pitch100_time100.f0.csv
+duration of sound is 1.5671201814058957
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase39_pitch25_time25.f0.csv
+duration of sound is 1.5908843537414965
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase39_pitch75_time75.f0.csv
+duration of sound is 1.7200226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase40_pitch0_time0.f0.csv
+duration of sound is 1.5225170068027212
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase40_pitch100_time100.f0.csv
+duration of sound is 1.6199546485260772
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase40_pitch25_time25.f0.csv
+duration of sound is 1.5261451247165534
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 55ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase40_pitch75_time75.f0.csv
+duration of sound is 1.7750113378684806
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase41_pitch0_time0.f0.csv
+duration of sound is 1.8021315192743763
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase41_pitch100_time100.f0.csv
+duration of sound is 1.7673469387755103
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase41_pitch25_time25.f0.csv
+duration of sound is 1.7812244897959184
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase41_pitch75_time75.f0.csv
+duration of sound is 1.8550113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 65ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase42_pitch0_time0.f0.csv
+duration of sound is 1.8403628117913833
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 59ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase42_pitch100_time100.f0.csv
+duration of sound is 1.8321768707482993
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase42_pitch25_time25.f0.csv
+duration of sound is 1.8258730158730159
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase42_pitch75_time75.f0.csv
+duration of sound is 1.8800226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase43_pitch0_time0.f0.csv
+duration of sound is 1.961609977324263
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase43_pitch100_time100.f0.csv
+duration of sound is 1.8754875283446713
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase43_pitch25_time25.f0.csv
+duration of sound is 1.9187755102040815
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 66ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase43_pitch75_time75.f0.csv
+duration of sound is 1.6995691609977324
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase44_pitch0_time0.f0.csv
+duration of sound is 1.650453514739229
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase44_pitch100_time100.f0.csv
+duration of sound is 1.6651700680272108
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase44_pitch25_time25.f0.csv
+duration of sound is 1.6423809523809523
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase44_pitch75_time75.f0.csv
+duration of sound is 1.6900226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase46_pitch0_time0.f0.csv
+duration of sound is 1.6510204081632653
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase46_pitch100_time100.f0.csv
+duration of sound is 1.646530612244898
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase46_pitch25_time25.f0.csv
+duration of sound is 1.627437641723356
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase46_pitch75_time75.f0.csv
+duration of sound is 1.5750113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 54ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase47_pitch0_time0.f0.csv
+duration of sound is 1.7480272108843538
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase47_pitch100_time100.f0.csv
+duration of sound is 1.5819727891156463
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase47_pitch25_time25.f0.csv
+duration of sound is 1.6697052154195011
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase47_pitch75_time75.f0.csv
+duration of sound is 1.9850113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase48_pitch0_time0.f0.csv
+duration of sound is 1.9869160997732427
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase48_pitch100_time100.f0.csv
+duration of sound is 1.9565532879818595
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase48_pitch25_time25.f0.csv
+duration of sound is 1.9566439909297053
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase48_pitch75_time75.f0.csv
+duration of sound is 2.1400226757369616
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 67ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase49_pitch0_time0.f0.csv
+duration of sound is 1.8512244897959185
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase49_pitch100_time100.f0.csv
+duration of sound is 2.031156462585034
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase49_pitch25_time25.f0.csv
+duration of sound is 1.8948526077097505
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase49_pitch75_time75.f0.csv
+duration of sound is 1.8850113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 63ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase50_pitch0_time0.f0.csv
+duration of sound is 1.7398185941043083
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase50_pitch100_time100.f0.csv
+duration of sound is 1.8333560090702947
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 64ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase50_pitch25_time25.f0.csv
+duration of sound is 1.7619047619047619
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase50_pitch75_time75.f0.csv
+duration of sound is 1.4500226757369614
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase5_pitch0_time0.f0.csv
+duration of sound is 1.281201814058957
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 46ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase5_pitch100_time100.f0.csv
+duration of sound is 1.3727664399092971
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 53ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase5_pitch25_time25.f0.csv
+duration of sound is 1.2923356009070295
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 47ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase5_pitch75_time75.f0.csv
+duration of sound is 1.8650113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 61ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase7_pitch0_time0.f0.csv
+duration of sound is 1.7839455782312925
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase7_pitch100_time100.f0.csv
+duration of sound is 1.8164852607709752
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase7_pitch25_time25.f0.csv
+duration of sound is 1.7768707482993198
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 58ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase7_pitch75_time75.f0.csv
+duration of sound is 1.6850113378684808
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 60ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase8_pitch0_time0.f0.csv
+duration of sound is 1.5157596371882087
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 50ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase8_pitch100_time100.f0.csv
+duration of sound is 1.5858956916099773
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase8_pitch25_time25.f0.csv
+duration of sound is 1.505034013605442
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 52ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase8_pitch75_time75.f0.csv
+duration of sound is 1.6350113378684807
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 53ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase9_pitch0_time0.f0.csv
+duration of sound is 1.7061451247165533
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 62ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase9_pitch100_time100.f0.csv
+duration of sound is 1.6054195011337868
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 56ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase9_pitch25_time25.f0.csv
+duration of sound is 1.6449659863945578
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 57ms/step
+FCN-f0: File or directory not found: /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/*.WAV
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/prosody/audio/wav/phrase9_pitch75_time75.f0.csv
