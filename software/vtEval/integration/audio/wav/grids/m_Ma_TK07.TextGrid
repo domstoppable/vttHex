@@ -14,10 +14,10 @@ item []:
 		intervals: size = 3
 			intervals [1]:
 				xmin = 0.0
-				xmax = 0.640
+				xmax = 0.630
 				text = ""
 			intervals [2]:
-				xmin = 0.640
+				xmin = 0.630
 				xmax = 1.330
 				text = "ma"
 			intervals [3]:
@@ -32,14 +32,14 @@ item []:
 		intervals: size = 5
 			intervals [1]:
 				xmin = 0.000
-				xmax = 0.640
+				xmax = 0.630
 				text = "sil"
 			intervals [2]:
-				xmin = 0.640
-				xmax = 0.810
+				xmin = 0.630
+				xmax = 0.800
 				text = "M"
 			intervals [3]:
-				xmin = 0.810
+				xmin = 0.800
 				xmax = 1.330
 				text = "AA1"
 			intervals [4]:

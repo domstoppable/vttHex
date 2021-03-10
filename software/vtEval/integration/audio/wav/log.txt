@@ -217,3 +217,222 @@ duration of sound is 2.2559863945578233
 1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
 FCN-f0: File or directory not found: /home/dom/code/vttHex/software/vtEval/integration/audio/wav/*.WAV
 Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ta_TK08.f0.csv
+2021-03-09 15:36:02.170286: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-03-09 15:36:02.170479: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2021-03-09 15:36:03.678009: I tensorflow/compiler/jit/xla_cpu_device.cc:41] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-03-09 15:36:03.683453: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcuda.so.1
+2021-03-09 15:36:03.774041: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:941] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-03-09 15:36:03.774467: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:0a:00.0 name: GeForce RTX 2070 SUPER computeCapability: 7.5
+coreClock: 1.815GHz coreCount: 40 deviceMemorySize: 7.79GiB deviceMemoryBandwidth: 417.29GiB/s
+2021-03-09 15:36:03.774531: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-03-09 15:36:03.774579: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublas.so.11'; dlerror: libcublas.so.11: cannot open shared object file: No such file or directory
+2021-03-09 15:36:03.774618: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublasLt.so.11'; dlerror: libcublasLt.so.11: cannot open shared object file: No such file or directory
+2021-03-09 15:36:03.774657: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcufft.so.10'; dlerror: libcufft.so.10: cannot open shared object file: No such file or directory
+2021-03-09 15:36:03.774695: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcurand.so.10'; dlerror: libcurand.so.10: cannot open shared object file: No such file or directory
+2021-03-09 15:36:03.774734: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcusolver.so.10'; dlerror: libcusolver.so.10: cannot open shared object file: No such file or directory
+2021-03-09 15:36:03.774772: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcusparse.so.11'; dlerror: libcusparse.so.11: cannot open shared object file: No such file or directory
+2021-03-09 15:36:03.774810: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-03-09 15:36:03.774820: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1757] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-03-09 15:36:03.775086: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-03-09 15:36:03.775447: I tensorflow/compiler/jit/xla_gpu_device.cc:99] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-03-09 15:36:03.775464: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1261] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-03-09 15:36:03.775471: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1267]      
+2021-03-09 15:36:04.910016: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:116] None of the MLIR optimization passes are enabled (registered 2)
+2021-03-09 15:36:04.913770: I tensorflow/core/platform/profile_utils/cpu_utils.cc:112] CPU Frequency: 3593195000 Hz
+True
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 201ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ba_TK01.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 77ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ba_TK02.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ba_TK03.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 80ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ba_TK04.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Da_TK01.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Da_TK02.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Da_TK03.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Da_TK04.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 78ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ga_TK01.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ga_TK02.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ga_TK03.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ga_TK04.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 83ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ka_TK01.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 76ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ka_TK02.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ka_TK03.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ka_TK04.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ma_TK01.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ma_TK02.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ma_TK03.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 77ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ma_TK04.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Na_TK01.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Na_TK02.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 80ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Na_TK03.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Na_TK04.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Pa_TK01.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 77ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Pa_TK02.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Pa_TK03.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Pa_TK04.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 76ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ta_TK01.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ta_TK02.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 77ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ta_TK03.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/f_Ta_TK04.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ba_TK05.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ba_TK06.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 68ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ba_TK07.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ba_TK08.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Da_TK05.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Da_TK06.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 76ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Da_TK07.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 76ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Da_TK08.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ga_TK05.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ga_TK06.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 74ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ga_TK07.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ga_TK08.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 71ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ka_TK05.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ka_TK06.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ka_TK07.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 70ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ka_TK08.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 69ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ma_TK05.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ma_TK06.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ma_TK07.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 76ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ma_TK08.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 78ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Na_TK05.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Na_TK06.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Na_TK07.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 81ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Na_TK08.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 75ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Pa_TK05.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Pa_TK06.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 83ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Pa_TK07.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Pa_TK08.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 72ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ta_TK05.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 81ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ta_TK06.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 76ms/step
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ta_TK07.f0.csv
+duration of sound is 2.2559863945578233
+1/1 [==============================] - ETA: 0s1/1 [==============================] - 0s 73ms/step
+FCN-f0: File or directory not found: /home/dom/code/vttHex/software/vtEval/integration/audio/wav/*.WAV
+Saved the estimated frequencies values at /home/dom/code/vttHex/software/vtEval/integration/audio/wav/m_Ta_TK08.f0.csv

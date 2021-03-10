@@ -48,10 +48,11 @@ def makeVttBinary(inFile):
 	# check for constituent files
 	wavFile = inFile
 	pitchFile = pathlib.Path(folder/(name+'.f0.csv'))
+	loudnessFile = pathlib.Path(folder/(name+'.loudness.csv'))
 	textGridFile = pathlib.Path(folder/'grids'/(name+'.TextGrid'))
 
 	filesOk = True
-	for f in [wavFile, pitchFile, textGridFile]:
+	for f in [wavFile, pitchFile, loudnessFile, textGridFile]:
 		if not f.exists():
 			print('Missing constituent file:', f)
 			filesOk = False

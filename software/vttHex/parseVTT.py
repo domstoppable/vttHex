@@ -39,20 +39,21 @@ class VTTFile:
 		phones = self.getPhoneticSamples()
 		result = ''
 		lastPhone = None
+		silencePhone = '·'
 		for phoneIdx in phones:
 			if phoneIdx < len(tools.phoneLayout):
 				phone = tools.phoneLayout[phoneIdx]
 			else:
-				phone = ' '
+				phone = silencePhone
 
-			if phone == lastPhone and lastPhone != ' ':
-				result += '-'
+			if phone == lastPhone and phone != silencePhone:
+				result += '='
 			else:
 				result += phone
 
 			lastPhone = phone
 
-		return result.strip()
+		return result
 
 	def getDuration(self):
 		return self.sampleCount * self.samplePeriod

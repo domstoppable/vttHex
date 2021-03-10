@@ -18,10 +18,10 @@ item []:
 				text = ""
 			intervals [2]:
 				xmin = 0.680
-				xmax = 1.310
+				xmax = 1.300
 				text = "ga"
 			intervals [3]:
-				xmin = 1.310
+				xmin = 1.300
 				xmax = 2.2559863945578233
 				text = ""
 	item [2]:
@@ -40,10 +40,10 @@ item []:
 				text = "G"
 			intervals [3]:
 				xmin = 0.800
-				xmax = 1.310
+				xmax = 1.300
 				text = "AA1"
 			intervals [4]:
-				xmin = 1.310
+				xmin = 1.300
 				xmax = 2.240
 				text = "sp"
 			intervals [5]:

@@ -36,10 +36,10 @@ item []:
 				text = "sil"
 			intervals [2]:
 				xmin = 0.660
-				xmax = 0.820
+				xmax = 0.830
 				text = "M"
 			intervals [3]:
-				xmin = 0.820
+				xmin = 0.830
 				xmax = 1.320
 				text = "AA1"
 			intervals [4]:

@@ -18,10 +18,10 @@ item []:
 				text = ""
 			intervals [2]:
 				xmin = 0.670
-				xmax = 1.300
+				xmax = 1.280
 				text = "pa"
 			intervals [3]:
-				xmin = 1.300
+				xmin = 1.280
 				xmax = 2.2559863945578233
 				text = ""
 	item [2]:
@@ -40,10 +40,10 @@ item []:
 				text = "P"
 			intervals [3]:
 				xmin = 0.820
-				xmax = 1.300
+				xmax = 1.280
 				text = "AA1"
 			intervals [4]:
-				xmin = 1.300
+				xmin = 1.280
 				xmax = 2.240
 				text = "sp"
 			intervals [5]:

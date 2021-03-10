@@ -1,8 +1,6 @@
 import sys
 import pkg_resources
-import wave, audioop
 import math
-
 
 phoneLayout = ['B', 'D', 'G', 'HH', 'DH', None, 'P', 'T', 'K', 'TH', 'F', None, 'M', 'N', 'SH', 'S', 'V', 'W', 'Y', 'NG', 'CH', 'ZH', 'Z', 'L', 'R', 'ER', 'JH', 'AH', 'AO', 'AA', 'AW', 'UW', 'UH', 'OW', 'OY', 'AX', 'IY', 'EY', 'IH', 'EH', 'AE', 'AY', ]
 vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IY','OW','OY']
@@ -13,6 +11,10 @@ phoneIndexLookup = {phone:idx for (idx,phone) in enumerate(phoneLayout)}
 def mel(f):
 	# O’Shaughnessy, D. (1987). Speech Communication: Human and Machine. Addison-Wesley Publishing Company.
 	return 1127 * math.log(1+(f/700))
+
+def deMel(m):
+	# O’Shaughnessy, D. (1987). Speech Communication: Human and Machine. Addison-Wesley Publishing Company.
+	return 700 * (math.exp(m/1127) - 1)
 
 pitchMinHz = 30
 pitchMaxHz = 260
@@ -27,7 +29,6 @@ class TimeData:
 	def __init__(self, t, data):
 		self.time = t
 		self.data = data
-
 
 class TimeSeries:
 	def __init__(self, data=None):
@@ -67,12 +68,14 @@ class SignalPlayer():
 		if folder is None:
 			textGridFile = findAsset(f'MBOPP/audio/grids/{filename}.TextGrid')
 			pitchFile = findAsset(f'MBOPP/audio/{filename}.f0.csv')
+			loudnessFile = findAsset(f'MBOPP/audio/{filename}.loudness.csv')
 			wavFile = findAsset(f'MBOPP/audio/{filename}.wav')
 			if not wavFile.exists():
 				wavFile = findAsset(f'MBOPP/audio/{filename}.WAV')
 		else:
 			textGridFile = folder/'grids'/(filename + '.TextGrid')
 			pitchFile = folder/(filename + '.f0.csv')
+			loudnessFile = folder/(filename + '.loudness.csv')
 			wavFile = folder/(filename + '.wav')
 			if not wavFile.exists():
 				wavFile = folder/(filename + '.WAV')
@@ -92,30 +95,13 @@ class SignalPlayer():
 				(timestamp, pitch, confidence) = [float(x) for x in line.split('   ')]
 				self.pitchSeries.addData(timestamp, (pitch, confidence))
 
-		windowSize = 0.050
-		wav = wave.open(str(wavFile))
-		if wav.getsampwidth() == 2:
-			zero = 0
-			maxValue = 2**15
-		else:
-			zero = 128
-			maxValue = 255
-
-		frames = wav.readframes(wav.getnframes())
-		framesPerWindow = int(wav.getframerate() * windowSize * wav.getsampwidth())
-
-		pad = zero.to_bytes(length=wav.getsampwidth(), byteorder='little') * math.ceil(framesPerWindow/4)
-		paddedFrames = pad + frames + pad
-
 		self.intensitySeries = TimeSeries()
-		samples = int(len(frames)/2)
-		for i in range(samples):
-			start = i*2
-			window = paddedFrames[start:start+framesPerWindow]
-			intensity = audioop.rms(window, wav.getsampwidth())
-			intensity /= maxValue
-
-			self.intensitySeries.addData(i*(1/wav.getframerate()), intensity)
+		with open(loudnessFile) as csvFile:
+			for idx,line in enumerate(csvFile.readlines()):
+				if idx == 0:
+					continue
+				(timestamp, loudness) = [float(x) for x in line.split(',')]
+				self.intensitySeries.addData(timestamp, loudness)
 
 	def reset(self):
 		self.phoneSeries.reset()
@@ -164,6 +150,6 @@ def formatSignalAsBytes(phoneOrCellID, pitch, intensity):
 	pitch = max(0, min(255, pitch))
 
 
-	intensity = int(255*intensity)
+	intensity = int(255*min(50, intensity)/50)
 
 	return bytearray([ cellID, pitch, intensity ])
