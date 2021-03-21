@@ -5,14 +5,26 @@ LOG=./log.txt
 
 
 function resampleWav(){
-	gst-launch-1.0 filesrc location="$1" ! \
+	inputFile="$1"
+	outputFile="$2"
+
+	gst-launch-1.0 filesrc location="$inputFile" ! \
 		wavparse ! \
-		audioconvert ! \
-		rganalysis ! rgvolume ! rglimiter ! \
 		audioconvert ! "audio/x-raw,channels=1,format=S16LE" ! \
 		audioresample ! audio/x-raw, rate=44100 ! \
 		wavenc ! \
-		filesink location="$2"
+		filesink location="$outputFile.tmp.wav"
+
+	duration=$(soxi -D $outputFile.tmp.wav)
+	padLength=$(echo ".5-$duration" | bc)
+	if [[ $padLength != -* ]]; then
+		echo "pad needed $padLength"
+		sox "$outputFile.tmp.wav" "$outputFile.tmp-pad.wav" pad $padLength
+		mv "$outputFile.tmp-pad.wav" "$outputFile.tmp.wav"
+	fi
+	gain=$(loudgain -qo "$outputFile.tmp.wav" 2>/dev/null | tail -n 1 | cut -f 3)
+	sox "$outputFile.tmp.wav" "$2" gain $gain
+	rm "$outputFile.tmp.wav"
 }
 
 function resample(){
