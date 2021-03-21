@@ -13,3 +13,4 @@ praat-textgrids = "*"
 tqdm = "*"
 vtthex = {editable = true, path = "."}
 mosqito = {path = "/home/dom/code/MoSQITo/dist/mosqito-0.1.0-py3-none-any.whl"}
+num2words = "*"

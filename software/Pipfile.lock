@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "60dacce20b6e5034b20702cc59ccd8891ec2b23573d5f64b0b21252e49e0234e"
+            "sha256": "02a25fa83a2b4713b42ca3e1652c69fd6266de7d01f160a9e881db9d2c47ebf2"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -20,6 +20,12 @@
                 "sha256:cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8"
             ],
             "version": "==0.10.0"
+        },
+        "docopt": {
+            "hashes": [
+                "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491"
+            ],
+            "version": "==0.6.2"
         },
         "kiwisolver": {
             "hashes": [
@@ -97,6 +103,14 @@
             ],
             "path": "/home/dom/code/MoSQITo/dist/mosqito-0.1.0-py3-none-any.whl",
             "version": "==0.1.0"
+        },
+        "num2words": {
+            "hashes": [
+                "sha256:0b6e5f53f11d3005787e206d9c03382f459ef048a43c544e3db3b1e05a961548",
+                "sha256:37cd4f60678f7e1045cdc3adf6acf93c8b41bf732da860f97d301f04e611cc57"
+            ],
+            "index": "pypi",
+            "version": "==0.5.10"
         },
         "numpy": {
             "hashes": [
