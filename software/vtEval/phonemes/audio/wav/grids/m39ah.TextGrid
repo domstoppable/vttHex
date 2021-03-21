@@ -32,10 +32,10 @@ item []:
 				text = "HH"
 			intervals [2]:
 				xmin = 0.070
-				xmax = 0.370
+				xmax = 0.380
 				text = "AO1"
 			intervals [3]:
-				xmin = 0.370
+				xmin = 0.380
 				xmax = 0.510
 				text = "D"
 			intervals [4]:

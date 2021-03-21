@@ -14,10 +14,10 @@ item []:
 		intervals: size = 2
 			intervals [1]:
 				xmin = 0.000
-				xmax = 0.600
+				xmax = 0.590
 				text = "hiyd"
 			intervals [2]:
-				xmin = 0.600
+				xmin = 0.590
 				xmax = 0.6510204081632653
 				text = ""
 	item [2]:
@@ -36,10 +36,10 @@ item []:
 				text = "IY1"
 			intervals [3]:
 				xmin = 0.460
-				xmax = 0.600
+				xmax = 0.590
 				text = "D"
 			intervals [4]:
-				xmin = 0.600
+				xmin = 0.590
 				xmax = 0.630
 				text = "sp"
 			intervals [5]:

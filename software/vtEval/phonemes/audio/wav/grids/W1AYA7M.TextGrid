@@ -32,10 +32,10 @@ item []:
 				text = "AA2"
 			intervals [2]:
 				xmin = 0.280
-				xmax = 0.520
+				xmax = 0.510
 				text = "Y"
 			intervals [3]:
-				xmin = 0.520
+				xmin = 0.510
 				xmax = 0.910
 				text = "AA1"
 			intervals [4]:

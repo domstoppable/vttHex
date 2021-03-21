@@ -11,12 +11,16 @@ item []:
 		name = "words"
 		xmin = 0.0
 		xmax = 0.9509977324263038
-		intervals: size = 2
+		intervals: size = 3
 			intervals [1]:
-				xmin = 0.000
+				xmin = 0.0
+				xmax = 0.060
+				text = ""
+			intervals [2]:
+				xmin = 0.060
 				xmax = 0.930
 				text = "aja"
-			intervals [2]:
+			intervals [3]:
 				xmin = 0.930
 				xmax = 0.9509977324263038
 				text = ""
@@ -25,20 +29,24 @@ item []:
 		name = "phones"
 		xmin = 0.0
 		xmax = 0.9509977324263038
-		intervals: size = 4
+		intervals: size = 5
 			intervals [1]:
 				xmin = 0.000
+				xmax = 0.060
+				text = "sil"
+			intervals [2]:
+				xmin = 0.060
 				xmax = 0.340
 				text = "AA2"
-			intervals [2]:
+			intervals [3]:
 				xmin = 0.340
 				xmax = 0.530
 				text = "JH"
-			intervals [3]:
+			intervals [4]:
 				xmin = 0.530
 				xmax = 0.930
 				text = "AA1"
-			intervals [4]:
+			intervals [5]:
 				xmin = 0.930
 				xmax = 0.9509977324263038
 				text = ""

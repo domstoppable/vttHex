@@ -28,10 +28,10 @@ item []:
 		intervals: size = 4
 			intervals [1]:
 				xmin = 0.000
-				xmax = 0.220
+				xmax = 0.230
 				text = "AA2"
 			intervals [2]:
-				xmin = 0.220
+				xmin = 0.230
 				xmax = 0.360
 				text = "R"
 			intervals [3]:
