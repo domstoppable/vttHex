@@ -154,9 +154,10 @@ class IntegrationEvalApp(VtEvalApp):
 		self.stimSets = []
 
 		for audibleFile in (stimPath/'wav').glob('*.wav'):
+			speakerID = int(audibleFile.stem[7:9])
 			audiblePhone = StimPair.getPhone(audibleFile)
 
-			for tactileFile in (stimPath/'vtt').glob('*.vtt'):
+			for tactileFile in (stimPath/'vtt').glob(f'*TK0{speakerID}.vtt'):
 				tactilePhone = StimPair.getPhone(tactileFile)
 
 				token = (audiblePhone, tactilePhone)
