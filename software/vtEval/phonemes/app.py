@@ -146,27 +146,39 @@ class PhonemeEvalApp(VtEvalApp):
 			ButtonPromptWidget('instructions', instructions),
 		]
 
-		consonantStack = []
+		consonantStack = [
+			ButtonPromptWidget('instructions', '<h2>Consonants</h2><p>Identify the consonants.</p>')
+		]
 		for idx,stim in enumerate(self.consonants):
 			stimWidget = AFCWidget(f'consonant-{idx:03}', stim, self.consonantSet)
 			stimWidget.stimulusBraced.connect(self.prepareStimulus)
 			stimWidget.stimulusTriggered.connect(self.playStimulus)
 			consonantStack.append(stimWidget)
 
-		vowelStack = []
+		consonantStack.insert(
+			int(len(consonantStack)/2),
+			ButtonPromptWidget('break', '<center>Time for a break!<br/><br/>Press the button below when you are ready to continue with consonants.</center>')
+		)
+
+		vowelStack = [
+			ButtonPromptWidget('instructions', '<h2>Vowels</h2><p>Identify the vowels.</p>')
+		]
 		for idx,stim in enumerate(self.vowels):
 			stimWidget = AFCWidget(f'vowel-{idx:03}', stim, self.vowelSet)
 			stimWidget.stimulusBraced.connect(self.prepareStimulus)
 			stimWidget.stimulusTriggered.connect(self.playStimulus)
 			vowelStack.append(stimWidget)
 
-		breakWidget = ButtonPromptWidget('break', '<center>Time for a break!<br/><br/>Press the button below when you are ready to continue.</center>')
+		vowelStack.insert(
+			int(len(vowelStack)/2),
+			ButtonPromptWidget('break', '<center>Time for a break!<br/><br/>Press the button below when you are ready to continue with vowels.</center>')
+		)
 
 		# counterbalance consonants vs vowels order presentation
 		if int(arguments['pid']) % 2 == 0:
-			stack += consonantStack + [breakWidget] + vowelStack
+			stack += consonantStack + vowelStack
 		else:
-			stack += vowelStack + [breakWidget] + consonantStack
+			stack += vowelStack + consonantStack
 
 		self.widgetStack = stack
 		self.dataLogger = DataLogger(arguments, 'phonemes')
