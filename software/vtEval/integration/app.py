@@ -100,9 +100,9 @@ class AFCWidget(StateWidget):
 		self.buttonContainer.setLayout(QtWidgets.QGridLayout())
 		self.buttonContainer.layout().setSpacing(20)
 
-		options = list(self.stimulus.getResponseOptions())
-		random.shuffle(options)
-		for idx,opt in enumerate(options):
+		self.options = list(self.stimulus.getResponseOptions())
+		random.shuffle(self.options)
+		for idx,opt in enumerate(self.options):
 			row = int(idx / horizontalCount)
 			col = idx % horizontalCount
 
@@ -140,13 +140,16 @@ class AFCWidget(StateWidget):
 
 class IntegrationDataLogger(DataLogger):
 	def getFieldNames(self):
-		return super().getFieldNames() + ['audibleFile']
+		return super().getFieldNames() + ['audibleFile', 'options']
 
 	def buildRecord(self, finishedWidget):
 		record = super().buildRecord(finishedWidget)
 
 		if hasattr(finishedWidget, 'stimulus'):
 			record['audibleFile'] = finishedWidget.stimulus.wavFile.name
+
+		if hasattr(finishedWidget, 'options'):
+			record['options'] = '|'.join(finishedWidget.options)
 
 		return record
 
