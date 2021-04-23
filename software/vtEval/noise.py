@@ -7,10 +7,10 @@ class FadeSound:
 		self.soundEffect.setLoopCount(QtMultimedia.QSoundEffect.Infinite)
 
 		self.timer = QtCore.QTimer()
-		self.timer.setInterval(10)
+		self.timer.setInterval(50)
 		self.timer.timeout.connect(self.adjust)
 
-		self.adjustment = .025
+		self.adjustment = .1
 		self.adjustmentDirection = 1
 
 		self.fadeInMax = 1.0
