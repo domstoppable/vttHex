@@ -9,7 +9,7 @@ from pathlib import Path
 from PySide2 import QtCore, QtGui, QtWidgets
 
 from vtEval.vtEvalApp import *
-from vtEval import serial
+from vtEval import serial, noise
 from vttHex.parseVTT import loadVTTFile
 
 instructions = '''<html>
@@ -126,6 +126,7 @@ class AFCWidget(StateWidget):
 		return button
 
 	def showEvent(self, event):
+		noise.play()
 		QtCore.QTimer.singleShot(self.delayBeforeStimulus, self.nextStep)
 
 	def nextStep(self):
@@ -153,6 +154,7 @@ class AFCWidget(StateWidget):
 		self.choiceButtons[1].setStyleSheet('')
 		self.promptLabel.setText('Which version was a better match?')
 		self.buttonContainer.setDisabled(False)
+		noise.stop()
 
 	def onChoiceMade(self, option):
 		self.selection = option

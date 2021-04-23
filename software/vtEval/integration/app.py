@@ -9,7 +9,7 @@ from pathlib import Path
 from PySide2 import QtCore, QtGui, QtWidgets, QtMultimedia
 
 from vtEval.vtEvalApp import *
-from vtEval import serial
+from vtEval import serial, noise
 
 instructions = '''<html>
 	<h1>Perceptual Integration</h1>
@@ -114,6 +114,7 @@ class AFCWidget(StateWidget):
 		self.layout().addWidget(self.buttonContainer)
 
 	def showEvent(self, event):
+		noise.play()
 		QtCore.QTimer.singleShot(self.delayBeforeStimulus, self.playStimulus)
 		self.stimulusBraced.emit(self.stimulus)
 
@@ -130,6 +131,8 @@ class AFCWidget(StateWidget):
 	def enableButtons(self):
 		self.label.setText('Make a selection')
 		self.buttonContainer.setDisabled(False)
+
+		noise.stop()
 
 	def onChoiceMade(self, option):
 		self.selection = option
