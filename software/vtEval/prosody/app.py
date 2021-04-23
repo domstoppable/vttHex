@@ -12,15 +12,29 @@ from vtEval.vtEvalApp import *
 from vtEval import serial, noise
 from vttHex.parseVTT import loadVTTFile
 
-instructions = '''<html>
-	<h1>Prosody Evaluation</h1>
-	<p>Amet magni dolor ea repellat illo quis expedita sint. Omnis ea eum perspiciatis culpa maiores voluptatem repudiandae perspiciatis. Adipisci delectus voluptate dolorem aut qui hic sunt dolor. Autem dolores doloribus autem exercitationem dicta molestiae quibusdam. Ab in provident iure eveniet voluptatum voluptatum aut.</p>
-	<p>Eius provident magni voluptas tenetur reprehenderit qui consequatur. Ipsa nihil cupiditate id qui. Consequatur unde fugiat tenetur est harum provident deleniti.</p>
-	<p>In harum delectus eligendi pariatur vero ab. Reprehenderit porro optio dicta rem quibusdam quidem fugiat et. Voluptatem dolorum sequi enim non molestiae consequatur velit. Quis modi dolorum vero sint facilis. Ab quam repellat velit voluptatem earum. Nisi sint voluptatem esse iusto voluptas.</p>
-	<p>Cupiditate est consequuntur deleniti dolorem eos. Beatae vel qui quas sed impedit iusto eaque. Exercitationem laborum repudiandae voluptatum et veniam qui non quod. Sunt necessitatibus et sed voluptate nulla sunt vero et. Aperiam eligendi tempore exercitationem adipisci.</p>
-	<br/>
-	<center>Click the button below when you are ready to begin.</center></p>
-</html>'''
+instructions = {
+	'intro': '''<html>
+			<h1>Prosody Evaluation</h1>
+			<p>Amet magni dolor ea repellat illo quis expedita sint. Omnis ea eum perspiciatis culpa maiores voluptatem repudiandae perspiciatis. Adipisci delectus voluptate dolorem aut qui hic sunt dolor. Autem dolores doloribus autem exercitationem dicta molestiae quibusdam. Ab in provident iure eveniet voluptatum voluptatum aut.</p>
+			<p>Eius provident magni voluptas tenetur reprehenderit qui consequatur. Ipsa nihil cupiditate id qui. Consequatur unde fugiat tenetur est harum provident deleniti.</p>
+			<p>In harum delectus eligendi pariatur vero ab. Reprehenderit porro optio dicta rem quibusdam quidem fugiat et. Voluptatem dolorum sequi enim non molestiae consequatur velit. Quis modi dolorum vero sint facilis. Ab quam repellat velit voluptatem earum. Nisi sint voluptatem esse iusto voluptas.</p>
+			<p>Cupiditate est consequuntur deleniti dolorem eos. Beatae vel qui quas sed impedit iusto eaque. Exercitationem laborum repudiandae voluptatum et veniam qui non quod. Sunt necessitatibus et sed voluptate nulla sunt vero et. Aperiam eligendi tempore exercitationem adipisci.</p>
+			<br/>
+			<center>Click the button below when you are ready to begin.</center></p>
+		</html>''',
+	'focus': '''
+		<html>
+			<h2>Focus Evaluation</h1>
+		</html>
+		''',
+	'phrase': '''
+		<html>
+			<h2>Phrase Boundary Evaluation</h1>
+		</html>
+		''',
+}
+
+
 
 stimPath = Path('vtEval/prosody/audio')
 
@@ -188,15 +202,16 @@ class ProsodyEvalApp(VtEvalApp):
 		focusStack = self.buildSubStack('focus')
 		phraseStack = self.buildSubStack('phrase')
 
-		breakWidget = ButtonPromptWidget('break', '<center>Time for a break!<br/><br/>Press the button below when you are ready to continue.</center>')
-
-		self.widgetStack = [ ButtonPromptWidget('instructions', instructions) ]
+		self.widgetStack = [ ButtonPromptWidget('instructions', instructions['intro']) ]
 
 		# counterbalance order of focus vs phrase boundaries
 		if int(arguments['pid']) % 2 == 0:
-			self.widgetStack += focusStack + [breakWidget] + phraseStack
+			self.widgetStack += focusStack + phraseStack
 		else:
-			self.widgetStack += phraseStack + [breakWidget] + focusStack
+			self.widgetStack += phraseStack + focusStack
+
+		for w in self.widgetStack:
+			print(w.name, '\t', w)
 
 		self.dataLogger = DataLogger(arguments, 'prosody')
 
@@ -218,6 +233,16 @@ class ProsodyEvalApp(VtEvalApp):
 		random.shuffle(stack)
 		for idx,stimWidget in enumerate(stack):
 			stimWidget.name += f'-{idx}'
+
+		breaks = 5
+		breakEveryN = len(stack)/(breaks+1)
+		for breakIdx in range(breaks,0,-1):
+			pos = int(breakIdx * breakEveryN)
+			breakWidget = ButtonPromptWidget('break', '<center>Time for a break!<br/><br/>Press the button below when you are ready to continue.</center>')
+
+			stack.insert(pos, breakWidget)
+
+		stack.insert(0, ButtonPromptWidget('instructions', instructions[name]))
 
 		return stack
 
