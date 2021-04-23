@@ -30,6 +30,9 @@ class VtEvalApp():
 		self.window.setStyleSheet('font-size: 24pt')
 		self.window.setContentsMargins(200, 50, 200, 50)
 
+		self.progressBar = QtWidgets.QProgressBar()
+		self.window.layout().addWidget(self.progressBar)
+
 		self.dataLogger = None
 		self.device = None
 
@@ -37,6 +40,7 @@ class VtEvalApp():
 		raise Exception(f'{self.app.applicationName()} is not configured!')
 
 	def onStarted(self):
+		self.progressBar.setMaximum(len(self.widgetStack))
 		self.popNextState()
 
 	def onAboutToQuit(self):
@@ -61,8 +65,9 @@ class VtEvalApp():
 		self.app.exit()
 
 	def popNextState(self):
-		while self.window.layout().count() > 0:
-			widget = self.window.layout().takeAt(0).widget()
+		self.progressBar.setValue(self.progressBar.maximum() - len(self.widgetStack) + 1)
+		while self.window.layout().count() > 1:
+			widget = self.window.layout().takeAt(1).widget()
 			widget.setParent(None)
 
 		self.currentStateWidget = self.widgetStack.pop(0)
