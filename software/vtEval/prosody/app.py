@@ -162,6 +162,26 @@ class ProsodyEvalApp(VtEvalApp):
 	def __init__(self):
 		super().__init__('Prosody Evaluation')
 
+	def simulate(self):
+		isPostTest = self.arguments['condition'] == 'Post-test'
+
+		opposites = {
+			'early': 'late',
+			'late': 'early'
+		}
+
+		for w in self.widgetStack:
+			if isinstance(w, AFCWidget):
+				if isPostTest and random.random() > 0.65:
+					w.selection = w.earlyOrLate
+				else:
+					if random.random() > 0.5:
+						w.selection = w.earlyOrLate
+					else:
+						w.selection = opposites[w.earlyOrLate]
+
+			self.dataLogger.logWidgetCompletion(w)
+
 	def initialize(self, arguments):
 		focusStack = self.buildSubStack('focus')
 		phraseStack = self.buildSubStack('phrase')

@@ -70,13 +70,14 @@ class VtEvalApp():
 		self.currentStateWidget.finished.connect(lambda: self.onStateWidgetFinished(self.currentStateWidget))
 		self.currentStateWidget.onStarted()
 
-	def execute(self):
+	def parseArgs(self):
 		parser = argparse.ArgumentParser(description=self.app.applicationName())
 
 		parser.add_argument('--facilitator', type=str)
 		parser.add_argument('--pid', type=str)
 		parser.add_argument('--condition', type=str)
 		parser.add_argument('--device', type=str)
+		parser.add_argument('--simulate', action='store_true')
 
 		self.arguments = argparseqt.groupingTools.parseIntoGroups(parser)
 
@@ -90,12 +91,19 @@ class VtEvalApp():
 			else:
 				sys.exit(1)
 
+	def execute(self):
+		self.parseArgs()
+
 		self.device = serial.SerialDevice(self.arguments['device'])
 		self.initialize(self.arguments)
 		self.widgetStack.append(KeyPromptWidget(name='finished', text='<center>You are finished!<br/><br/>Please let the facilitator know.</center>', dismissKey=QtCore.Qt.Key_F4))
 		self.window.showFullScreen()
 		QtCore.QTimer.singleShot(0, self.onStarted)
-		self.app.exec_()
+
+		if self.arguments['simulate']:
+			self.simulate()
+		else:
+			self.app.exec_()
 
 class StateWidget(QtWidgets.QWidget):
 	finished = QtCore.Signal()

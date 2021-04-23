@@ -122,6 +122,23 @@ class PhonemeEvalApp(VtEvalApp):
 		self.loadConsonants()
 		self.loadVowels()
 
+	def simulate(self):
+		isPostTest = self.arguments['condition'] == 'Post-test'
+		targetRates = {
+			'c': 4/20,
+			'v': 4/12,
+		}
+
+		for w in self.widgetStack:
+			if isinstance(w, AFCWidget):
+				consonantOrVowel = w.name[0]
+				if not isPostTest or random.random() > targetRates[consonantOrVowel]:
+					w.selection = random.choice(w.options)
+				else:
+					w.selection = w.stimulus.id
+
+			self.dataLogger.logWidgetCompletion(w)
+
 	def initialize(self, arguments):
 		stack = [
 			ButtonPromptWidget('instructions', instructions),

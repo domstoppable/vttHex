@@ -166,6 +166,29 @@ class IntegrationEvalApp(VtEvalApp):
 
 		random.shuffle(self.stimSets)
 
+	def simulate(self):
+		isPostTest = self.arguments['condition'] == 'Post-test'
+
+		for w in self.widgetStack:
+			if isinstance(w, AFCWidget):
+				if not isPostTest:
+					if random.random() < .9:
+						w.selection = w.stimulus.id[:2]
+					else:
+						w.selection = random.choice(w.options)
+				else:
+					if random.random() < .80:
+						w.selection = w.stimulus.id[:2]
+					else:
+						nonIntegratedOptions = w.stimulus.id.split('-')
+						integratedOptions = list(w.options)
+						for opt in nonIntegratedOptions:
+							integratedOptions.remove(opt)
+
+						w.selection = random.choice(integratedOptions)
+
+			self.dataLogger.logWidgetCompletion(w)
+
 	def initialize(self, arguments):
 		self.widgetStack.append(ButtonPromptWidget('instructions', instructions))
 
