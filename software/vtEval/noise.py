@@ -29,7 +29,6 @@ class FadeSound:
 		self.timer.start()
 
 	def adjust(self):
-		print('Adj', self.adjustmentDirection)
 		volume = self.soundEffect.volume()
 
 		fadeInComplete = self.adjustmentDirection > 0 and volume >= self.fadeInMax
