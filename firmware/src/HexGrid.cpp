@@ -11,7 +11,12 @@ void HexGrid::testActuator(uint8_t actuatorID){
 	actuators.setValue(actuatorID, 0);
 }
 
+void HexGrid::setActuatorIntensity(uint8_t actuatorID, uint8_t intensity){
+	actuators.setValue(actuatorID, intensity);
+}
 void HexGrid::enable(uint8_t cellID, uint8_t intensity, uint8_t pitch){
+	const float* easeFunc = easeFunc_cubicInOut;
+
 	if(currentCell != 255){
 		disable(currentCell);
 	}
@@ -24,9 +29,10 @@ void HexGrid::enable(uint8_t cellID, uint8_t intensity, uint8_t pitch){
 	int overlapWidth = 255 / (actuatorCount-1);
 
 	float distanceFromFirstNode = ((float)(pitch % overlapWidth) / (float)overlapWidth);
+	int transitionIdx = pitch % overlapWidth;
 	float values[] = {
-		255.0f*(1.0f-distanceFromFirstNode),
-		255.0f*distanceFromFirstNode,
+		intensity*easeFunc[overlapWidth - transitionIdx - 1],
+		intensity*easeFunc[transitionIdx]
 	};
 
 	for(int i=0; i<2; i++){

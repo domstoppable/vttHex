@@ -11,10 +11,12 @@ uint8_t CMD_PAYLOAD_SIZES[NUM_COMMANDS] = {
 	3,
 	0,
 	9,
-	1
+	1,
+	2
 };
 
 void CommandStream::update(){
+
 	if(stream == nullptr){
 		return;
 	}
@@ -30,18 +32,25 @@ void CommandStream::update(){
 		// NOP
 	}else if(cmd == CMD_CALIBRATE){
 		grid->calibrate();
-	}else if(cmd == CMD_ACTUATOR_ENABLE){
+	}else if(cmd == CMD_CELL_ENABLE){
 		byte cellID = nextByte();
 		sprintf(msg, "%02d Enable", cellID);
 		Logger::getGlobal()->debug(msg);
 
 		grid->enable(cellID, 255, 0);
-	}else if(cmd == CMD_ACTUATOR_DISABLE){
+	}else if(cmd == CMD_CELL_DISABLE){
 		byte cellID = nextByte();
 		sprintf(msg, "%02d Disable", cellID);
 		Logger::getGlobal()->debug(msg);
 
 		grid->disable(cellID);
+	}else if(cmd == CMD_SET_ACTUATOR_INT){
+		byte actuatorID = nextByte();
+		byte intensity = nextByte();
+
+		grid->setActuatorIntensity(actuatorID, intensity);
+		sprintf(msg, " %02d ON %03d ", actuatorID, intensity);
+		display->showText(msg);
 	}else if(cmd == CMD_PITCH){
 		byte pitch = nextByte();
 		display->showText("Freq");
@@ -89,8 +98,8 @@ void CommandStream::update(){
 		display->showText("Play clip");
 		playBite(nextByte());
 	}else{
-		Logger::getGlobal()->debug("???");
-		stream->println(cmd);
+		sprintf(msg, "??? %d", cmd);
+		Logger::getGlobal()->debug(msg);
 	}
 }
 
@@ -164,7 +173,7 @@ void CommandStream::playBite(uint8_t id){
 		now = millis();
 
 		long delta = now - startTime;
-		delta *= 0.75f;
+		//delta *= 0.75f;
 		sampleIdx = int(delta / soundBites[id].period);
 		if(sampleIdx >= soundBites[id].sampleCount){
 			break;

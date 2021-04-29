@@ -89,6 +89,10 @@ void LRAArray::setValue(int id, uint8_t value) {
 		int driverID = id / 4;
 		int channelID = id % 4;
 		setDriverChannelValue(driverID, channelID, value);
+	}else if(id<16){
+		int driverID = 3 + (id%2);
+		int channelID = (id-12)/2;
+		setDriverChannelValue(driverID, channelID, value);
 	}
 }
 
