@@ -13,13 +13,27 @@
 	char hostname[] = "vt00";
 #endif
 
+char* resetReasonText[] = {
+	"UNKNOWN",    //!< Reset reason can not be determined
+    "",           //!< Reset due to power-on event
+    "EXT",        //!< Reset by external pin (not applicable for ESP32)
+    "SW",         //!< Software reset via esp_restart
+    "PANIC",      //!< Software reset due to exception/panic
+    "INT_WDT",    //!< Reset (software or hardware) due to interrupt watchdog
+    "TASK_WDT",   //!< Reset due to task watchdog
+    "WDT",        //!< Reset due to other watchdogs
+    "DEEPSLEEP",  //!< Reset after exiting deep sleep mode
+    "BROWNOUT",   //!< Brownout reset (software or hardware)
+    "SDIO"        //!< Reset over SDI"
+};
+
 
 void VTTDevice::setup(){
 	display.setup();
 
 	char startScreen[41];
 	esp_reset_reason_t resetReason = esp_reset_reason();
-	sprintf(startScreen, "   Vibey\nTranscribey\n   v2.6\n% 11d", resetReason);
+	sprintf(startScreen, "   Vibey\nTranscribey\n   v2.6\n% 11s", resetReasonText[resetReason]);
 	display.showText(startScreen);
 
 	#if defined (USE_WIFI)
