@@ -28,6 +28,8 @@ void CommandStream::update(){
 	char msg[45];
 	byte cmd = nextByte();
 
+	bool doFlush = false;
+
 	if(cmd == 255 || cmd == 0){
 		// NOP
 	}else if(cmd == CMD_CALIBRATE){
@@ -38,12 +40,14 @@ void CommandStream::update(){
 		Logger::getGlobal()->debug(msg);
 
 		grid->enable(cellID, 255, 0);
+		doFlush = true;
 	}else if(cmd == CMD_CELL_DISABLE){
 		byte cellID = nextByte();
 		sprintf(msg, "%02d Disable", cellID);
 		Logger::getGlobal()->debug(msg);
 
 		grid->disable(cellID);
+		doFlush = true;
 	}else if(cmd == CMD_SET_ACTUATOR_INT){
 		byte actuatorID = nextByte();
 		byte intensity = nextByte();
@@ -51,6 +55,7 @@ void CommandStream::update(){
 		grid->setActuatorIntensity(actuatorID, intensity);
 		sprintf(msg, " %02d ON %03d ", actuatorID, intensity);
 		display->showText(msg);
+		doFlush = true;
 	}else if(cmd == CMD_PITCH){
 		byte pitch = nextByte();
 		display->showText("Freq");
@@ -67,6 +72,7 @@ void CommandStream::update(){
 	}else if(cmd == CMD_STOP){
 		grid->disableAll();
 		display->showText("");
+		doFlush = true;
 	}else if(cmd == CMD_SOUNDBITE){
 		uint8_t id = nextByte();
 
@@ -96,10 +102,16 @@ void CommandStream::update(){
 	}else if(cmd == CMD_PLAY_BITE){
 		stream->println("Play SoundBite");
 		display->showText("Play clip");
+
 		playBite(nextByte());
+		doFlush = true;
 	}else{
 		sprintf(msg, "??? %d", cmd);
 		Logger::getGlobal()->debug(msg);
+	}
+
+	if(doFlush){
+		flush();
 	}
 }
 
