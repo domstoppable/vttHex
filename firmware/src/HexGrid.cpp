@@ -14,10 +14,46 @@ void HexGrid::testActuator(uint8_t actuatorID){
 void HexGrid::setActuatorIntensity(uint8_t actuatorID, uint8_t intensity){
 	actuators.setValue(actuatorID, intensity);
 }
+/*
+float easeInOutExpo(float x) {
+	if(x == 0.0f || x == 1.0f){
+		return x;
+	}
+	if(x < 0.5f){
+		return pow(2.0f, 20.0f * x - 10.0f) / 2.0f;
+	}else{
+		return (2.0f - pow(2.0f, -20.0f * x + 10.0f)) / 2.0f;
+	}
+}
+
+float easeInOutSine(float x) {
+	return -(cos(PI * x) - 1.0f) / 2.0f;
+}
+
+float easeInCubic(float x) {
+	return x * x * x;
+}
+
+float easeInExpo(float x) {
+	if(x == 0.0f){
+		return 0.0f;
+	}
+	return pow(2.0f, 10.0f * x - 10.0f);
+}
+
+float easeOutExpo(float x) {
+	if(x == 1.0f){
+		return 1.0f;
+	}
+
+	return pow(2.0f, -10.0f * x);
+}
+*/
+
 void HexGrid::enable(uint8_t cellID, uint8_t intensity, uint8_t pitch){
 	const float* easeFunc = easeFunc_cubicInOut;
 
-	if(currentCell != 255){
+	if(currentCell != 255 && currentCell != cellID){
 		disable(currentCell);
 	}
 	_setValue(activationMap[cellID][0], activationMap[cellID][1], 255);
@@ -34,6 +70,15 @@ void HexGrid::enable(uint8_t cellID, uint8_t intensity, uint8_t pitch){
 		intensity*easeFunc[overlapWidth - transitionIdx - 1],
 		intensity*easeFunc[transitionIdx]
 	};
+
+//	Serial.print("Pitch ");
+//	Serial.print(pitch);
+//	Serial.print(" : ");
+//	Serial.print((int)values[0]);
+//	Serial.print("  ");
+//	Serial.print((int)values[1]);
+//	Serial.print("  idx = ");
+//	Serial.println(transitionIdx);
 
 	for(int i=0; i<2; i++){
 		int actuatorIdx = actuatorIdxA+i;

@@ -14,26 +14,26 @@
 #endif
 
 char* resetReasonText[] = {
-	"UNKNOWN",    //!< Reset reason can not be determined
-    "",           //!< Reset due to power-on event
-    "EXT",        //!< Reset by external pin (not applicable for ESP32)
-    "SW",         //!< Software reset via esp_restart
-    "PANIC",      //!< Software reset due to exception/panic
-    "INT_WDT",    //!< Reset (software or hardware) due to interrupt watchdog
-    "TASK_WDT",   //!< Reset due to task watchdog
-    "WDT",        //!< Reset due to other watchdogs
-    "DEEPSLEEP",  //!< Reset after exiting deep sleep mode
-    "BROWNOUT",   //!< Brownout reset (software or hardware)
-    "SDIO"        //!< Reset over SDI"
+	"UNKNOWN\0",    //!< Reset reason can not be determined
+    "\0",           //!< Reset due to power-on event
+    "EXT\0",        //!< Reset by external pin (not applicable for ESP32)
+    "SW\0",         //!< Software reset via esp_restart
+    "PANIC\0",      //!< Software reset due to exception/panic
+    "INT_WDT\0",    //!< Reset (software or hardware) due to interrupt watchdog
+    "TASK_WDT\0",   //!< Reset due to task watchdog
+    "WDT\0",        //!< Reset due to other watchdogs
+    "DEEPSLEEP\0",  //!< Reset after exiting deep sleep mode
+    "BROWNOUT\0",   //!< Brownout reset (software or hardware)
+    "SDIO\0"        //!< Reset over SDI"
 };
 
 
 void VTTDevice::setup(){
 	display.setup();
 
-	char startScreen[41];
+	char startScreen[64];
 	esp_reset_reason_t resetReason = esp_reset_reason();
-	sprintf(startScreen, "   Vibey\nTranscribey\n   v2.6\n% 11s", resetReasonText[resetReason]);
+	sprintf(startScreen, "   Vibey\nTranscribey\n\n% 11s", resetReasonText[resetReason]);
 	display.showText(startScreen);
 
 	#if defined (USE_WIFI)
@@ -43,7 +43,7 @@ void VTTDevice::setup(){
 	Serial.begin(115200);
 	Serial.setRxBufferSize(2048);
 
-	delay(2000);
+	//delay(2000);
 
 	Logger* GlobalLogger = new CombinedLogger(&display);
 	Logger::setGlobal(GlobalLogger);
@@ -91,7 +91,9 @@ void VTTDevice::setup(){
 		sprintf(msg, "  Ready :)\n%s.local\n%s", hostname, ipAsChars);
 		Logger::getGlobal()->info(msg);
 	#else
-		Logger::getGlobal()->info("\n  Ready :)");
+		//Logger::getGlobal()->info("\n  Ready :)");
+		sprintf(startScreen, "   Vibey\nTranscribey\n  v2.6.1\n% 11s", resetReasonText[resetReason]);
+		display.showText(startScreen);
 	#endif
 }
 

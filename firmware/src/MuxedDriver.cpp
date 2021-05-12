@@ -67,11 +67,13 @@ void MuxedDriver::calibrate(bool fast){
 			if(!fast){
 				doFullCalibration();
 			}else{
+				/*
 				if(setValue(i, 255)){
 					delay(250);
 					setValue(i, 0);
 					delay(150);
 				}
+				*/
 				/*
 					// this doesn't work when driving actuators through a mux
 					DeviceStatus status = checkStatus();

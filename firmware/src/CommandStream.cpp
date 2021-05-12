@@ -93,17 +93,21 @@ void CommandStream::update(){
 			soundBites[id].samples[i].phone = readBlocking();
 			soundBites[id].samples[i].pitch = readBlocking();
 			soundBites[id].samples[i].intensity = readBlocking();
+
+			//sprintf(msg, "S %d = % 3d % 3d % 3d", i, soundBites[id].samples[i].phone, soundBites[id].samples[i].pitch, soundBites[id].samples[i].intensity);
+			//stream->println(msg);
 		}
 		stream->println("Bite received");
 
-		sprintf(msg, "S-Bite in  %03d samples %03d period", sampleCount, period);
-		Logger::getGlobal()->debug(msg);
+		//sprintf(msg, "S-Bite in  %03d samples %03d period", sampleCount, period);
+		//Logger::getGlobal()->debug(msg);
 
 	}else if(cmd == CMD_PLAY_BITE){
 		stream->println("Play SoundBite");
-		display->showText("Play clip");
 
+		display->showText("\n    ^  ^\n   ~~~~~~");
 		playBite(nextByte());
+		display->showText("\n    O  O\n   \\____/");
 		doFlush = true;
 	}else{
 		sprintf(msg, "??? %d", cmd);
@@ -171,6 +175,9 @@ byte CommandStream::nextByte(){
 }
 
 void CommandStream::playBite(uint8_t id){
+//	int phoneList[255];
+//	int phoneListIdx = 0;
+
 	char msg[45];
 	long now = millis();
 	long startTime = now;
@@ -178,34 +185,65 @@ void CommandStream::playBite(uint8_t id){
 	long sampleIdx = 0;
 	Sample lastSample;
 	lastSample.phone = 255;
-	lastSample.intensity = 0;
 	lastSample.pitch = 0;
+	lastSample.intensity = 0;
 
 	while(sampleIdx < soundBites[id].sampleCount){
 		now = millis();
 
 		long delta = now - startTime;
-		//delta *= 0.75f;
+//		delta *= 0.5f;
 		sampleIdx = int(delta / soundBites[id].period);
 		if(sampleIdx >= soundBites[id].sampleCount){
 			break;
 		}
 
 		Sample sample = soundBites[id].samples[sampleIdx];
+//		char msg[255];
+//		sprintf(msg, "SAMPLE % 3d, % 3d, % 3d", sample.phone, sample.pitch, sample.intensity);
+//		stream->println(msg);
+
 		if(sample != lastSample){
+
 			if(sample.phone != lastSample.phone){
 				if(sample.phone != 255){
-					char msg[45] = "";
-					sprintf(msg, "Play clip\n% 3d", sample.phone);
-					display->showText(msg);
+//					phoneList[phoneListIdx++] = sample.phone;
+//					char msg[45] = "";
+//					sprintf(msg, "Play clip\n% 3d\n% 3d", sample.phone, sample.intensity);
+//					display->showText(msg);
+//					stream->println(msg);
 				}
 			}
-			grid->enable(sample.phone, sample.intensity, sample.pitch);
+
+			if(sample.phone < 255 && sample.intensity > 0){
+				grid->enable(sample.phone, sample.intensity, sample.pitch);
+			}
+
 			lastSample = sample;
 		}
 	}
 	grid->disableAll();
 
-	sprintf(msg, "/SoundBite %d", id);
-	stream->println(msg);
+/*
+	for(int i=0; i<phoneListIdx; i++){
+		sprintf(msg, "phones[%d] = %d", i, phoneList[i]);
+		display->showText(msg);
+		delay(1000);
+	}
+*/
+
+//	sprintf(msg, "/SoundBite %d", id);
+//	stream->println(msg);
 }
+
+/*
+26  jh
+39  eh
+23  l
+36  iy
+0   b
+36  iy
+13  n
+
+Jelly bean
+*/

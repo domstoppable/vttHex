@@ -70,14 +70,14 @@ void LRAArray::switchToDriver(int driverID){
 void LRAArray::calibrate(bool fast){
 	Wire.begin();
 
-	char buffer[128];
-	sprintf(buffer, "\nCalibrate...\n fast=%d", fast);
-	Logger::getGlobal()->info(buffer);
-	delay(1500);
+	//char buffer[128];
+	//sprintf(buffer, "\nCalibrate...\n fast=%d", fast);
+	//Logger::getGlobal()->info(buffer);
+	//delay(1500);
 
 	for(int driverID=0; driverID<5; driverID++){
-		sprintf(buffer, "Calibrate\n driver %d", driverID);
-		Logger::getGlobal()->info(buffer);
+		//sprintf(buffer, "Calibrate\n driver %d", driverID);
+		//Logger::getGlobal()->info(buffer);
 
 		switchToDriver(driverID);
 		drivers[driverID].calibrate(fast);
@@ -97,6 +97,13 @@ void LRAArray::setValue(int id, uint8_t value) {
 }
 
 void LRAArray::setDriverChannelValue(int driverID, int channelID, uint8_t value){
+	/*
+	float maxtensity = 255.0f;
+	if(value > 0){
+		value = (int)((maxtensity-mintensity) * (value/maxtensity) + mintensity);
+	}
+	value = max((uint8_t)0, min(value, (uint8_t)maxtensity));
+	*/
 	if(value > 0){
 		value = (int)((255.0f-mintensity) * (value/255.0f) + mintensity);
 	}
