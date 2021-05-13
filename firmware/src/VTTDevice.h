@@ -37,7 +37,7 @@ class VTTDevice {
 
 		HexGrid grid;
 //		RingArray ring;
-		SoundBite soundBites[10];
+		SoundBite soundBites[1];
 
 		Display display;
 

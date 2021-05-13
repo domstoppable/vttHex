@@ -28,6 +28,8 @@ void CommandStream::update(){
 	char msg[45];
 	byte cmd = nextByte();
 
+	display->showText("\n    >  <\n   \\____/");
+
 	bool doFlush = false;
 
 	if(cmd == 255 || cmd == 0){
@@ -112,6 +114,7 @@ void CommandStream::update(){
 	}else{
 		sprintf(msg, "??? %d", cmd);
 		Logger::getGlobal()->debug(msg);
+		display->showText("\n    ?  ?\n   ??????");
 	}
 
 	if(doFlush){

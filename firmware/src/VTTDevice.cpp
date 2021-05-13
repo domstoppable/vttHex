@@ -41,7 +41,7 @@ void VTTDevice::setup(){
 	#endif
 
 	Serial.begin(115200);
-	Serial.setRxBufferSize(2048);
+	Serial.setRxBufferSize(16384);
 
 	//delay(2000);
 
