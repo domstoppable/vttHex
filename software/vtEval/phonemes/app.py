@@ -78,7 +78,7 @@ class AFCWidget(StateWidget):
 		self.label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 		self.layout().addWidget(self.label)
 
-		horizontalCount = 5
+		horizontalCount = 3
 		self.buttonContainer = QtWidgets.QWidget()
 		self.buttonContainer.setDisabled(True)
 		self.buttonContainer.setLayout(QtWidgets.QGridLayout())
@@ -127,8 +127,8 @@ class PhonemeEvalApp(VtEvalApp):
 	def simulate(self):
 		isPostTest = self.arguments['condition'] == 'Post-test'
 		targetRates = {
-			'c': 4/20,
-			'v': 4/12,
+			'c': 3/9,
+			'v': 5/9,
 		}
 
 		for w in self.widgetStack:
@@ -150,7 +150,9 @@ class PhonemeEvalApp(VtEvalApp):
 			ButtonPromptWidget('instructions', '<h2>Consonants</h2><p>Identify the consonants.</p>')
 		]
 		for idx,stim in enumerate(self.consonants):
-			stimWidget = AFCWidget(f'consonant-{idx:03}', stim, self.consonantSet)
+			options = self.makeRandomSubset(self.consonantSet, stim.id)
+
+			stimWidget = AFCWidget(f'consonant-{idx:03}', stim, options)
 			stimWidget.stimulusBraced.connect(self.prepareStimulus)
 			stimWidget.stimulusTriggered.connect(self.playStimulus)
 			consonantStack.append(stimWidget)
@@ -164,7 +166,9 @@ class PhonemeEvalApp(VtEvalApp):
 			ButtonPromptWidget('instructions', '<h2>Vowels</h2><p>Identify the vowels.</p>')
 		]
 		for idx,stim in enumerate(self.vowels):
-			stimWidget = AFCWidget(f'vowel-{idx:03}', stim, self.vowelSet)
+			options = self.makeRandomSubset(self.vowelSet, stim.id)
+
+			stimWidget = AFCWidget(f'vowel-{idx:03}', stim, options)
 			stimWidget.stimulusBraced.connect(self.prepareStimulus)
 			stimWidget.stimulusTriggered.connect(self.playStimulus)
 			vowelStack.append(stimWidget)
@@ -182,6 +186,17 @@ class PhonemeEvalApp(VtEvalApp):
 
 		self.widgetStack = stack
 		self.dataLogger = DataLogger(arguments, 'phonemes')
+
+	def makeRandomSubset(self, fullSet, correctOption, size=9):
+		options = list(fullSet)
+		options.remove(correctOption)
+		random.shuffle(options)
+		options = options[:size-1]
+
+		options.insert(random.randint(0, size-1), correctOption)
+
+		return options
+
 
 	def _loadStimuliFromFolder(self, pattern):
 		path = stimPath/'vtt'
