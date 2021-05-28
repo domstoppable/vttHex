@@ -27,8 +27,17 @@ class StreamComms():
 		periodAsBytes = period.to_bytes(length=4, byteorder='little')
 		msg = bytearray([ CMD_HEADER, CMD_SOUNDBITE, 0, *periodAsBytes, *lenAsBytes ])
 		self._send(msg)
-		for sample in samples:
-			sampleAsBytes = tools.formatSignalAsBytes(sample[0], sample[1][0], sample[2])
+
+		for idx,sample in enumerate(samples):
+			cell = sample[0]
+			if isinstance(sample[1], list):
+				pitch = sample[1][0]
+			else:
+				pitch = sample[1]
+
+			intensity = sample[2]
+
+			sampleAsBytes = tools.formatSignalAsBytes(cell, pitch, intensity)
 			self._send(sampleAsBytes)
 
 	def sendPlayBite(self):

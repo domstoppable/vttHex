@@ -210,9 +210,6 @@ class ProsodyEvalApp(VtEvalApp):
 		else:
 			self.widgetStack += phraseStack + focusStack
 
-		for w in self.widgetStack:
-			print(w.name, '\t', w)
-
 		self.dataLogger = DataLogger(arguments, 'prosody')
 
 	def buildSubStack(self, name):

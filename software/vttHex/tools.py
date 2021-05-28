@@ -1,6 +1,7 @@
 import sys
 import pkg_resources
 import math
+import pathlib
 
 phoneLayout = ['B', 'D', 'G', 'HH', 'DH', None, 'P', 'T', 'K', 'TH', 'F', None, 'M', 'N', 'SH', 'S', 'V', 'W', 'Y', 'NG', 'CH', 'ZH', 'Z', 'L', 'R', 'ER', 'JH', 'AH', 'AO', 'AA', 'AW', 'UW', 'UH', 'OW', 'OY', 'AX', 'IY', 'EY', 'IH', 'EH', 'AE', 'AY', ]
 vowels = ['AA','AE','AH','AO','AW','AY','EH','ER','EY','IY','OW','OY']
@@ -24,6 +25,9 @@ pitchMaxMel = mel(pitchMaxHz)
 def findAsset(*resourceParts):
 	resource = '/'.join(['assets'] + list(resourceParts))
 	return pkg_resources.resource_filename(__name__, resource)
+
+def findAssetPath(*resourceParts):
+	return pathlib.Path(findAsset(*resourceParts))
 
 class TimeData:
 	def __init__(self, t, data):
@@ -66,12 +70,12 @@ class SignalPlayer():
 		from praatio import tgio
 
 		if folder is None:
-			textGridFile = findAsset(f'MBOPP/audio/grids/{filename}.TextGrid')
-			pitchFile = findAsset(f'MBOPP/audio/{filename}.f0.csv')
-			loudnessFile = findAsset(f'MBOPP/audio/{filename}.loudness.csv')
-			wavFile = findAsset(f'MBOPP/audio/{filename}.wav')
+			textGridFile = findAssetPath(f'MBOPP/audio/grids/{filename}.TextGrid')
+			pitchFile = findAssetPath(f'MBOPP/audio/{filename}.f0.csv')
+			loudnessFile = findAssetPath(f'MBOPP/audio/{filename}.loudness.csv')
+			wavFile = findAssetPath(f'MBOPP/audio/{filename}.wav')
 			if not wavFile.exists():
-				wavFile = findAsset(f'MBOPP/audio/{filename}.WAV')
+				wavFile = findAssetPath(f'MBOPP/audio/{filename}.WAV')
 		else:
 			textGridFile = folder/'grids'/(filename + '.TextGrid')
 			pitchFile = folder/(filename + '.f0.csv')
@@ -96,12 +100,15 @@ class SignalPlayer():
 				self.pitchSeries.addData(timestamp, (pitch, confidence))
 
 		self.intensitySeries = TimeSeries()
-		with open(loudnessFile) as csvFile:
-			for idx,line in enumerate(csvFile.readlines()):
-				if idx == 0:
-					continue
-				(timestamp, loudness) = [float(x) for x in line.split(',')]
-				self.intensitySeries.addData(timestamp, loudness)
+		if loudnessFile.exists():
+			with open(loudnessFile) as csvFile:
+				for idx,line in enumerate(csvFile.readlines()):
+					if idx == 0:
+						continue
+					(timestamp, loudness) = [float(x) for x in line.split(',')]
+					self.intensitySeries.addData(timestamp, loudness)
+		else:
+			self.intensitySeries.addData(0, 255)
 
 	def reset(self):
 		self.phoneSeries.reset()
@@ -150,6 +157,8 @@ def formatSignalAsBytes(phoneOrCellID, pitch, intensity):
 	pitch = max(0, min(255, pitch))
 
 
-	intensity = int(255*min(50, intensity)/50)
+	intensity = int(255.*min(50., intensity)/50.)
 
-	return bytearray([ cellID, pitch, intensity ])
+	data = [ cellID, pitch, intensity ]
+
+	return bytearray(data)

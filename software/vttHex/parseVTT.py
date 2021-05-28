@@ -2,6 +2,7 @@ import struct
 import pathlib
 
 from . import tools
+from . import serial
 
 fixedHeaderFormat = '3s' # magic bytes
 fixedHeaderFormat += 'B' # file format version
@@ -110,7 +111,21 @@ def loadVTTFile(filename):
 
 if __name__ == '__main__':
 	import sys
-	for filename in sys.argv[1:]:
+	import argparse
+	import time
+
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--device')
+	parser.add_argument('vtt_files', nargs='+')
+
+	args = parser.parse_args()
+
+	device = None
+	if args.device is not None:
+		device = serial.SerialComms()
+		device.open(args.device)
+
+	for filename in args.vtt_files:
 		vttFile = loadVTTFile(filename)
 		print(f'{filename}')
 		print(f'	File version  : {vttFile.fileVersion}')
@@ -120,3 +135,19 @@ if __name__ == '__main__':
 		print(f'	Written text  : {vttFile.writtenText}')
 		print(f'	Phonetic text : {vttFile.phoneticText}')
 		print(f'	Preview       : {vttFile.getPhoneticSampleString()}')
+
+		if args.device is not None:
+			duration = vttFile.getDuration() / 1000
+			samples = [vttFile.samples[i:i+3] for i in range(0, len(vttFile.samples), 3)]
+			print('Sending', filename, 'to', args.device, '...')
+
+			device.sendFile(vttFile.samplePeriod, samples)
+			time.sleep(duration/2)
+			print('Play', filename)
+			device.sendPlayBite()
+
+			time.sleep(duration + .25)
+
+			#print('Received:')
+			#for line in device.readLines():
+			#	print(line)
