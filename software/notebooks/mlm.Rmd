@@ -1,0 +1,236 @@
+
+```{r}
+path <- "data"
+setwd(path)
+
+# Practice data
+training_data <- data.frame(
+    pid = c(0, 1, 2, 3, 4, 5),
+    training = c(13.2, 14.4, 13.8, 14.1, 15.7, 16.1)
+)
+
+load_files <- function(file_pattern, create_correct_column = TRUE) {
+    # find matching files
+    df_files <- list.files(".", file_pattern)
+    # combine into single dataframe
+    df <- dplyr::bind_rows(lapply(df_files, read.csv))
+    df <- subset(df, select=-c(timestamp, facilitator, event, item))
+
+    # remove non-data rows
+    df <- dplyr::filter(df, stimulus != "")
+
+    if(create_correct_column){
+        df$correct <- as.integer(df$stimulus == df$selection)
+    }
+
+    # configure data types
+    ordered_conditions <- c("Pre-test", "Post-test")
+    df <- within(df, {
+        pid <- as.factor(pid)
+        condition <- factor(
+            condition,
+            levels = ordered_conditions,
+            labels = ordered_conditions
+        )
+        selection <- as.factor(selection)
+        stimulus <- as.factor(stimulus)
+    })
+
+    df <- merge(df, training_data, key = "pid")
+
+    df$training <- ifelse(df$condition == "Pre-test", 0, df$training)
+
+    return(df)
+}
+
+bin_lme <- function(formula, data) {
+    data <- rlang::enexpr(data)
+    model_call <- rlang::expr(lme4::glmer(
+        formula = formula,
+        data = !!data,
+        family = binomial,
+        control = lme4::glmerControl(optimizer = "bobyqa")
+    ))
+
+    model <- eval(model_call)
+    print(summary(model))
+
+return(model)
+
+#    model <- lme4::glmer(
+#        formula = formula,
+#        data = data,
+#        family = binomial,
+#        control = lme4::glmerControl(optimizer = "bobyqa")
+#    )
+#    print(summary(model))
+#    return(model)
+}
+```
+
+# Phonemes
+## Load data
+```{r}
+phoneDF <- load_files("_phonemes_")
+phoneDF <- within(phoneDF, {
+    phoneType <- as.factor(ifelse(substring(stimulus, 1, 1) == "a", "Consonant", "Vowel"))
+    speakerGender <- as.factor(toupper(substring(stimfile, 1, 1)))
+    stimfile <- as.factor(stimfile)
+})
+```
+
+## Explore and visualize
+```{r}
+phoneSummary <- dplyr::summarise(dplyr::group_by(phoneDF, pid, training, phoneType), correctPortion = mean(correct))
+
+ggplot2::ggplot(phoneSummary, ggplot2::aes(x = training, y = 100*correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size = 3) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::labs(
+        colour = "Phone Type",
+        shape = "Phone Type",
+        x = "Time",
+        y = "Correct %"
+    )
+
+ggplot2::ggplot(phoneSummary, ggplot2::aes(x = training, y = 100*correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
+    ggplot2::geom_point(size = 3) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::geom_smooth(method=lm) +
+    ggplot2::labs(
+        colour = "Phone Type",
+        shape = "Phone Type",
+        x = "Time",
+        y = "Correct %"
+    )
+
+```
+
+## Model
+```{r}
+phone_model <- function(formula) bin_lme(formula = formula, data = phoneDF)
+
+phone_m0a = phone_model(correct ~ training + (training|pid))
+phone_m1a = phone_model(correct ~ training + phoneType + (training|pid))
+phone_m2a = phone_model(correct ~ training*phoneType + (training|pid))
+
+plot(ggeffects::ggeffect(phone_m0a, terms = c("training [0:50]"), type="re"))
+plot(ggeffects::ggeffect(phone_m1a, terms = c("training [0:50]", "phoneType"), type="re"))
+plot(ggeffects::ggeffect(phone_m2a, terms = c("training [0:50]", "phoneType"), type="re"))
+
+AIC(phone_m0a, phone_m1a, phone_m2a)
+BIC(phone_m0a, phone_m1a, phone_m2a)
+
+```
+
+# Prosody
+## Load Data
+```{r}
+prosodyDF <- load_files("_prosody_")
+prosodyDF <- tidyr::separate(data = prosodyDF, col = stimfile, into = "sentenceID", sep = "_", extra = "drop", remove = FALSE)
+prosodyDF$prosodyType <- as.factor(ifelse(substring(prosodyDF$stimfile, 1, 1) == "f", "Focus", "Phrase"))
+
+focusDF <- dplyr::filter(prosodyDF, prosodyDF$prosodyType == "Focus")
+focusDF$stimfile <- as.factor(focusDF$stimfile)
+focusDF$sentenceID <- as.factor(focusDF$sentenceID)
+
+phraseDF <- dplyr::filter(prosodyDF, prosodyDF$prosodyType == "Phrase")
+phraseDF$stimfile <- as.factor(phraseDF$stimfile)
+phraseDF$sentenceID <- as.factor(phraseDF$sentenceID)
+
+prosodySummary <- dplyr::summarise(dplyr::group_by(prosodyDF, pid, prosodyType, training), correctPortion = mean(correct))
+
+ggplot2::ggplot(prosodySummary, ggplot2::aes(x = training, y = 100*correctPortion, shape = prosodyType, group = prosodyType, color = prosodyType)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size=4) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::labs(x = "Time", y = "Correct %")
+
+```
+## Focus
+### Explore & Visualize
+```{r}
+#focusSummary <- dplyr::summarise(dplyr::group_by(focusDF, pid, training), correctPortion = mean(correct))
+```
+
+### Model & Test
+```{r}
+focus_model <- function(formula) bin_lme(formula = formula, data = focusDF)
+
+focus_m00 = focus_model(correct ~ training + (training | pid))
+focus_m01 = focus_model(correct ~ training + (training | pid) + (1 | sentenceID))
+
+lapply(c(focus_m00, focus_m01), summary)
+
+lapply(lapply(phone_models, logLik), AIC)
+
+```
+
+## Phrase Boundary
+### Explore & Visualize
+```{r}
+#phraseSummary <- dplyr::summarise(dplyr::group_by(phraseDF, condition), correctPortion = mean(correct))
+```
+
+### Model & Test
+```{r}
+phrase_model <- function(formula) bin_lme(formula = formula, data = phraseDF)
+
+phrase_m00 = phrase_model(correct ~ training + (training | pid))
+phrase_m01 = phrase_model(correct ~ training + (training | pid) + (1 | sentenceID))
+
+```
+
+# Perceptual Integration
+## Load Data
+```{r}
+integrationDF <- load_files("_integration_", create_correct_column = FALSE)
+integrationDF <- within(integrationDF, {
+    integrated <- 1-as.integer(mapply(grepl, pattern = selection, x = stimulus))
+    auditoryStim <- as.factor(substring(stimulus, 1, 2))
+    tactileStim <- as.factor(substring(stimulus, 4, 5))
+})
+
+```
+
+## Explore & Visualize
+```{r}
+integrationSummary <- dplyr::summarise(dplyr::group_by(integrationDF, pid, training), correctPortion = mean(integrated))
+
+ggplot2::ggplot(integrationSummary, ggplot2::aes(x = training, y = 100*correctPortion, group = 1)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size=4) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::labs(x = "Time", y = "% Integrated")
+
+integrationSummaryByStim <- dplyr::summarise(dplyr::group_by(integrationDF, stimulus, training), correctPortion = mean(integrated))
+
+ggplot2::ggplot(integrationSummaryByStim, ggplot2::aes(x = training, y = 100*correctPortion, group = 1)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(stimulus)) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size=4) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::labs(x = "Time", y = "% Integrated")
+
+integrationSummaryByStimAndPid <- dplyr::summarise(dplyr::group_by(integrationDF, stimulus, pid, training), correctPortion = mean(integrated))
+
+ggplot2::ggplot(integrationSummaryByStimAndPid, ggplot2::aes(x = training, y = 100*correctPortion, group = 1)) +
+    ggplot2::facet_grid(rows = ggplot2::vars(stimulus), cols = ggplot2::vars(pid)) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size=4) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::labs(x = "Time", y = "% Integrated")
+```
+
+## Model & Test
+```{r}
+integration_model <- function(formula) bin_lme(formula = formula, data = integrationDF)
+
+integration_m00 = integration_model(integrated ~ training + (training | pid))
+integration_m01 = integration_model(integrated ~ training + (training | pid) + (1 | stimulus))
+
+```
