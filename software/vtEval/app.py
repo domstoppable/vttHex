@@ -32,7 +32,6 @@ class VtEvalController():
 				'--pid', participant.id,
 				'--condition', condition,
 				'--device', device.systemLocation(),
-#				'--simulate',
 			],
 			text=True
 		)
