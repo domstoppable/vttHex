@@ -178,14 +178,18 @@ class IntegrationEvalApp(VtEvalApp):
 		for w in self.widgetStack:
 			if isinstance(w, AFCWidget):
 				if not isPostTest:
+					# on the pre-test, we'll pick the auditory stim at least 90%
 					if random.random() < .9:
 						w.selection = w.stimulus.id[:2]
 					else:
+					# on all other trials, we'll pick randomly
 						w.selection = random.choice(w.options)
 				else:
-					if random.random() < .80:
+					# on the post-test, we'll pick the auditory stim at least 85%
+					if random.random() < .9:
 						w.selection = w.stimulus.id[:2]
 					else:
+					# on all other trials, we'll pick an integrated option
 						nonIntegratedOptions = w.stimulus.id.split('-')
 						integratedOptions = list(w.options)
 						for opt in nonIntegratedOptions:

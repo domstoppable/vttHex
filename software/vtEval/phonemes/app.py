@@ -128,7 +128,7 @@ class PhonemeEvalApp(VtEvalApp):
 		isPostTest = self.arguments['condition'] == 'Post-test'
 		targetRates = {
 			'c': 3/9,
-			'v': 5/9,
+			'v': 3/9,
 		}
 
 		for w in self.widgetStack:

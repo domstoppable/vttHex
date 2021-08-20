@@ -55,7 +55,7 @@ bin_lme <- function(formula, data) {
     model <- eval(model_call)
     print(summary(model))
 
-return(model)
+    return(model)
 
 #    model <- lme4::glmer(
 #        formula = formula,
@@ -77,51 +77,82 @@ phoneDF <- within(phoneDF, {
     speakerGender <- as.factor(toupper(substring(stimfile, 1, 1)))
     stimfile <- as.factor(stimfile)
 })
+
+# Check ratios
+summary(phoneDF$correct)
+table(phoneDF$pid, phoneDF$correct)
+table(phoneDF$phoneType, phoneDF$correct)
+table(phoneDF$condition, phoneDF$correct)
+
 ```
 
 ## Explore and visualize
 ```{r}
-phoneSummary <- dplyr::summarise(dplyr::group_by(phoneDF, pid, training, phoneType), correctPortion = mean(correct))
 
-ggplot2::ggplot(phoneSummary, ggplot2::aes(x = training, y = 100*correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
+phoneSummary <- dplyr::summarise(
+    dplyr::group_by(phoneDF, pid, training, phoneType),
+    correctPortion = 100*mean(correct),
+    se = 100*sd(correct)/sqrt(length(correct))
+)
+
+# Adds a line for consonants+vowels collapsed together
+#phoneSummary2 <- dplyr::summarise(
+#    dplyr::group_by(phoneDF, pid, training),
+#    correctPortion = 100*mean(correct),
+#    se = 100*sd(correct)/sqrt(length(correct))
+#)
+#phoneSummary2$phoneType <- "Combined"
+#phoneSummary <- dplyr::union_all(phoneSummary, phoneSummary2)
+
+
+ggplot2::ggplot(phoneSummary, ggplot2::aes(x = training, y = correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
     ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
     ggplot2::geom_line() +
     ggplot2::geom_point(size = 3) +
+    ggplot2::geom_errorbar(
+        ggplot2::aes(ymin=correctPortion-se, ymax=correctPortion+se),
+        width=1,
+        position=ggplot2::position_dodge(2)
+    ) +
     ggplot2::ylim(0, 100) +
     ggplot2::labs(
         colour = "Phone Type",
         shape = "Phone Type",
-        x = "Time",
-        y = "Correct %"
+        x = "Training Time (Hours)",
+        y = "Percentage Correct",
+        title = "Phoneme Recognition (by participant)"
     )
 
-ggplot2::ggplot(phoneSummary, ggplot2::aes(x = training, y = 100*correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
-    ggplot2::geom_point(size = 3) +
-    ggplot2::ylim(0, 100) +
-    ggplot2::geom_smooth(method=lm) +
-    ggplot2::labs(
-        colour = "Phone Type",
-        shape = "Phone Type",
-        x = "Time",
-        y = "Correct %"
-    )
+ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/phoneme-recognition.png")
 
+# this was an attempt to plot all the people on a single graph, but still separate lines
+#ggplot2::ggplot(phoneSummary, ggplot2::aes(x = training, y = 100*correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
+#    ggplot2::geom_point(size = 3) +
+#    ggplot2::ylim(0, 100) +
+#    ggplot2::geom_smooth(method=lm) +
+#    ggplot2::labs(
+#        colour = "Phone Type",
+#        shape = "Phone Type",
+#        x = "Time",
+#        y = "Correct %"
+#    )
+#
 ```
 
 ## Model
 ```{r}
 phone_model <- function(formula) bin_lme(formula = formula, data = phoneDF)
 
-phone_m0a = phone_model(correct ~ training + (training|pid))
-phone_m1a = phone_model(correct ~ training + phoneType + (training|pid))
-phone_m2a = phone_model(correct ~ training*phoneType + (training|pid))
+phone_m0 <- phone_model(correct ~ 1 + (training|pid))
+phone_m1 <- phone_model(correct ~ training + (training|pid))
+phone_m2 <- phone_model(correct ~ training + phoneType + (training|pid))
+phone_m3 <- phone_model(correct ~ training*phoneType + (training|pid))
 
-plot(ggeffects::ggeffect(phone_m0a, terms = c("training [0:50]"), type="re"))
-plot(ggeffects::ggeffect(phone_m1a, terms = c("training [0:50]", "phoneType"), type="re"))
-plot(ggeffects::ggeffect(phone_m2a, terms = c("training [0:50]", "phoneType"), type="re"))
+#plot(ggeffects::ggeffect(phone_m1, terms = c("training [0:50]"), type="re"))
+#plot(ggeffects::ggeffect(phone_m2, terms = c("training [0:50]", "phoneType"), type="re"))
+#plot(ggeffects::ggeffect(phone_m3, terms = c("training [0:50]", "phoneType"), type="re"))
 
-AIC(phone_m0a, phone_m1a, phone_m2a)
-BIC(phone_m0a, phone_m1a, phone_m2a)
+anova(phone_m0, phone_m1, phone_m2, phone_m3)
 
 ```
 
@@ -140,47 +171,53 @@ phraseDF <- dplyr::filter(prosodyDF, prosodyDF$prosodyType == "Phrase")
 phraseDF$stimfile <- as.factor(phraseDF$stimfile)
 phraseDF$sentenceID <- as.factor(phraseDF$sentenceID)
 
-prosodySummary <- dplyr::summarise(dplyr::group_by(prosodyDF, pid, prosodyType, training), correctPortion = mean(correct))
+prosodySummary <- dplyr::summarise(
+    dplyr::group_by(prosodyDF, pid, prosodyType, training),
+    correctPortion = 100*mean(correct),
+    se = 100*sd(correct)/sqrt(length(correct))
+)
 
-ggplot2::ggplot(prosodySummary, ggplot2::aes(x = training, y = 100*correctPortion, shape = prosodyType, group = prosodyType, color = prosodyType)) +
+ggplot2::ggplot(prosodySummary, ggplot2::aes(x = training, y = correctPortion, shape = prosodyType, group = prosodyType, color = prosodyType)) +
     ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
     ggplot2::geom_line() +
     ggplot2::geom_point(size=4) +
+    ggplot2::geom_errorbar(
+        ggplot2::aes(ymin=correctPortion-se, ymax=correctPortion+se),
+        width=1,
+        position=ggplot2::position_dodge(2)
+    ) +
     ggplot2::ylim(0, 100) +
-    ggplot2::labs(x = "Time", y = "Correct %")
+    ggplot2::labs(
+        colour = "Feature",
+        shape = "Feature",
+        x = "Training Time (hours)",
+        y = "Percentage Correct",
+        title = "Prosody Perception (by participant)"
+    )
 
+ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/prosody-perception.png")
 ```
-## Focus
-### Explore & Visualize
-```{r}
-#focusSummary <- dplyr::summarise(dplyr::group_by(focusDF, pid, training), correctPortion = mean(correct))
-```
-
-### Model & Test
+## Focus - Model & Test
 ```{r}
 focus_model <- function(formula) bin_lme(formula = formula, data = focusDF)
 
-focus_m00 = focus_model(correct ~ training + (training | pid))
-focus_m01 = focus_model(correct ~ training + (training | pid) + (1 | sentenceID))
+focus_m0 = focus_model(correct ~ 1 + (training | pid))
+focus_m1 = focus_model(correct ~ training + (training | pid))
+focus_m2 = focus_model(correct ~ training + (training | pid) + (1 | sentenceID))
 
-lapply(c(focus_m00, focus_m01), summary)
-
-lapply(lapply(phone_models, logLik), AIC)
+anova(focus_m0, focus_m1, focus_m2)
 
 ```
 
-## Phrase Boundary
-### Explore & Visualize
-```{r}
-#phraseSummary <- dplyr::summarise(dplyr::group_by(phraseDF, condition), correctPortion = mean(correct))
-```
-
-### Model & Test
+## Phrase Boundary - Model & Test
 ```{r}
 phrase_model <- function(formula) bin_lme(formula = formula, data = phraseDF)
 
-phrase_m00 = phrase_model(correct ~ training + (training | pid))
-phrase_m01 = phrase_model(correct ~ training + (training | pid) + (1 | sentenceID))
+phrase_m0 <- phrase_model(correct ~ 1 + (training | pid))
+phrase_m1 <- phrase_model(correct ~ training + (training | pid))
+phrase_m2 <- phrase_model(correct ~ training + (training | pid) + (1 | sentenceID))
+
+anova(phrase_m0, phrase_m1, phrase_m2)
 
 ```
 
@@ -198,39 +235,85 @@ integrationDF <- within(integrationDF, {
 
 ## Explore & Visualize
 ```{r}
-integrationSummary <- dplyr::summarise(dplyr::group_by(integrationDF, pid, training), correctPortion = mean(integrated))
+integrationSummary <- dplyr::summarise(
+    dplyr::group_by(integrationDF, pid, condition),
+    correctPortion = 100*mean(integrated),
+    se = 100*sd(integrated)/sqrt(length(integrated)),
+    training = mean(training),
+)
 
-ggplot2::ggplot(integrationSummary, ggplot2::aes(x = training, y = 100*correctPortion, group = 1)) +
+ggplot2::ggplot(integrationSummary, ggplot2::aes(x = training, y = correctPortion, group = 1)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size=4) +
+    ggplot2::geom_errorbar(
+        ggplot2::aes(ymin=correctPortion-se, ymax=correctPortion+se),
+        width=1.5,
+        position=ggplot2::position_dodge(2)
+    ) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::labs(
+        title = "Perceptual Integration (by participant)",
+        x = "Training Time (Hours)",
+        y = "Percentage Integrated"
+    )
+
+ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/integration01.png")
+
+integrationSummaryByStim <- dplyr::summarise(dplyr::group_by(integrationDF, pid, condition, stimulus), correctPortion = mean(integrated), training = mean(training))
+
+ggplot2::ggplot(integrationSummaryByStim, ggplot2::aes(x = training, y = 100*correctPortion, group = stimulus, color = stimulus)) +
     ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
     ggplot2::geom_line() +
     ggplot2::geom_point(size=4) +
     ggplot2::ylim(0, 100) +
-    ggplot2::labs(x = "Time", y = "% Integrated")
+    ggplot2::labs(
+        title = "Perceptual Integration (by participant)",
+        x = "Training Time (Hours)",
+        y = "Percentage Integrated"
+    )
 
-integrationSummaryByStim <- dplyr::summarise(dplyr::group_by(integrationDF, stimulus, training), correctPortion = mean(integrated))
-
-ggplot2::ggplot(integrationSummaryByStim, ggplot2::aes(x = training, y = 100*correctPortion, group = 1)) +
+ggplot2::ggplot(integrationSummaryByStim, ggplot2::aes(x = training, y = 100*correctPortion, shape = pid, group = pid, color = pid)) +
     ggplot2::facet_wrap(facets = ggplot2::vars(stimulus)) +
     ggplot2::geom_line() +
     ggplot2::geom_point(size=4) +
     ggplot2::ylim(0, 100) +
-    ggplot2::labs(x = "Time", y = "% Integrated")
+    ggplot2::labs(
+        title = "Perceptual Integration (by stimulus)",
+        x = "Training Time (Hours)",
+        y = "Percentage Integrated"
+    )
 
-integrationSummaryByStimAndPid <- dplyr::summarise(dplyr::group_by(integrationDF, stimulus, pid, training), correctPortion = mean(integrated))
 
-ggplot2::ggplot(integrationSummaryByStimAndPid, ggplot2::aes(x = training, y = 100*correctPortion, group = 1)) +
-    ggplot2::facet_grid(rows = ggplot2::vars(stimulus), cols = ggplot2::vars(pid)) +
-    ggplot2::geom_line() +
-    ggplot2::geom_point(size=4) +
-    ggplot2::ylim(0, 100) +
-    ggplot2::labs(x = "Time", y = "% Integrated")
+
+#integrationSummaryByStim <- dplyr::summarise(dplyr::group_by(integrationDF, stimulus, training), correctPortion = mean(integrated))
+#
+#ggplot2::ggplot(integrationSummaryByStim, ggplot2::aes(x = training, y = 100*correctPortion, group = 1)) +
+#    ggplot2::facet_wrap(facets = ggplot2::vars(stimulus)) +
+#    ggplot2::geom_line() +
+#    ggplot2::geom_point(size=4) +
+#    ggplot2::ylim(0, 100) +
+#    ggplot2::labs(x = "Time", y = "% Integrated")
+#
+#integrationSummaryByStimAndPid <- dplyr::summarise(dplyr::group_by(integrationDF, stimulus, pid, training), correctPortion = mean(integrated))
+#
+#ggplot2::ggplot(integrationSummaryByStimAndPid, ggplot2::aes(x = training, y = 100*correctPortion, group = 1)) +
+#    ggplot2::facet_grid(rows = ggplot2::vars(stimulus), cols = ggplot2::vars(pid)) +
+#    ggplot2::geom_line() +
+#    ggplot2::geom_point(size=4) +
+#    ggplot2::ylim(0, 100) +
+#    ggplot2::labs(x = "Time", y = "% Integrated")
 ```
 
 ## Model & Test
 ```{r}
 integration_model <- function(formula) bin_lme(formula = formula, data = integrationDF)
 
-integration_m00 = integration_model(integrated ~ training + (training | pid))
-integration_m01 = integration_model(integrated ~ training + (training | pid) + (1 | stimulus))
+integration_m0 <- integration_model(integrated ~ 1 + (training | pid))
+integration_m1 <- integration_model(integrated ~ training + (training | pid))
+integration_m2 <- integration_model(integrated ~ training + (training | pid) + (1 | stimulus))
+
+anova(integration_m0, integration_m1, integration_m2)
+
 
 ```

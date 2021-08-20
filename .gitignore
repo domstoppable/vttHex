@@ -149,3 +149,4 @@ software/vttHex/assets/MBOPP/audio/
 # Gerbers
 hardware/*/output/
 software/data
+software/vtEval/data
