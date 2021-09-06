@@ -15,26 +15,40 @@ from vttHex.parseVTT import loadVTTFile
 instructions = {
 	'intro': '''<html>
 			<h1>Prosody Evaluation</h1>
-			<p>Amet magni dolor ea repellat illo quis expedita sint. Omnis ea eum perspiciatis culpa maiores voluptatem repudiandae perspiciatis. Adipisci delectus voluptate dolorem aut qui hic sunt dolor. Autem dolores doloribus autem exercitationem dicta molestiae quibusdam. Ab in provident iure eveniet voluptatum voluptatum aut.</p>
-			<p>Eius provident magni voluptas tenetur reprehenderit qui consequatur. Ipsa nihil cupiditate id qui. Consequatur unde fugiat tenetur est harum provident deleniti.</p>
-			<p>In harum delectus eligendi pariatur vero ab. Reprehenderit porro optio dicta rem quibusdam quidem fugiat et. Voluptatem dolorum sequi enim non molestiae consequatur velit. Quis modi dolorum vero sint facilis. Ab quam repellat velit voluptatem earum. Nisi sint voluptatem esse iusto voluptas.</p>
-			<p>Cupiditate est consequuntur deleniti dolorem eos. Beatae vel qui quas sed impedit iusto eaque. Exercitationem laborum repudiandae voluptatum et veniam qui non quod. Sunt necessitatibus et sed voluptate nulla sunt vero et. Aperiam eligendi tempore exercitationem adipisci.</p>
-			<br/>
-			<center>Click the button below when you are ready to begin.</center></p>
+			<p>This evaluation is separated into two parts measuring your perception of different aspects of sentence structure. Both parts of this evaluation follow a similar structure:</p>
+			<ul>
+				<li>A sentence will appear in a box on the screen, and you will have a short time to read it silently and consider it.</li>
+				<li>Two different versions of the underlined section of that sentence will be vibrated on your arm. One will match the underlined part of the sentence on the screen, the other will not. They will be similar but not identical, and they cannot be repeated.</li>
+				<li>You will then be asked to select which of the two vibrations felt most like the underlined section of the sentence on the screen. If you are uncertain, make a guess.</li>
+			</ul>
+			<p>You will hear static to cover-up sounds made by the vibrations of the device. You should rely solely on the vibrating sensations themselves when making decisions.</p>
+			<p>Opportunities for breaks will be provided as you proceed.</p>
+			<hr/>
+			<p><center>Click the button below when you are ready to begin the first part of this evaluation. More instructions will be provided on the next screen.</center></p>
 		</html>''',
 	'focus': '''
 		<html>
-			<h2>Focus Evaluation</h1>
+			<h2>Focus Evaluation</h2>
+			<p>For this part of the evaluation, each sentence will emphasize a specific word as indicated with <i>ITALIC, CAPITALIZED</i> letters.</p>
+			<p>When the vibration options are presented, one option will emphasize the italicized word, and the other will emphasize a different word in the sentence.</p>
+			<p>You should select the vibration option which emphasizes the italicized word. If you are uncertain, make a guess.</p>
+			<p>Remember, only the underlined section of the sentence will be vibrated, and the options cannot be repeated.</p>
+			<hr/>
+			<p><center>If you have any questions, please ask them now. Otherwise, click the button below when you are ready to begin.</center></p>
 		</html>
 		''',
 	'phrase': '''
 		<html>
-			<h2>Phrase Boundary Evaluation</h1>
+			<h2>Phrase Boundary Evaluation</h2>
+			<p>For this part of the evaluation, each sentence will contain a phrase boundary indicated by a comma, which will either be in the middle or at the end of the underlined section.</p>
+			<p>When the vibration options are presented, one option will have the comma in the same place as the sentence in the box, and the other will have a comma in a different place.</p>
+			<p>You should select the vibration option which matches the comma placement of the sentence in the box. If you are uncertain, make a guess.</p>
+			<p>Remember, only the underlined section of the sentence will be vibrated, and the options cannot be repeated.</p>
+			<hr/>
+			<p><center>If you have any questions, please ask them now. Otherwise, click the button below when you are ready to begin.</center></p>
 		</html>
 		''',
 }
-
-
 
 stimPath = Path('vtEval/prosody/audio')
 
@@ -67,7 +81,7 @@ class AFCWidget(StateWidget):
 	def __init__(self, name, stimPair, earlyOrLate, parent=None):
 		super().__init__(name=name, parent=parent)
 
-		self.delayBeforeStimulus = 1000
+		self.delayBeforeStimulus = 0
 		self.delayAfterStimulus = 750
 
 		self.stimPair = stimPair
@@ -82,14 +96,14 @@ class AFCWidget(StateWidget):
 		textWidgetContainer.setLayout(QtWidgets.QVBoxLayout())
 
 		label = QtWidgets.QLabel(parent=self)
-		label.setText('Read the sentence below silently and imagine how it should feel:')
+		label.setText('Read the sentence in the box below silently and imagine how the underlined part should feel:')
 		label.setAlignment(QtCore.Qt.AlignCenter)
 		label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 		textWidgetContainer.layout().addWidget(label)
 
 		self.sentenceLabel = QtWidgets.QLabel(parent=self)
 		self.sentenceLabel.setText(' ')
-		self.sentenceLabel.setStyleSheet('border: 3px solid #fff')
+		self.sentenceLabel.setStyleSheet('border: 3px solid #fff; background: #222; color: #ddd')
 		self.sentenceLabel.setAlignment(QtCore.Qt.AlignCenter)
 		self.sentenceLabel.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 		textWidgetContainer.layout().addWidget(self.sentenceLabel)
@@ -151,7 +165,7 @@ class AFCWidget(StateWidget):
 		sentence = getSentence(self.stimPair.type, self.stimPair.typeIdx, self.earlyOrLate)
 		self.sentenceLabel.setText(sentence)
 		self.stimulusBraced.emit(self.stims[0])
-		QtCore.QTimer.singleShot(4000, self.nextStep)
+		QtCore.QTimer.singleShot(5000, self.nextStep)
 
 	def playStim(self, idx):
 		self.choiceButtons[idx].setStyleSheet('background-color: #6cc')
