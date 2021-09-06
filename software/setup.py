@@ -9,6 +9,9 @@ setup(
 	author='Dominic Canare',
 	author_email='dom@dominiccanare.com',
 	url='https://dominiccanare.com/',
-	packages=['vttHex',],
+	packages=[
+		'vttHex',
+		'vtEval', 'vtEval.prosody', 'vtEval.phonemes', 'vtEval.integration',
+	],
 	install_requires=[ ],
 )
