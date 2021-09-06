@@ -155,10 +155,13 @@ class MainWindow(QtWidgets.QWidget):
 
 	def loadParticipants(self):
 		participants = []
-		with open('participants.csv', newline='') as csvfile:
-			reader = csv.DictReader(csvfile)
-			for row in reader:
-				participants.append(Participant(row['id'], row['name']))
+		try:
+			with open('participants.csv', newline='') as csvfile:
+				reader = csv.DictReader(csvfile)
+				for row in reader:
+					participants.append(Participant(row['id'], row['name']))
+		except Exception as exc:
+			print(f'Error while reading participants: {exc}')
 
 		return sorted(participants)
 
