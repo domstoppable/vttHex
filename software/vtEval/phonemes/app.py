@@ -21,12 +21,12 @@ instructions = {
 			</ul>
 			<p>Opportunities for breaks will be provided as you proceed.</p>
 			<hr/>
-			<p>Click the button below when you are ready to begin the first part of this evaluation. More instructions will be provided on the next screen.</p>
+			<p>Click the <strong>Continue</strong> button below when you are ready to begin the first part of this evaluation. More instructions will be provided on the next screen.</p>
 		</html>''',
 	'vowels': '''<html>
 			<h2>Vowels</h2>
 			<p>For this part of the evaluation, one of several possible words will be vibrated on your arm. Each of the words begin with an <em>h</em> sound and end with a <em>d</em> sound - they differ only on the vowel between the <em>h</em> and the <em>d</em>.</p>
-			<p>The words are presented in a random order and will be repeated. The options are also randomized, so pay attention to what's on each button before you make each selection. If you are uncertain, guess.
+			<p>The words are presented in a random order, and each will come up multiple times. The options are also randomized, so pay attention to what's on each button before you make a selection. If you are uncertain, guess.
 			<hr/>
 			<p>Multiple auditory samples of each of the words are available below. This is your only opportunity to familiarize yourself with the differences between the vowel sounds.</p>
 			<hr/>
@@ -35,7 +35,7 @@ instructions = {
 	'consonants': '''<html>
 			<h2>Consonants</h2>
 			<p>For this part of the evaluation, one of several possible words will be vibrated on your arm. Each of the words begins and ends with an <em>ah</em> sound - they differ only on the consonant in the middle.</p>
-			<p>The words are presented in a random order and will be repeated. The options are also randomized, so pay attention to what's on each button before you make each selection. If you are uncertain, guess.
+			<p>The words are presented in a random order, and each will come up multiple times. The options are also randomized, so pay attention to what's on each button before you make a selection. If you are uncertain, guess.
 			<hr/>
 			<p>Multiple auditory samples of each of the words are available below. This is your only opportunity to familiarize yourself with the differences between the vowel sounds.</p>
 			<hr/>

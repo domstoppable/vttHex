@@ -28,7 +28,7 @@ class VtEvalApp():
 		self.window = QtWidgets.QWidget()
 		self.window.setLayout(QtWidgets.QVBoxLayout())
 		self.window.setStyleSheet('font-size: 18pt')
-		self.window.setContentsMargins(200, 50, 200, 50)
+		self.window.setContentsMargins(100, 50, 100, 50)
 
 		self.progressBar = QtWidgets.QProgressBar()
 		self.window.layout().addWidget(self.progressBar)
@@ -196,6 +196,34 @@ class ButtonPromptWidgetWithVideo(ButtonPromptWidget):
 		super().showEvent(event)
 		QtCore.QTimer.singleShot(self.videoStartDelaySeconds*1000, self.replayVideo)
 
+class ButtonPromptWidgetWithSoundBoard(ButtonPromptWidget):
+	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=5, sounds=None, buttonsPerColumn=10, parent=None):
+		super().__init__(name, text, buttonText, enabledDelaySeconds, parent)
+
+		if sounds is None:
+			return
+
+		sounds = list(sounds)
+
+		self.widgetContainer = QtWidgets.QWidget()
+		self.widgetContainer.setLayout(QtWidgets.QGridLayout())
+		for idx,stimulus in enumerate(sounds):
+			button = QtWidgets.QPushButton(self)
+			button.setText(stimulus.id)
+			button.released.connect(lambda stimulus=stimulus: self.play(stimulus))
+
+			self.widgetContainer.layout().addWidget(button, idx%buttonsPerColumn, int(idx/buttonsPerColumn))
+
+		self.layout().insertWidget(1, self.widgetContainer)
+
+	def play(self, stimulus):
+		self.soundEffect = QtMultimedia.QSoundEffect()
+		self.soundEffect.setSource(QtCore.QUrl.fromLocalFile(str(stimulus.file)))
+		self.soundEffect.play()
+
+
+
+
 class DataLogger:
 	def __init__(self, arguments, evalType):
 		self.arguments = arguments
@@ -238,11 +266,16 @@ class DataLogger:
 	def close(self):
 		self.dataFile.close()
 
-class Stimulus:
+class FileStimulus:
 	def __init__(self, file, id):
-		self.vtt = loadVTTFile(file)
+		self.file = file
 		self.id = id
 
 	def __repr__(self):
-		return f'<{self.__class__.__name__} id={self.id} file={self.vtt.filepath}>'
+		return f'<{self.__class__.__name__} id={self.id} file={self.file}>'
 
+class Stimulus(FileStimulus):
+	def __init__(self, file, id):
+		super().__init__(file, id)
+
+		self.vtt = loadVTTFile(file)
