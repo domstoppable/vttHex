@@ -3,7 +3,7 @@ import datetime
 from pathlib import Path
 import csv
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtGui, QtWidgets, QtMultimedia, QtMultimediaWidgets 
 
 import argparse
 import argparseqt.gui
@@ -27,7 +27,7 @@ class VtEvalApp():
 
 		self.window = QtWidgets.QWidget()
 		self.window.setLayout(QtWidgets.QVBoxLayout())
-		self.window.setStyleSheet('font-size: 24pt')
+		self.window.setStyleSheet('font-size: 18pt')
 		self.window.setContentsMargins(200, 50, 200, 50)
 
 		self.progressBar = QtWidgets.QProgressBar()
@@ -158,6 +158,43 @@ class ButtonPromptWidget(PromptWidget):
 	def showEvent(self, event):
 		super().showEvent(event)
 		QtCore.QTimer.singleShot(self.enabledDelaySeconds*1000, lambda: self.button.setDisabled(False))
+
+class ButtonPromptWidgetWithVideo(ButtonPromptWidget):
+	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=5, videoURL=None, videoStartDelaySeconds=0.5, parent=None):
+		super().__init__(name, text, buttonText, enabledDelaySeconds, parent)
+
+		self.videoStartDelaySeconds = videoStartDelaySeconds
+
+		self.widgetContainer = QtWidgets.QWidget()
+		self.widgetContainer.setLayout(QtWidgets.QVBoxLayout())
+		self.widgetContainer.setStyleSheet('QWidget { border: 10px solid #000; background: #000; }')
+
+		self.videoWidget = QtMultimediaWidgets.QVideoWidget(self)
+		self.widgetContainer.layout().addWidget(self.videoWidget)
+		
+		self.playButton = QtWidgets.QPushButton(self)
+		self.playButton.setText('Replay video')
+		self.playButton.clicked.connect(self.replayVideo)
+
+		self.layout().insertWidget(0, self.widgetContainer)
+		self.layout().insertWidget(1, self.playButton)
+
+		self.mediaPlayer = QtMultimedia.QMediaPlayer()
+		self.mediaPlayer.setVideoOutput(self.videoWidget)
+
+		self.playlist = QtMultimedia.QMediaPlaylist()
+		self.playlist.addMedia(videoURL)
+		self.mediaPlayer.setPlaylist(self.playlist)
+
+		self.videoDelaySeconds = videoStartDelaySeconds
+
+	def replayVideo(self):
+		self.mediaPlayer.stop()
+		self.mediaPlayer.play()
+
+	def showEvent(self, event):
+		super().showEvent(event)
+		QtCore.QTimer.singleShot(self.videoStartDelaySeconds*1000, self.replayVideo)
 
 class DataLogger:
 	def __init__(self, arguments, evalType):

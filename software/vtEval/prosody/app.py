@@ -29,7 +29,7 @@ instructions = {
 	'focus': '''
 		<html>
 			<h2>Focus Evaluation</h2>
-			<p>For this part of the evaluation, each sentence will emphasize a specific word as indicated with <i>ITALIC, CAPITALIZED</i> letters.</p>
+			<p>For this part of the evaluation, a sentence will appear in the box with an emphasized word as indicated with <i>ITALIC, CAPITALIZED</i> letters.</p>
 			<p>When the vibration options are presented, one option will emphasize the italicized word, and the other will emphasize a different word in the sentence.</p>
 			<p>You should select the vibration option which emphasizes the italicized word. If you are uncertain, make a guess.</p>
 			<p>Remember, only the underlined section of the sentence will be vibrated, and the options cannot be repeated.</p>
@@ -253,7 +253,8 @@ class ProsodyEvalApp(VtEvalApp):
 
 			stack.insert(pos, breakWidget)
 
-		stack.insert(0, ButtonPromptWidget('instructions', instructions[name]))
+		videoURL = QtCore.QUrl.fromLocalFile(f'vtEval/prosody/video/{name}.wmv')
+		stack.insert(0, ButtonPromptWidgetWithVideo('instructions', instructions[name], videoURL=videoURL))
 
 		return stack
 
