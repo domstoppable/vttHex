@@ -1,5 +1,7 @@
 from PySide2 import QtCore, QtMultimedia
 
+from .vtEvalApp import locateAsset
+
 class FadeSound:
 	def __init__(self, url):
 		self.soundEffect = QtMultimedia.QSoundEffect()
@@ -45,7 +47,7 @@ def play(fadeInMax=1.0):
 	global noise
 
 	if noise is None:
-		noise = FadeSound('vtEval/noise.wav')
+		noise = FadeSound(locateAsset('noise.wav'))
 
 	noise.fadeIn(fadeInMax)
 
