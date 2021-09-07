@@ -13,12 +13,10 @@ from vtEval import serial, noise
 
 instructions = '''<html>
 	<h1>Perceptual Integration</h1>
-	<p>Amet magni dolor ea repellat illo quis expedita sint. Omnis ea eum perspiciatis culpa maiores voluptatem repudiandae perspiciatis. Adipisci delectus voluptate dolorem aut qui hic sunt dolor. Autem dolores doloribus autem exercitationem dicta molestiae quibusdam. Ab in provident iure eveniet voluptatum voluptatum aut.</p>
-	<p>Eius provident magni voluptas tenetur reprehenderit qui consequatur. Ipsa nihil cupiditate id qui. Consequatur unde fugiat tenetur est harum provident deleniti.</p>
-	<p>In harum delectus eligendi pariatur vero ab. Reprehenderit porro optio dicta rem quibusdam quidem fugiat et. Voluptatem dolorum sequi enim non molestiae consequatur velit. Quis modi dolorum vero sint facilis. Ab quam repellat velit voluptatem earum. Nisi sint voluptatem esse iusto voluptas.</p>
-	<p>Cupiditate est consequuntur deleniti dolorem eos. Beatae vel qui quas sed impedit iusto eaque. Exercitationem laborum repudiandae voluptatum et veniam qui non quod. Sunt necessitatibus et sed voluptate nulla sunt vero et. Aperiam eligendi tempore exercitationem adipisci.</p>
-	<br/>
-	<center>Click the button below when you are ready to begin.</center></p>
+	<p>In this evaluation, you will be presented with a syllable as a sound to your ears and, simultaneously, as a vibration on your arm.</p>
+	<p>After the syllable is played, click the button which matches what you heard. The buttons change every time, so pay attention to what's on each button before you make a selection. If you are uncertain, make a guess.</p>
+	<hr/>
+	<p>If you have any questions, please ask them now. Otherwise, click the <strong>Continue</strong> button below when you are ready to begin.</p>
 </html>'''
 
 stimPath = Path('vtEval/integration/audio')
