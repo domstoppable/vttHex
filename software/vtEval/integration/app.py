@@ -19,8 +19,6 @@ instructions = '''<html>
 	<p>If you have any questions, please ask them now. Otherwise, click the <strong>Continue</strong> button below when you are ready to begin.</p>
 </html>'''
 
-stimPath = Path('vtEval/integration/audio')
-
 stimPairResponseOptions = {
 	('Ba', 'Da'): ['Ba', 'Da', 'Ga', 'Pa'],
 	('Ba', 'Ga'): ['Ba', 'Ga', 'Da', 'Ma'],
@@ -157,11 +155,11 @@ class IntegrationEvalApp(VtEvalApp):
 
 		self.stimSets = []
 
-		for audibleFile in (stimPath/'wav').glob('*.wav'):
+		for audibleFile in Path(locateAsset('wav')).glob('*.wav'):
 			speakerID = int(audibleFile.stem[7:9])
 			audiblePhone = StimPair.getPhone(audibleFile)
 
-			for tactileFile in (stimPath/'vtt').glob(f'*TK0{speakerID}.vtt'):
+			for tactileFile in Path(locateAsset('vtt')).glob(f'*TK0{speakerID}.vtt'):
 				tactilePhone = StimPair.getPhone(tactileFile)
 
 				token = (audiblePhone, tactilePhone)

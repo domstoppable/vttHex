@@ -50,13 +50,11 @@ instructions = {
 		''',
 }
 
-stimPath = Path('vtEval/prosody/audio')
-
 sentences = {
 	'focus': {},
 	'phrase': {},
 }
-with open('vtEval/prosody/sentences.csv', 'r') as sentenceFile:
+with open(locateAsset('sentences.csv'), 'r') as sentenceFile:
 	reader = csv.DictReader(sentenceFile)
 	for row in reader:
 		sentences[row['type']][str(row['id'])] = {
@@ -253,7 +251,7 @@ class ProsodyEvalApp(VtEvalApp):
 
 			stack.insert(pos, breakWidget)
 
-		videoURL = QtCore.QUrl.fromLocalFile(f'vtEval/prosody/video/{name}.wmv')
+		videoURL = QtCore.QUrl.fromLocalFile(locateAsset(f'video/{name}.wmv'))
 		stack.insert(0, ButtonPromptWidgetWithVideo('instructions', instructions[name], videoURL=videoURL))
 
 		return stack
@@ -268,7 +266,7 @@ class ProsodyEvalApp(VtEvalApp):
 	def loadStimuliFromFolder(self, prefix, earlyLevel, lateLevel):
 		stimSets = {}
 
-		path = stimPath/'vtt'
+		path = Path(locateAsset('vtt'))
 
 		pattern = re.compile(rf'{prefix}(\d\d?)_.*')
 

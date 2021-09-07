@@ -11,6 +11,15 @@ import argparseqt.gui
 from . import serial
 from vttHex.parseVTT import loadVTTFile
 
+import inspect, pkg_resources
+
+def locateAsset(*resourceParts):
+	resource = '/'.join(['assets'] + list(resourceParts))
+	callingFrame = inspect.stack()[1]
+	callingModule = inspect.getmodule(callingFrame[0])
+
+	return pkg_resources.resource_filename(callingModule.__name__, resource)
+
 def nowStamp():
 	now = datetime.datetime.now()
 	return now.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (now.microsecond / 10000))

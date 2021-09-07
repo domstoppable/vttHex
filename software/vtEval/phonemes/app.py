@@ -43,8 +43,6 @@ instructions = {
 		</html>'''
 }
 
-stimPath = Path('vtEval/phonemes/audio')
-
 phoneToHumanMap = {
 	'AW': 'hAWEd',
 	'AE': 'hAd',
@@ -226,7 +224,7 @@ class PhonemeEvalApp(VtEvalApp):
 
 
 	def _loadStimuliFromFolder(self, pattern, folder, stimClass):
-		path = stimPath/folder
+		path = Path(locateAsset(folder))
 
 		uniqueSet = set()
 		stims = []

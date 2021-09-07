@@ -3,6 +3,7 @@ import re
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
+from .vtEvalApp import locateAsset
 from .participant import Participant
 from . import subprocs
 from . import serial
@@ -94,7 +95,7 @@ class MainWindow(QtWidgets.QWidget):
 		participants = sorted(participants)
 
 		# save to disk
-		with open('participants.csv', 'w', newline='') as csvfile:
+		with open(locateAsset('participants.csv'), 'w', newline='') as csvfile:
 			fieldnames = ['id', 'name']
 			writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
@@ -156,7 +157,7 @@ class MainWindow(QtWidgets.QWidget):
 	def loadParticipants(self):
 		participants = []
 		try:
-			with open('participants.csv', newline='') as csvfile:
+			with open(locateAsset('participants.csv'), newline='') as csvfile:
 				reader = csv.DictReader(csvfile)
 				for row in reader:
 					participants.append(Participant(row['id'], row['name']))
@@ -167,7 +168,7 @@ class MainWindow(QtWidgets.QWidget):
 
 	def loadFacilitators(self):
 		facilitators = []
-		with open('facilitators.csv', newline='') as csvfile:
+		with open(locateAsset('facilitators.csv'), newline='') as csvfile:
 			reader = csv.DictReader(csvfile)
 			for row in reader:
 				facilitators.append(row)
