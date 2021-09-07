@@ -11,15 +11,37 @@ from PySide2 import QtCore, QtGui, QtWidgets
 from vtEval.vtEvalApp import *
 from vtEval import serial, noise
 
-instructions = '''<html>
-	<h1>Phoneme Evaluation</h1>
-	<p>Amet magni dolor ea repellat illo quis expedita sint. Omnis ea eum perspiciatis culpa maiores voluptatem repudiandae perspiciatis. Adipisci delectus voluptate dolorem aut qui hic sunt dolor. Autem dolores doloribus autem exercitationem dicta molestiae quibusdam. Ab in provident iure eveniet voluptatum voluptatum aut.</p>
-	<p>Eius provident magni voluptas tenetur reprehenderit qui consequatur. Ipsa nihil cupiditate id qui. Consequatur unde fugiat tenetur est harum provident deleniti.</p>
-	<p>In harum delectus eligendi pariatur vero ab. Reprehenderit porro optio dicta rem quibusdam quidem fugiat et. Voluptatem dolorum sequi enim non molestiae consequatur velit. Quis modi dolorum vero sint facilis. Ab quam repellat velit voluptatem earum. Nisi sint voluptatem esse iusto voluptas.</p>
-	<p>Cupiditate est consequuntur deleniti dolorem eos. Beatae vel qui quas sed impedit iusto eaque. Exercitationem laborum repudiandae voluptatum et veniam qui non quod. Sunt necessitatibus et sed voluptate nulla sunt vero et. Aperiam eligendi tempore exercitationem adipisci.</p>
-	<br/>
-	<center>Click the button below when you are ready to begin.</center></p>
-</html>'''
+instructions = {
+	'intro': '''<html>
+			<h1>Phoneme Evaluation</h1>
+			<p>This evaluation is separated into two parts to measure your perception of consonants and vowels. Both parts follow a similar structure:</p>
+			<ul>
+				<li>A short, one-syllable word will be vibrated on your arm.</li>
+				<li>Your task is to select the word on the screen which matches the vibrated word. If you are uncertain, guess.</li>
+			</ul>
+			<p>Opportunities for breaks will be provided as you proceed.</p>
+			<hr/>
+			<p>Click the button below when you are ready to begin the first part of this evaluation. More instructions will be provided on the next screen.</p>
+		</html>''',
+	'vowels': '''<html>
+			<h2>Vowels</h2>
+			<p>For this part of the evaluation, one of several possible words will be vibrated on your arm. Each of the words begin with an <em>h</em> sound and end with a <em>d</em> sound - they differ only on the vowel between the <em>h</em> and the <em>d</em>.</p>
+			<p>The words are presented in a random order and will be repeated. The options are also randomized, so pay attention to what's on each button before you make each selection. If you are uncertain, guess.
+			<hr/>
+			<p>Multiple auditory samples of each of the words are available below. This is your only opportunity to familiarize yourself with the differences between the vowel sounds.</p>
+			<hr/>
+			<p>If you have any questions, please ask them now. Otherwise, click the <strong>Continue</strong> button below when you are ready to begin.</p>
+		</html>''',
+	'consonants': '''<html>
+			<h2>Consonants</h2>
+			<p>For this part of the evaluation, one of several possible words will be vibrated on your arm. Each of the words begins and ends with an <em>ah</em> sound - they differ only on the consonant in the middle.</p>
+			<p>The words are presented in a random order and will be repeated. The options are also randomized, so pay attention to what's on each button before you make each selection. If you are uncertain, guess.
+			<hr/>
+			<p>Multiple auditory samples of each of the words are available below. This is your only opportunity to familiarize yourself with the differences between the vowel sounds.</p>
+			<hr/>
+			<p>If you have any questions, please ask them now. Otherwise, click the <strong>Continue</strong> button below when you are ready to begin.</p>
+		</html>'''
+}
 
 stimPath = Path('vtEval/phonemes/audio')
 
@@ -29,7 +51,7 @@ phoneToHumanMap = {
 	'UH': 'hUd',
 	'AH': 'hOd',
 	'EH': 'hEAd',
-	'ER': 'hEARd',
+	'ER': 'hERd',
 	'EI': 'hAYEd',
 	'IH': 'hId',
 	'IY': 'hEEd',
@@ -117,12 +139,13 @@ class AFCWidget(StateWidget):
 	def onChoiceMade(self, option):
 		self.selection = option
 		self.finished.emit()
+
 class PhonemeEvalApp(VtEvalApp):
 	def __init__(self):
 		super().__init__('Phoneme Evaluation')
 
-		self.loadConsonants()
-		self.loadVowels()
+		(self.consonants, self.consonantSet) = self.loadConsonants()
+		(self.vowels, self.vowelSet) = self.loadVowels()
 
 	def simulate(self):
 		isPostTest = self.arguments['condition'] == 'Post-test'
@@ -143,11 +166,13 @@ class PhonemeEvalApp(VtEvalApp):
 
 	def initialize(self, arguments):
 		stack = [
-			ButtonPromptWidget('instructions', instructions),
+			ButtonPromptWidget('instructions', instructions['intro']),
 		]
 
+		sounds = self.loadConsonants('src', FileStimulus)[0]
+		sounds.sort(key=lambda x: str(x))
 		consonantStack = [
-			ButtonPromptWidget('instructions', '<h2>Consonants</h2><p>Identify the consonants.</p>')
+			ButtonPromptWidgetWithSoundBoard('instructions', instructions['consonants'], sounds=sounds)
 		]
 		for idx,stim in enumerate(self.consonants):
 			options = self.makeRandomSubset(self.consonantSet, stim.id)
@@ -162,8 +187,10 @@ class PhonemeEvalApp(VtEvalApp):
 			ButtonPromptWidget('break', '<center>Time for a break!<br/><br/>Press the button below when you are ready to continue with consonants.</center>')
 		)
 
+		sounds = self.loadVowels('src', FileStimulus)[0]
+		sounds.sort(key=lambda x: str(x))
 		vowelStack = [
-			ButtonPromptWidget('instructions', '<h2>Vowels</h2><p>Identify the vowels.</p>')
+			ButtonPromptWidgetWithSoundBoard('instructions', instructions['vowels'], sounds=sounds)
 		]
 		for idx,stim in enumerate(self.vowels):
 			options = self.makeRandomSubset(self.vowelSet, stim.id)
@@ -198,33 +225,33 @@ class PhonemeEvalApp(VtEvalApp):
 		return options
 
 
-	def _loadStimuliFromFolder(self, pattern):
-		path = stimPath/'vtt'
+	def _loadStimuliFromFolder(self, pattern, folder, stimClass):
+		path = stimPath/folder
 
 		uniqueSet = set()
 		stims = []
 
-		for f in list(path.glob('*.vtt')):
+		for f in list(path.glob('*.*')):
 			match = pattern.match(str(f.stem))
 			if match is None:
 				continue
 
 			phone = match.group(1)
 			phone = phoneToHumanMap[phone.upper()]
-			stims.append(Stimulus(f, phone))
+			stims.append(stimClass(f, phone))
 
 			uniqueSet.add(phone)
 
 		random.shuffle(stims)
 		return (stims, sorted(list(uniqueSet)))
 
-	def loadConsonants(self):
+	def loadConsonants(self, folder='vtt', stimClass=Stimulus):
 		pattern = re.compile(r'[MW][1-5]A(.{1,2})A7M')
-		(self.consonants, self.consonantSet) = self._loadStimuliFromFolder(pattern)
+		return self._loadStimuliFromFolder(pattern, folder, stimClass)
 
-	def loadVowels(self):
+	def loadVowels(self, folder='vtt', stimClass=Stimulus):
 		pattern = re.compile(r'[mw][0-9]{2}(.*)')
-		(self.vowels, self.vowelSet) = self._loadStimuliFromFolder(pattern)
+		return self._loadStimuliFromFolder(pattern, folder, stimClass)
 
 	def prepareStimulus(self, stimulus):
 		self.device.sendFile(stimulus.vtt)

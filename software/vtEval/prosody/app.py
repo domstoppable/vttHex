@@ -24,7 +24,7 @@ instructions = {
 			<p>You will hear static to cover-up sounds made by the vibrations of the device. You should rely solely on the vibrating sensations themselves when making decisions.</p>
 			<p>Opportunities for breaks will be provided as you proceed.</p>
 			<hr/>
-			<p><center>Click the button below when you are ready to begin the first part of this evaluation. More instructions will be provided on the next screen.</center></p>
+			<p>Click the button below when you are ready to begin the first part of this evaluation. More instructions will be provided on the next screen.</p>
 		</html>''',
 	'focus': '''
 		<html>
@@ -34,7 +34,7 @@ instructions = {
 			<p>You should select the vibration option which emphasizes the italicized word. If you are uncertain, make a guess.</p>
 			<p>Remember, only the underlined section of the sentence will be vibrated, and the options cannot be repeated.</p>
 			<hr/>
-			<p><center>If you have any questions, please ask them now. Otherwise, click the button below when you are ready to begin.</center></p>
+			<p>If you have any questions, please ask them now. Otherwise, click the button below when you are ready to begin.</p>
 		</html>
 		''',
 	'phrase': '''
@@ -45,7 +45,7 @@ instructions = {
 			<p>You should select the vibration option which matches the comma placement of the sentence in the box. If you are uncertain, make a guess.</p>
 			<p>Remember, only the underlined section of the sentence will be vibrated, and the options cannot be repeated.</p>
 			<hr/>
-			<p><center>If you have any questions, please ask them now. Otherwise, click the button below when you are ready to begin.</center></p>
+			<p>If you have any questions, please ask them now. Otherwise, click the button below when you are ready to begin.</p>
 		</html>
 		''',
 }
