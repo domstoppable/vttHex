@@ -72,6 +72,9 @@ class StimPair:
 		self.earlyStim = earlyStim
 		self.lateStim = lateStim
 
+	def getMaxDurationMS(self):
+		return max(self.earlyStim.vtt.getDuration(), self.lateStim.vtt.getDuration())
+
 class AFCWidget(StateWidget):
 	stimulusBraced = QtCore.Signal(object)
 	stimulusTriggered = QtCore.Signal(object)
@@ -80,7 +83,6 @@ class AFCWidget(StateWidget):
 		super().__init__(name=name, parent=parent)
 
 		self.delayBeforeStimulus = 0
-		self.delayAfterStimulus = 750
 
 		self.stimPair = stimPair
 		self.earlyOrLate = earlyOrLate
@@ -141,6 +143,7 @@ class AFCWidget(StateWidget):
 			lambda: self.playStim(0),
 			lambda: self.prepSecondStim(),
 			lambda: self.playStim(1),
+			lambda: self.prepInput(),
 			lambda: self.getInput()
 		]
 
@@ -169,15 +172,18 @@ class AFCWidget(StateWidget):
 		self.choiceButtons[idx].setStyleSheet('background-color: #6cc')
 
 		self.stimulusTriggered.emit(self.stims[idx])
-		QtCore.QTimer.singleShot(3000, self.nextStep)
+		QtCore.QTimer.singleShot(self.stimPair.getMaxDurationMS() + 500, self.nextStep)
 
 	def prepSecondStim(self):
 		self.choiceButtons[0].setStyleSheet('')
 		self.stimulusBraced.emit(self.stims[1])
 		QtCore.QTimer.singleShot(1000, self.nextStep)
 
-	def getInput(self):
+	def prepInput(self):
 		self.choiceButtons[1].setStyleSheet('')
+		QtCore.QTimer.singleShot(500, self.nextStep)
+
+	def getInput(self):
 		self.promptLabel.setText('Which version was a better match?')
 		self.buttonContainer.setDisabled(False)
 		noise.stop()
