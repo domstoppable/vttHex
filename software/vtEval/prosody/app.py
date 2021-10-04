@@ -80,7 +80,6 @@ class AFCWidget(StateWidget):
 		super().__init__(name=name, parent=parent)
 
 		self.delayBeforeStimulus = 0
-		self.delayAfterStimulus = 750
 
 		self.stimPair = stimPair
 		self.earlyOrLate = earlyOrLate

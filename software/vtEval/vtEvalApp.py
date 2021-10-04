@@ -2,6 +2,7 @@ import sys
 import datetime
 from pathlib import Path
 import csv
+import random
 
 from PySide2 import QtCore, QtGui, QtWidgets, QtMultimedia, QtMultimediaWidgets 
 
@@ -160,6 +161,7 @@ class ButtonPromptWidget(PromptWidget):
 		self.button = QtWidgets.QPushButton(parent=self, text=buttonText)
 		self.button.clicked.connect(self.finished.emit)
 		self.button.setDisabled(True)
+		self.button.setStyleSheet('QPushButton { padding: 15px }')
 
 		self.layout().addWidget(self.button)
 		self.setFocusProxy(self.button)
@@ -205,33 +207,77 @@ class ButtonPromptWidgetWithVideo(ButtonPromptWidget):
 		super().showEvent(event)
 		QtCore.QTimer.singleShot(self.videoStartDelaySeconds*1000, self.replayVideo)
 
+class CenteredContainer(QtWidgets.QWidget):
+	def __init__(self, widget=None, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.setLayout(QtWidgets.QGridLayout(self))
+		spacer = QtWidgets.QWidget(self)
+		spacer.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
+		self.layout().addWidget(spacer, 0, 0)
+
+		spacer = QtWidgets.QWidget(self)
+		spacer.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
+		self.layout().addWidget(spacer, 2, 2)
+
+		if widget is not None:
+			self.setWidget(widget)
+
+	def setWidget(self, widget):
+		self.layout().addWidget(widget, 1, 1)
+
+
+class SoundCollectionButton(QtWidgets.QPushButton):
+	def __init__(self, text, collection=None, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+		if collection is None:
+			collection = []
+		
+		self.setText(text)
+		self.sounds = list(collection)
+		self.clicked.connect(self.onClicked)
+		self.soundIdx = -1
+	
+	def addSound(self, sound):
+		self.sounds.append(sound)
+
+	def onClicked(self):
+		self.soundIdx = (self.soundIdx + 1) % len(self.sounds)
+
+		soundFile = self.sounds[self.soundIdx]
+		self.soundEffect = QtMultimedia.QSoundEffect()
+		self.soundEffect.setSource(QtCore.QUrl.fromLocalFile(str(soundFile)))
+		self.soundEffect.play()
+
 class ButtonPromptWidgetWithSoundBoard(ButtonPromptWidget):
-	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=5, sounds=None, buttonsPerColumn=10, parent=None):
+	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=5, sounds=None, buttonsPerRow=4, parent=None):
 		super().__init__(name, text, buttonText, enabledDelaySeconds, parent)
 
 		if sounds is None:
 			return
 
-		sounds = list(sounds)
-
 		self.widgetContainer = QtWidgets.QWidget()
 		self.widgetContainer.setLayout(QtWidgets.QGridLayout())
+		self.widgetContainer.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+		soundCollections = {}
 		for idx,stimulus in enumerate(sounds):
-			button = QtWidgets.QPushButton(self)
-			button.setText(stimulus.id)
-			button.released.connect(lambda stimulus=stimulus: self.play(stimulus))
+			if stimulus.id not in soundCollections:
+				soundCollections[stimulus.id] = []
+			
+			soundCollections[stimulus.id].append(stimulus.file)
 
-			self.widgetContainer.layout().addWidget(button, idx%buttonsPerColumn, int(idx/buttonsPerColumn))
+		for idx,(stimID,collection) in enumerate(soundCollections.items()):
+			random.shuffle(collection)
+			button = SoundCollectionButton(stimID, collection, parent=self)
+			button.setMinimumSize(125, 75)
+			button.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+			self.widgetContainer.layout().addWidget(button, int(idx/buttonsPerRow), idx%buttonsPerRow)
 
-		self.layout().insertWidget(1, self.widgetContainer)
-
-	def play(self, stimulus):
-		self.soundEffect = QtMultimedia.QSoundEffect()
-		self.soundEffect.setSource(QtCore.QUrl.fromLocalFile(str(stimulus.file)))
-		self.soundEffect.play()
-
-
-
+		centeredContainer = CenteredContainer(self.widgetContainer, parent=self)
+		self.layout().insertWidget(1, centeredContainer)
+		self.layout().insertStretch(0)
+		self.layout().insertStretch(2)
+		self.layout().insertStretch(4)
 
 class DataLogger:
 	def __init__(self, arguments, evalType):

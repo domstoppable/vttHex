@@ -28,7 +28,7 @@ instructions = {
 			<p>For this part of the evaluation, one of several possible words will be vibrated on your arm. Each of the words begin with an <em>h</em> sound and end with a <em>d</em> sound - they differ only on the vowel between the <em>h</em> and the <em>d</em>.</p>
 			<p>The words are presented in a random order, and each will come up multiple times. The options are also randomized, so pay attention to what's on each button before you make a selection. If you are uncertain, guess.
 			<hr/>
-			<p>Multiple auditory samples of each of the words are available below. This is your only opportunity to familiarize yourself with the differences between the vowel sounds. During the actual experiment, you will be <em>feeling</em> these, not hearing them.</p>
+			<p>Auditory samples of each of the words are available below. This is your only opportunity to familiarize yourself with the differences between the vowel sounds. During the actual experiment, you will be <em>feeling</em> the tactile versions of these sounds, not hearing them.</p>
 			<hr/>
 			<p>If you have any questions, please ask them now. Otherwise, click the <strong>Continue</strong> button below when you are ready to begin.</p>
 		</html>''',
@@ -37,7 +37,7 @@ instructions = {
 			<p>For this part of the evaluation, one of several possible words will be vibrated on your arm. Each of the words begins and ends with an <em>ah</em> sound - they differ only on the consonant in the middle.</p>
 			<p>The words are presented in a random order, and each will come up multiple times. The options are also randomized, so pay attention to what's on each button before you make a selection. If you are uncertain, guess.
 			<hr/>
-			<p>Multiple auditory samples of each of the words are available below. This is your only opportunity to familiarize yourself with the differences between the consonant sounds. During the actual experiment, you will be <em>feeling</em> these, not hearing them.</p>
+			<p>Auditory samples of each of the words are available below. This is your only opportunity to familiarize yourself with the differences between the consonant sounds. During the actual experiment, you will be <em>feeling</em> the tactile versions of these sounds, not hearing them.</p>
 			<hr/>
 			<p>If you have any questions, please ask them now. Otherwise, click the <strong>Continue</strong> button below when you are ready to begin.</p>
 		</html>'''
