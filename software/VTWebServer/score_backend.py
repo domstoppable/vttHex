@@ -1,11 +1,12 @@
 import csv
 import time
+import pkg_resources
 
 from pathlib import Path
 
 scores = []
 
-score_file = Path('scores.csv')
+score_file = Path(pkg_resources.resource_filename(__name__, 'scores.csv'))
 
 if score_file.exists():
 	with open(score_file, mode='r') as file:

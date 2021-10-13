@@ -5,14 +5,14 @@ from flask import Flask
 
 import score_backend
 
-app = Flask(__name__)
+application = Flask(__name__)
 
-@app.route('/api/scores/')
+@application.route('/api/scores/')
 def get_scores():
 	scores = sorted(score_backend.scores, key=lambda item: int(item['score']), reverse=True)
 	return json.dumps({'scores': scores})
 
-@app.route('/api/score/<int:user_id>/<int:score>/<int:checksum>', methods=['POST'])
+@application.route('/api/score/<int:user_id>/<int:score>/<int:checksum>', methods=['POST'])
 def update_score(user_id, score, checksum):
 	try:
 		validateChecksum = score % (user_id+7)
