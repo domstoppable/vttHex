@@ -4,22 +4,15 @@ from pathlib import Path
 import csv
 import random
 
-from PySide2 import QtCore, QtGui, QtWidgets, QtMultimedia, QtMultimediaWidgets 
+from PySide2 import QtCore, QtGui, QtWidgets, QtMultimedia, QtMultimediaWidgets
 
 import argparse
 import argparseqt.gui
 
 from . import serial
+from .asset import locateAsset
+from .ui import SerialSelector
 from vttHex.parseVTT import loadVTTFile
-
-import inspect, pkg_resources
-
-def locateAsset(*resourceParts):
-	resource = '/'.join(['assets'] + list(resourceParts))
-	callingFrame = inspect.stack()[1]
-	callingModule = inspect.getmodule(callingFrame[0])
-
-	return pkg_resources.resource_filename(callingModule.__name__, resource)
 
 def nowStamp():
 	now = datetime.datetime.now()
@@ -37,7 +30,7 @@ class VtEvalApp():
 
 		self.window = QtWidgets.QWidget()
 		self.window.setLayout(QtWidgets.QVBoxLayout())
-		self.window.setStyleSheet('font-size: 18pt')
+		self.app.setStyleSheet('* { font-size: 18pt; }')
 		self.window.setContentsMargins(100, 50, 100, 50)
 
 		self.progressBar = QtWidgets.QProgressBar()
@@ -45,6 +38,9 @@ class VtEvalApp():
 
 		self.dataLogger = None
 		self.device = None
+		self.serialErrorWidget = SerialErrorWidget()
+		self.serialErrorWidget.finished.connect(self.resumeFromSerialError)
+		self.serialErrorWidget.deviceSelected.connect(self.connectNewDevice)
 
 	def initialize(self, arguments):
 		raise Exception(f'{self.app.applicationName()} is not configured!')
@@ -120,6 +116,91 @@ class VtEvalApp():
 		else:
 			self.app.exec_()
 
+	def connectNewDevice(self, device):
+		print('Connect to', device)
+
+		self.device = serial.SerialDevice(device)
+		if self.device.open():
+			self.serialErrorWidget.enableButton()
+		else:
+			self.serialErrorWidget.showError('Could not connect to device.')
+
+	def handleSerialError(self):
+		if self.serialErrorWidget.isVisible():
+			return
+
+		self.serialErrorWidget.showFullScreen()
+		self.serialErrorWidget.reset()
+
+	def resumeFromSerialError(self):
+		self.serialErrorWidget.hide()
+		self.currentStateWidget.onStarted()
+
+	def prepareStimulus(self, stimulus):
+		try:
+			self.device.sendFile(stimulus.vtt)
+		except Exception as exc:
+			self.handleSerialError()
+
+	def playStimulus(self, stimulus):
+		try:
+			self.device.play()
+		except Exception as exc:
+			self.handleSerialError()
+
+
+class SerialErrorWidget(QtWidgets.QWidget):
+	finished = QtCore.Signal()
+	deviceSelected = QtCore.Signal(object)
+
+	def __init__(self, parent=None):
+		super().__init__(parent)
+		self.setWindowModality(QtCore.Qt.ApplicationModal)
+
+		self.contents = QtWidgets.QWidget()
+		self.contents.setLayout(QtWidgets.QVBoxLayout())
+		self.contents.layout().setSpacing(50)
+		self.contents.layout().addWidget(QtWidgets.QLabel('<h1 style="color: #900"><center>Device error!</center></h1>', self))
+		self.contents.layout().addWidget(QtWidgets.QLabel('<center>There was an error communicating with the device. Please check the device connection.</center>', self))
+
+		self.serialSelector = SerialSelector(self)
+		self.serialSelector.selectionChanged.connect(self.onDeviceSelected)
+
+		self.contents.layout().addWidget(self.serialSelector)
+
+		self.messageLabel = QtWidgets.QLabel(self)
+		self.messageLabel.setText('test test test test')
+		self.contents.layout().addWidget(self.messageLabel)
+
+		self.button = QtWidgets.QPushButton(parent=self, text='Return')
+		self.button.clicked.connect(self.finished.emit)
+		self.button.setEnabled(False)
+		self.button.setStyleSheet('QPushButton { padding: 15px }')
+
+		self.contents.layout().addWidget(self.button)
+
+		self.setLayout(QtWidgets.QVBoxLayout())
+		self.centeredContainer = CenteredContainer()
+		self.layout().addWidget(self.centeredContainer)
+		self.centeredContainer.setWidget(self.contents)
+
+	def onDeviceSelected(self, device):
+		if device is not None:
+			self.deviceSelected.emit(device)
+
+	def reset(self):
+		self.messageLabel.setText('')
+		self.button.setEnabled(False)
+
+	def showError(self, message):
+		self.messageLabel.setText(f'<center>{message}</center>')
+		self.messageLabel.setStyleSheet('QLabel { color: #A00; font-weight: bold; } ')
+
+	def enableButton(self):
+		self.messageLabel.setText('<center>Connected!</center>')
+		self.messageLabel.setStyleSheet('QLabel { color: #090; font-weight: bold; } ')
+		self.button.setEnabled(True)
+
 class StateWidget(QtWidgets.QWidget):
 	finished = QtCore.Signal()
 
@@ -182,7 +263,7 @@ class ButtonPromptWidgetWithVideo(ButtonPromptWidget):
 
 		self.videoWidget = QtMultimediaWidgets.QVideoWidget(self)
 		self.widgetContainer.layout().addWidget(self.videoWidget)
-		
+
 		self.playButton = QtWidgets.QPushButton(self)
 		self.playButton.setText('Replay video')
 		self.playButton.clicked.connect(self.replayVideo)
@@ -225,19 +306,18 @@ class CenteredContainer(QtWidgets.QWidget):
 	def setWidget(self, widget):
 		self.layout().addWidget(widget, 1, 1)
 
-
 class SoundCollectionButton(QtWidgets.QPushButton):
 	def __init__(self, text, collection=None, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
 		if collection is None:
 			collection = []
-		
+
 		self.setText(text)
 		self.sounds = list(collection)
 		self.clicked.connect(self.onClicked)
 		self.soundIdx = -1
-	
+
 	def addSound(self, sound):
 		self.sounds.append(sound)
 
@@ -263,7 +343,7 @@ class ButtonPromptWidgetWithSoundBoard(ButtonPromptWidget):
 		for idx,stimulus in enumerate(sounds):
 			if stimulus.id not in soundCollections:
 				soundCollections[stimulus.id] = []
-			
+
 			soundCollections[stimulus.id].append(stimulus.file)
 
 		for idx,(stimID,collection) in enumerate(soundCollections.items()):

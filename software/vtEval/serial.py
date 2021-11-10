@@ -55,6 +55,11 @@ def formatPacket_SoundBite(vttFile, soundBiteID=0):
 		*vttFile.samples
 	])
 
+class SerialError(Exception):
+	def __init__(self, message, qtError):
+		super().__init__(message)
+		self.qtError = qtError
+
 class SerialDevice():
 	def __init__(self, pathOrSerialInfo):
 		if not isinstance(pathOrSerialInfo, SerialInfo):
@@ -64,7 +69,7 @@ class SerialDevice():
 		self.port.setBaudRate(115200)
 
 	def open(self):
-		self.port.open(QtCore.QIODevice.ReadWrite)
+		return self.port.open(QtCore.QIODevice.ReadWrite)
 
 	def close(self):
 		self.port.close()
@@ -82,7 +87,10 @@ class SerialDevice():
 	def send(self, bytes):
 		if not self.port.isOpen():
 			self.open()
+			if self.port.error() != QtSerialPort.QSerialPort.SerialPortError.NoError:
+				raise SerialError('Failed to open port', self.port.error())
 
 		print(f'Send {len(bytes)} bytes', bytes[:32], '...' if len(bytes) > 32 else '')
 		self.port.write(bytes)
-
+		if self.port.error() != QtSerialPort.QSerialPort.SerialPortError.NoError:
+			raise SerialError('Failed to write to port', self.port.error())

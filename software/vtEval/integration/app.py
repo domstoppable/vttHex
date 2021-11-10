@@ -92,7 +92,6 @@ class AFCWidget(StateWidget):
 
 		horizontalCount = 2
 		self.buttonContainer = QtWidgets.QWidget()
-		self.buttonContainer.setDisabled(True)
 		self.buttonContainer.setLayout(QtWidgets.QGridLayout())
 		self.buttonContainer.layout().setSpacing(20)
 
@@ -109,8 +108,10 @@ class AFCWidget(StateWidget):
 
 		self.layout().addWidget(self.buttonContainer)
 
-	def showEvent(self, event):
+	def onStarted(self):
 		noise.play()
+		self.buttonContainer.setDisabled(True)
+
 		QtCore.QTimer.singleShot(self.delayBeforeStimulus, self.playStimulus)
 		self.stimulusBraced.emit(self.stimulus)
 
@@ -210,12 +211,9 @@ class IntegrationEvalApp(VtEvalApp):
 		self.widgetStack += tactileAuditoryStack
 		self.dataLogger = IntegrationDataLogger(arguments, 'integration')
 
-	def prepareStimulus(self, stimulus):
-		self.device.sendFile(stimulus.vtt)
-
 	def playStimulus(self, stimulus):
 		stimulus.sound.play()
-		self.device.play()
+		super().playStimulus(stimulus)
 
 def run():
 	app = IntegrationEvalApp()

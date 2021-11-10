@@ -100,7 +100,6 @@ class AFCWidget(StateWidget):
 
 		horizontalCount = 3
 		self.buttonContainer = QtWidgets.QWidget()
-		self.buttonContainer.setDisabled(True)
 		self.buttonContainer.setLayout(QtWidgets.QGridLayout())
 		self.buttonContainer.layout().setSpacing(20)
 		for idx,opt in enumerate(self.options):
@@ -114,10 +113,12 @@ class AFCWidget(StateWidget):
 
 		self.layout().addWidget(self.buttonContainer)
 
-	def showEvent(self, event):
-		noise.play()
+	def onStarted(self):
+		self.buttonContainer.setDisabled(True)
+		self.label.setText('')
 		QtCore.QTimer.singleShot(self.delayBeforeStimulus, self.playStimulus)
 		self.stimulusBraced.emit(self.stimulus)
+		noise.play()
 
 	def playStimulus(self):
 		self.label.setText('{{ 🖐 }}')
@@ -250,12 +251,6 @@ class PhonemeEvalApp(VtEvalApp):
 	def loadVowels(self, folder='vtt', stimClass=Stimulus):
 		pattern = re.compile(r'[mw][0-9]{2}(.*)')
 		return self._loadStimuliFromFolder(pattern, folder, stimClass)
-
-	def prepareStimulus(self, stimulus):
-		self.device.sendFile(stimulus.vtt)
-
-	def playStimulus(self, stimulus):
-		self.device.play()
 
 def run():
 	app = PhonemeEvalApp()

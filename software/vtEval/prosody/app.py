@@ -102,21 +102,18 @@ class AFCWidget(StateWidget):
 		textWidgetContainer.layout().addWidget(label)
 
 		self.sentenceLabel = QtWidgets.QLabel(parent=self)
-		self.sentenceLabel.setText(' ')
 		self.sentenceLabel.setStyleSheet('border: 3px solid #fff; background: #222; color: #ddd')
 		self.sentenceLabel.setAlignment(QtCore.Qt.AlignCenter)
 		self.sentenceLabel.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 		textWidgetContainer.layout().addWidget(self.sentenceLabel)
 
 		self.promptLabel = QtWidgets.QLabel(parent=self)
-		self.promptLabel.setText(' ')
 		self.promptLabel.setAlignment(QtCore.Qt.AlignCenter)
 		self.promptLabel.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
 		self.layout().addWidget(textWidgetContainer, stretch=2)
 
 		self.buttonContainer = QtWidgets.QWidget()
-		self.buttonContainer.setDisabled(True)
 		self.buttonContainer.setLayout(QtWidgets.QHBoxLayout())
 		self.buttonContainer.layout().setSpacing(20)
 
@@ -137,6 +134,17 @@ class AFCWidget(StateWidget):
 		self.layout().addWidget(self.buttonContainer, stretch=3)
 		self.layout().addWidget(self.promptLabel, stretch=1)
 
+	def setupButton(self, text, choice):
+		button = QtWidgets.QPushButton(parent=self, text=text)
+		button.clicked.connect(lambda _=None, text=text: self.onChoiceMade(choice))
+		button.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+		return button
+
+	def onStarted(self):
+		self.promptLabel.setText('')
+		self.sentenceLabel.setText('')
+		self.buttonContainer.setDisabled(True)
 
 		self.steps = [
 			lambda: self.showSentence(),
@@ -146,15 +154,6 @@ class AFCWidget(StateWidget):
 			lambda: self.prepInput(),
 			lambda: self.getInput()
 		]
-
-	def setupButton(self, text, choice):
-		button = QtWidgets.QPushButton(parent=self, text=text)
-		button.clicked.connect(lambda _=None, text=text: self.onChoiceMade(choice))
-		button.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-
-		return button
-
-	def showEvent(self, event):
 		noise.play()
 		QtCore.QTimer.singleShot(self.delayBeforeStimulus, self.nextStep)
 
@@ -295,12 +294,6 @@ class ProsodyEvalApp(VtEvalApp):
 		stimSets = list(stimSets.values())
 		random.shuffle(stimSets)
 		return stimSets
-
-	def prepareStimulus(self, stimulus):
-		self.device.sendFile(stimulus.vtt)
-
-	def playStimulus(self, stimulus):
-		self.device.play()
 
 def run():
 	app = ProsodyEvalApp()

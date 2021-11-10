@@ -3,7 +3,7 @@ import re
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from .vtEvalApp import locateAsset
+from .asset import locateAsset
 from .participant import Participant
 from . import subprocs
 from . import serial
@@ -212,7 +212,11 @@ class ComboWithButton(QtWidgets.QWidget):
 		self.combo.clear()
 
 		for idx,item in enumerate(items):
-			self.combo.addItem(repr(item), item)
+			if item is None:
+				self.combo.addItem('', None)
+			else:
+				self.combo.addItem(repr(item), item)
+
 			if item == selected:
 				self.combo.setCurrentIndex(idx)
 
@@ -224,21 +228,27 @@ class ComboWithButton(QtWidgets.QWidget):
 
 class SerialSelector(ComboWithButton):
 	def __init__(self, parent=None):
-		super().__init__(options=serial.availablePorts(), buttonText='↺', parent=parent)
+		ports = serial.availablePorts()
+		ports.insert(0, None)
+
+		super().__init__(options=ports, buttonText='↺', parent=parent)
 
 		self.buttonClicked.connect(self.refresh)
-		self.selectPreferred()
+		QtCore.QTimer.singleShot(100, self.selectPreferred)
 
 	def refresh(self):
-		self.resort(serial.availablePorts())
-		if self.combo.currentIndex() < 0:
-			self.selectPreferred()
+		ports = serial.availablePorts()
+		ports.insert(0, None)
+
+		self.resort(ports)
+		QtCore.QTimer.singleShot(100, self.selectPreferred)
 
 	def selectPreferred(self):
 		for idx in range(self.combo.count()):
 			info = self.combo.itemData(idx)
 			if hasattr(info, 'isPreferred') and info.isPreferred():
 				self.combo.setCurrentIndex(idx)
+
 class ComboWithAddButton(ComboWithButton):
 	itemAdded = QtCore.Signal(object)
 
