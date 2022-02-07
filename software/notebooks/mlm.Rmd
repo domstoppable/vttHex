@@ -1,8 +1,8 @@
 # Basic data
 ```{r}
+phone_translate <- read.csv('aux-data/phoneme-translate.csv')
+training_lexicon <- read.csv('aux-data/training-lexicon.csv')
 setwd("data")
-phone_translate <- read.csv('../aux-data/phoneme-translate.csv')
-training_lexicon <- read.csv('../aux-data/training-lexicon.csv')
 ```
 
 # Training data
@@ -28,8 +28,17 @@ training_data$timedelta <- ifelse(
     Inf
 )
 
-training_data$trainingDayIdx <- ifelse(is.na(training_data$timedelta), 1, as.integer(training_data$timedelta > 3600))
-training_data$trainingDayIdx <- cumsum(training_data$trainingDay)
+training_data$trainingDayInc <- ifelse(training_data$timedelta == Inf, 0, as.integer(training_data$timedelta > 3600))
+training_data$trainingDayIdx <- cumsum(training_data$trainingDayInc)
+
+tmp_firstDay <- data.frame(dplyr::summarise(
+    dplyr::group_by(training_data, PID),
+    firstDay = min(trainingDayIdx)
+))
+
+training_data <- dplyr::left_join(training_data, tmp_firstDay, c('PID'))
+training_data$trainingDayIdx <- training_data$trainingDayIdx - training_data$firstDay
+
 
 training_data$levelAttemptIdx <- ifelse(
     is.na(lag(training_data$trainingDayIdx)) | training_data$PID != lag(training_data$PID) | is.na(dplyr::lag(training_data$LevelAttemptGuid)),
@@ -67,7 +76,7 @@ exposure_counts_by_stimulus <- data.frame(dplyr::summarise(
     stimulusExposures = sum(Ok)
 ))
 
-write.csv(exposure_counts_by_stimulus, 'exposure_counts_by_stimulus.csv')
+write.csv(exposure_counts_by_stimulus, 'output/exposure_counts_by_stimulus.csv')
 
 exposure_counts_by_phrase <- data.frame(dplyr::summarise(
     dplyr::group_by(training_data, pid, phrase),
@@ -76,10 +85,10 @@ exposure_counts_by_phrase <- data.frame(dplyr::summarise(
 
 trainStim_exposure_counts_by_pid <- data.frame(dplyr::summarise(
     dplyr::group_by(training_data, pid),
-    totalTrainStimExposuresForPID = sum(Ok)
+    trainingWordExposures = sum(Ok)
 ))
 
-write.csv(exposure_counts_by_phrase, 'exposure_counts_by_phrase.csv')
+write.csv(exposure_counts_by_phrase, 'output/exposure_counts_by_phrase.csv')
 
 exposure_counts_by_phoneme <- merge(exposure_counts_by_stimulus, training_lexicon, by='stimulus', all.x = TRUE)
 exposure_counts_by_phoneme <- dplyr::rename(exposure_counts_by_phoneme, phrase=phrase.y)
@@ -92,7 +101,7 @@ if(nrow(words_not_in_lexicon) > 0){
     print(words_not_in_lexicon$word)
 }
 pronounciation_counts <- data.frame(dplyr::summarise(
-    dplyr::group_by(exposure_counts_by_phoneme, phrase),
+    dplyr::group_by(training_lexicon, phrase),
     pronounciations = dplyr::n()
 ))
 pronounciation_counts <- dplyr::filter(pronounciation_counts, pronounciations != 4)
@@ -103,7 +112,7 @@ if(nrow(pronounciation_counts) > 0){
 }
 
 exposure_counts_by_phoneme <- dplyr::mutate(exposure_counts_by_phoneme, across(AA:ZH, ~ .x * stimulusExposures))
-write.csv(exposure_counts_by_phoneme, 'exposure_counts_by_phoneme_0.csv')
+write.csv(exposure_counts_by_phoneme, 'output/exposure_counts_by_phoneme_0.csv')
 
 p_exposures <- tidyr::gather(exposure_counts_by_phoneme, phoneme, phonemeExposures, AA:ZH)
 p_exposures <- data.frame(dplyr::summarise(
@@ -111,7 +120,7 @@ p_exposures <- data.frame(dplyr::summarise(
     phonemeExposures = sum(phonemeExposures)
 ))
 
-write.csv(p_exposures, 'exposure_counts_by_phoneme.csv')
+write.csv(p_exposures, 'output/exposure_counts_by_phoneme.csv')
 
 ```
 
@@ -156,18 +165,28 @@ training_report <- data.frame(dplyr::summarise(
     firstDay = min(datetime),
     lastDay = max(datetime),
     uniqueSessions = max(trainingDayIdx),
-    levelAttempts = nrow(dplyr::filter(stims_per_level, pid==pid)),
     dateRange = as.integer(max(datetime) - min(datetime)),
-    totalPhraseStimExposures = sum(Ok),
-    meanTrainingDayDurationM = mean(dplyr::filter(training_day_summary, pid==pid)$durationInM)
+    totalPhraseStimExposures = sum(Ok)
 ))
 
+training_day_summary_by_pid <- data.frame(dplyr::summarise(
+    dplyr::group_by(training_day_summary, pid),
+    meanTrainingDayDurationM = mean(durationInM)
+))
+
+level_attempts_by_pid <- data.frame(dplyr::summarise(
+    dplyr::group_by(stims_per_level, pid),
+    levelAttempts = dplyr::n()
+))
+
+training_report <- merge(training_report, level_attempts_by_pid, by='pid', keep.x=TRUE)
+training_report <- merge(training_report, training_day_summary_by_pid, by='pid', keep.x=TRUE)
 training_report$levelAttemptsPerSession <- training_report$levelAttempts / training_report$uniqueSessions
 training_report <- merge(training_report, total_p_exposures_by_pid, by='pid', keep.x=TRUE)
 training_report <- merge(training_report, untrained_phones, by='pid', keep.x=TRUE)
 training_report <- merge(training_report, uniq_phrases, by='pid', keep.x=TRUE)
 
-View(training_report)
+write.csv(training_report, 'output/training_report.csv')
 ```
 
 
@@ -175,9 +194,14 @@ View(training_report)
 ```{r}
 load_files <- function(file_pattern, create_correct_column = TRUE) {
     # find matching files
+    setwd("evals")
+
     df_files <- list.files(".", file_pattern)
     # combine into single dataframe
     df <- dplyr::bind_rows(lapply(df_files, read.csv))
+
+    setwd("..")
+
     df <- subset(df, select=-c(timestamp, facilitator, event, item))
 
     # remove non-data rows
@@ -203,7 +227,7 @@ load_files <- function(file_pattern, create_correct_column = TRUE) {
     # combine with training data
 
     df <- merge(df, trainStim_exposure_counts_by_pid, key="pid", all.x = TRUE)
-    df$totalTrainStimExposuresForPID <- ifelse(df$condition == "Pre-test", 0, df$totalTrainStimExposuresForPID)
+    df$trainingWordExposures <- ifelse(df$condition == "Pre-test", 0, df$trainingWordExposures)
 
     return(df)
 }
@@ -244,70 +268,176 @@ table(phoneDF$condition, phoneDF$correct)
 
 ## Explore and visualize
 ```{r}
-phoneSummary <- dplyr::summarise(
-    dplyr::group_by(phoneDF, pid, phoneType),
-    correctPortion = 100*mean(correct),
-    se = 100*sd(correct)/sqrt(length(correct))
+phoneDF <- load_files("_phonemes_")
+
+test_df <- merge(phoneDF, phone_translate, by.x='stimulus', by.y='test_word', keep.x=TRUE)
+test_df <- dplyr::left_join(test_df, p_exposures, c('train_phone'='phoneme', 'pid'))
+test_df <- dplyr::rename(test_df, phoneType = phone_type)
+
+pre_test_only <- dplyr::filter(test_df, condition == 'Pre-test')
+
+test_df$phonemeExposures <- ifelse(test_df$condition == 'Pre-test', 0, test_df$phonemeExposures)
+
+post_test_only <- dplyr::filter(test_df, condition == 'Post-test')
+
+exposure_counts_by_phoneType <- data.frame(
+    dplyr::summarise(
+        dplyr::group_by(test_df, pid, condition, test_phone, phoneType),
+        phonemeExposures = mean(phonemeExposures),
+    )
 )
 
-# Adds a line for consonants+vowels collapsed together
-#phoneSummary2 <- dplyr::summarise(
-#    dplyr::group_by(phoneDF, pid, training),
-#    correctPortion = 100*mean(correct),
-#    se = 100*sd(correct)/sqrt(length(correct))
-#)
-#phoneSummary2$phoneType <- "Combined"
-#phoneSummary <- dplyr::union_all(phoneSummary, phoneSummary2)
+exposure_counts_by_phoneType <- data.frame(
+    dplyr::summarise(
+        dplyr::group_by(exposure_counts_by_phoneType, pid, phoneType, condition),
+        phonemeExposures = sum(phonemeExposures),
+    )
+)
 
+test_summary <- data.frame(
+    dplyr::summarise(
+        dplyr::group_by(test_df, condition, pid, phoneType),
+        correctPortion = 100*mean(correct),
+        se = 100*sd(correct)/sqrt(length(correct))
+    )
+)
 
-ggplot2::ggplot(phoneSummary, ggplot2::aes(x = training, y = correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
+phone_summary_by_type_and_pid <- merge(test_summary, exposure_counts_by_phoneType, by=c('condition', 'pid', 'phoneType'))
+
+ggplot2::ggplot(phone_summary_by_type_and_pid, ggplot2::aes(x=phonemeExposures, y=correctPortion, shape=phoneType, group=phoneType, color=phoneType)) +
     ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+    ggplot2::geom_hline(yintercept=100/9, linetype='dashed', color='gray') +
     ggplot2::geom_line() +
     ggplot2::geom_point(size = 3) +
     ggplot2::geom_errorbar(
         ggplot2::aes(ymin=correctPortion-se, ymax=correctPortion+se),
-        width=1,
-        position=ggplot2::position_dodge(2)
+        width=500,
     ) +
     ggplot2::ylim(0, 100) +
     ggplot2::labs(
         colour = "Phoneme Type",
         shape = "Phoneme Type",
-        x = "Training Time (Hours)",
+        x = "Phoneme Exposures",
         y = "Percentage Correct",
-        title = "Phoneme Recognition (by participant)"
+        title = "Phoneme Recognition (pre vs post-test)"
+    ) +
+    ggplot2::theme_classic(base_size=10) +
+    ggplot2::theme(legend.position = c(0.85, 0.85))
+
+ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/phoneme-recognition-by-pid.png", width=6, height=6)
+
+post_test_summary_by_type <- data.frame(
+    dplyr::summarise(
+        dplyr::group_by(phone_summary_by_type_and_pid, phoneType, condition),
+        correctPortion = mean(correctPortion),
+        phonemeExposures = mean(phonemeExposures),
+        se = sd(correctPortion)/sqrt(length(correctPortion))
     )
+)
 
-ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/phoneme-recognition.png")
+ggplot2::ggplot(post_test_summary_by_type, ggplot2::aes(x=phonemeExposures, y=correctPortion, shape=phoneType, group=phoneType, color=phoneType)) +
+    ggplot2::geom_hline(yintercept=100/9, linetype='dashed', color='gray') +
+    ggplot2::geom_line() +
+    ggplot2::geom_point(size = 3) +
+    ggplot2::geom_errorbar(
+        ggplot2::aes(ymin=correctPortion-se, ymax=correctPortion+se),
+        width=500,
+    ) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::labs(
+        colour = "Phoneme Type",
+        shape = "Phoneme Type",
+#        x = "Phoneme Exposures"
+ #       y = "Percentage Correct",
+        title = "All Participants"
+    ) +
+    ggplot2::theme_classic(base_size=10) +
+    ggplot2::theme(legend.position="none", axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank())
+#    ggplot2::theme(legend.position = c(0.85, 0.85))
 
-# this was an attempt to plot all the people on a single graph, but still separate lines
-#ggplot2::ggplot(phoneSummary, ggplot2::aes(x = training, y = 100*correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
-#    ggplot2::geom_point(size = 3) +
-#    ggplot2::ylim(0, 100) +
-#    ggplot2::geom_smooth(method=lm) +
-#    ggplot2::labs(
-#        colour = "Phoneme Type",
-#        shape = "Phoneme Type",
-#        x = "Time",
-#        y = "Correct %"
-#    )
-#
+ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/phoneme-recognition.png", width=3, height=3)
+
+
+
+
+post_test_summary <- data.frame(
+    dplyr::summarise(
+        dplyr::group_by(post_test_only, phoneType, test_phone),
+        correctPortion = 100*mean(correct),
+        phonemeExposures = mean(phonemeExposures),
+        se = 100*sd(correct)/sqrt(length(correct))
+    )
+)
+
+ggplot2::ggplot(post_test_summary, ggplot2::aes(x=phonemeExposures, y=correctPortion, label=test_phone, color=phoneType)) +
+    ggplot2::geom_hline(yintercept=100/9, linetype='dashed', color='gray') +
+#    ggplot2::geom_line(ggplot2::aes(y=fitLine$fit), color='black') +
+#    ggplot2::geom_ribbon(ggplot2::aes(ymin=fitLine$lwr, ymax=fitLine$upr), alpha = .15, color='gray') +
+#    ggplot2::geom_point(show.legend = FALSE) +
+#    ggrepel::geom_text_repel(max.overlaps=Inf) +
+    ggplot2::geom_text(size=3) +
+    #ggplot2::ylim(min(fitLine$lwr), 100) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::labs(
+        colour = "Phoneme Type",
+#        x = "Phoneme Exposures",
+#        y = "Percentage Correct",
+        title = "All Participants"
+    ) +
+    ggplot2::theme_classic(base_size=10) +
+    ggplot2::theme(legend.position="none", axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank())
+
+ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/phoneme-recognition-by-phone.png", width=3, height=3)
+
+
+
+post_test_summary_by_pid <- data.frame(
+    dplyr::summarise(
+        dplyr::group_by(post_test_only, pid, phoneType, test_phone),
+        correctPortion = 100*mean(correct),
+        phonemeExposures = mean(phonemeExposures),
+        se = 100*sd(correct)/sqrt(length(correct))
+    )
+)
+
+ggplot2::ggplot(post_test_summary_by_pid, ggplot2::aes(x=phonemeExposures, y=correctPortion, label=test_phone, color=phoneType)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+    ggplot2::geom_hline(yintercept=100/9, linetype='dashed', color='gray') +
+#    ggplot2::geom_line(ggplot2::aes(y=fitLine$fit), color='black') +
+#    ggplot2::geom_ribbon(ggplot2::aes(ymin=fitLine$lwr, ymax=fitLine$upr), alpha = .15, color='gray') +
+#    ggplot2::geom_point(show.legend = FALSE) +
+    ggplot2::geom_text(size=3) +
+#    ggrepel::geom_text_repel(max.overlaps=Inf) +
+    #ggplot2::ylim(min(fitLine$lwr), 100) +
+    ggplot2::ylim(0, 100) +
+    ggplot2::labs(
+        colour = "Phoneme Type",
+        x = "Phoneme Exposures",
+        y = "Percentage Correct",
+        title = "Post-test Phoneme Identification"
+    ) +
+    ggplot2::theme_classic(base_size=10) +
+    ggplot2::theme(legend.position = c(0.85, 0.85))
+
+ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/phoneme-recognition-by-phone-by-pid.png", width=6, height=6)
+
+
+
 ```
 
 ## Model
 ```{r}
-phone_model <- function(formula) bin_lme(formula = formula, data = phoneDF)
+phone_model <- function(formula) bin_lme(formula = formula, data = post_test_only)
 
-phone_m0 <- phone_model(correct ~ 1 + (wordExposures|pid))
-phone_m1 <- phone_model(correct ~ wordExposures + (wordExposures|pid))
-phone_m2 <- phone_model(correct ~ wordExposures + phoneType + (wordExposures|pid))
-phone_m3 <- phone_model(correct ~ wordExposures*phoneType + (wordExposures|pid))
+phone_m0 <- phone_model(correct ~ 1 + (phonemeExposures|pid))
+phone_m1 <- phone_model(correct ~ phonemeExposures + (phonemeExposures|pid))
+phone_m2 <- phone_model(correct ~ phonemeExposures + phoneType + (phonemeExposures|pid))
 
 #plot(ggeffects::ggeffect(phone_m1, terms = c("training [0:50]"), type="re"))
 #plot(ggeffects::ggeffect(phone_m2, terms = c("training [0:50]", "phoneType"), type="re"))
 #plot(ggeffects::ggeffect(phone_m3, terms = c("training [0:50]", "phoneType"), type="re"))
 
-anova(phone_m0, phone_m1, phone_m2, phone_m3)
+anova(phone_m0, phone_m1, phone_m2)
 
 ```
 
@@ -319,11 +449,11 @@ prosodyDF <- tidyr::separate(data = prosodyDF, col = stimfile, into = "sentenceI
 prosodyDF$prosodyType <- as.factor(ifelse(substring(prosodyDF$stimfile, 1, 1) == "f", "Focus", "Phrase"))
 prosodyDF$stimfile <- as.factor(prosodyDF$stimfile)
 
-prosodyDF <- data.frame(dplyr::summarise(
-    dplyr::group_by(prosodyDF, pid, condition, sentenceID, prosodyType),
-    totalTrainStimExposuresForPID = mean(totalTrainStimExposuresForPID),
-    portionCorrect = mean(correct)
-))
+#prosodyDF <- data.frame(dplyr::summarise(
+#    dplyr::group_by(prosodyDF, pid, condition, sentenceID, prosodyType),
+#    trainingWordExposures = mean(trainingWordExposures),
+#    portionCorrect = mean(correct)
+#))
 
 focusDF <- dplyr::filter(prosodyDF, prosodyDF$prosodyType == "Focus")
 focusDF$sentenceID <- as.factor(focusDF$sentenceID)
@@ -333,13 +463,13 @@ phraseDF$sentenceID <- as.factor(phraseDF$sentenceID)
 
 prosodySummary <- dplyr::summarise(
     dplyr::group_by(prosodyDF, pid, prosodyType, condition),
-    correctPortion = 100*mean(portionCorrect),
-    se = 100*sd(portionCorrect)/sqrt(length(portionCorrect)),
-    totalTrainStimExposuresForPID = mean(totalTrainStimExposuresForPID)
+    correctPortion = 100*mean(correct),
+    se = 100*sd(correct)/sqrt(length(correct)),
+    trainingWordExposures = mean(trainingWordExposures)
 )
 
-ggplot2::ggplot(prosodySummary, ggplot2::aes(x=totalTrainStimExposuresForPID, y=correctPortion, shape=prosodyType, group=prosodyType, color=prosodyType)) +
-#    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+ggplot2::ggplot(prosodySummary, ggplot2::aes(x=trainingWordExposures, y=correctPortion, shape=prosodyType, group=prosodyType, color=prosodyType)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
     ggplot2::geom_hline(yintercept=50, linetype='dashed', color='gray') +
     ggplot2::geom_line() +
     ggplot2::geom_point(size=4) +
@@ -349,14 +479,15 @@ ggplot2::ggplot(prosodySummary, ggplot2::aes(x=totalTrainStimExposuresForPID, y=
     ) +
     ggplot2::ylim(0, 100) +
     ggplot2::labs(
-        colour = "Feature",
-        shape = "Feature",
-        x = "Word Exposures",
+        colour = "",
+        shape = "",
+        x = "Training Word Exposures",
         y = "Percentage Correct",
         title = "Prosody Perception"
     ) +
     ggplot2::theme_classic(base_size=10) +
-    ggplot2::theme(legend.position = c(0.85, 0.85))
+    #ggplot2::theme(legend.position = "top")
+    ggplot2::theme(legend.position = c(0.5, 0.065), legend.direction = "horizontal")
 
 ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/prosody-perception.png", width=6, height=6)
 
@@ -365,18 +496,18 @@ ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/prosody-perception.png
 
 ## Focus - Model & Test
 ```{r}
-#focus_model <- function(formula) bin_lme(formula = formula, data = focusDF)
+focus_model <- function(formula) bin_lme(formula = formula, data = focusDF)
 #
-#focus_m0 = focus_model(correct ~ 1 + (totalTrainStimExposuresForPID | pid))
-#focus_m1 = focus_model(correct ~ totalTrainStimExposuresForPID + (totalTrainStimExposuresForPID | pid))
-#focus_m2 = focus_model(correct ~ totalTrainStimExposuresForPID + (totalTrainStimExposuresForPID | pid) + (1 | sentenceID))
+focus_m0 = focus_model(correct ~ 1 + (trainingWordExposures | pid))
+focus_m1 = focus_model(correct ~ trainingWordExposures + (trainingWordExposures | pid))
+focus_m2 = focus_model(correct ~ trainingWordExposures + (trainingWordExposures | pid) + (1 | sentenceID))
 
-focus_model <- function(formula) lme(formula = formula, data = focusDF)
-lme4::lmer(portionCorrect ~ 1 + (totalTrainStimExposuresForPID|pid), data = focusDF)
+#focus_model <- function(formula) lme(formula = formula, data = focusDF)
+#lme4::lmer(portionCorrect ~ 1 + (trainingWordExposures|pid), data = focusDF)
 #
-#focus_m0 = focus_model(correct ~ 1 + (totalTrainStimExposuresForPID | pid))
-#focus_m1 = focus_model(correct ~ totalTrainStimExposuresForPID + (totalTrainStimExposuresForPID | pid))
-#focus_m2 = focus_model(correct ~ totalTrainStimExposuresForPID + (totalTrainStimExposuresForPID | pid) + (1 | sentenceID))
+#focus_m0 = focus_model(correct ~ 1 + (trainingWordExposures | pid))
+#focus_m1 = focus_model(correct ~ trainingWordExposures + (trainingWordExposures | pid))
+#focus_m2 = focus_model(correct ~ trainingWordExposures + (trainingWordExposures | pid) + (1 | sentenceID))
 
 
 anova(focus_m0, focus_m1, focus_m2)
@@ -387,9 +518,9 @@ anova(focus_m0, focus_m1, focus_m2)
 ```{r}
 phrase_model <- function(formula) bin_lme(formula = formula, data = phraseDF)
 
-phrase_m0 <- phrase_model(correct ~ 1 + (training | pid))
-phrase_m1 <- phrase_model(correct ~ training + (training | pid))
-phrase_m2 <- phrase_model(correct ~ training + (training | pid) + (1 | sentenceID))
+phrase_m0 <- phrase_model(correct ~ 1 + (trainingWordExposures | pid))
+phrase_m1 <- phrase_model(correct ~ trainingWordExposures + (trainingWordExposures | pid))
+phrase_m2 <- phrase_model(correct ~ trainingWordExposures + (trainingWordExposures | pid) + (1 | sentenceID))
 
 anova(phrase_m0, phrase_m1, phrase_m2)
 
@@ -416,11 +547,11 @@ integrationSummary <- dplyr::summarise(
     dplyr::group_by(integrationDF, pid, condition),
     correctPortion = 100*mean(integrated),
     se = 100*sd(integrated)/sqrt(length(integrated)),
-    totalTrainStimExposuresForPID = mean(totalTrainStimExposuresForPID),
+    trainingWordExposures = mean(trainingWordExposures),
 )
 
-ggplot2::ggplot(integrationSummary, ggplot2::aes(x=totalTrainStimExposuresForPID, y=correctPortion)) +
-#    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+ggplot2::ggplot(integrationSummary, ggplot2::aes(x=trainingWordExposures, y=correctPortion)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
     ggplot2::geom_hline(yintercept=0, linetype='dashed', color='gray') +
     ggplot2::geom_line() +
     ggplot2::geom_point(size=4) +
@@ -431,21 +562,21 @@ ggplot2::ggplot(integrationSummary, ggplot2::aes(x=totalTrainStimExposuresForPID
     ggplot2::ylim(0, 100) +
     ggplot2::labs(
         title = "Perceptual Integration",
-        x = "Word Exposures",
+        x = "Training Word Exposures",
         y = "Percentage Integrated"
     ) +
     ggplot2::theme_classic(base_size=10)
 
-ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/integration-good-speakers.png", width=6, height=6)
+ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/integration.png", width=6, height=6)
 ```
 
 ## Model & Test
 ```{r}
 integration_model <- function(formula) bin_lme(formula = formula, data = integrationDF)
 
-integration_m0 <- integration_model(integrated ~ 1 + (training | pid))
-integration_m1 <- integration_model(integrated ~ training + (training | pid))
-integration_m2 <- integration_model(integrated ~ training + (training | pid) + (1 | stimulus))
+integration_m0 <- integration_model(integrated ~ 1 + (trainingWordExposures | pid))
+integration_m1 <- integration_model(integrated ~ trainingWordExposures + (trainingWordExposures | pid))
+integration_m2 <- integration_model(integrated ~ trainingWordExposures + (trainingWordExposures | pid) + (1 | stimulus))
 
 anova(integration_m0, integration_m1, integration_m2)
 
@@ -462,8 +593,8 @@ anova(integration_m0, integration_m1, integration_m2)
 # PILOT DATA - phonemes
 ```{r}
 
-# checkout out roz's pilot data
-# maybe she did better on the ones she had the most exposure to?
+# checkout out pilot data
+# maybe the pilot did better on phones that had the most exposure?
 phoneDF <- load_files("_phonemes_")
 #test_df <- merge(phoneDF, phoneWordsTable, by.x='stimulus', by.y='word', keep.x=TRUE)
 test_df <- merge(phoneDF, phone_translate, by.x='stimulus', by.y='test_word', keep.x=TRUE)
@@ -481,28 +612,28 @@ post_test_only <- dplyr::filter(test_df, condition == 'Post-test')
 ```{r}
 exposure_counts_by_phoneType <- data.frame(
     dplyr::summarise(
-        dplyr::group_by(test_df, pid, condition, test_phone, phone_type),
+        dplyr::group_by(test_df, pid, condition, test_phone, phoneType),
         phonemeExposures = mean(phonemeExposures),
     )
 )
 exposure_counts_by_phoneType <- data.frame(
     dplyr::summarise(
-        dplyr::group_by(exposure_counts_by_phoneType, pid, phone_type, condition),
+        dplyr::group_by(exposure_counts_by_phoneType, pid, phoneType, condition),
         phonemeExposures = sum(phonemeExposures),
     )
 )
 
 test_summary <- data.frame(
     dplyr::summarise(
-        dplyr::group_by(test_df, condition, pid, phone_type),
+        dplyr::group_by(test_df, condition, pid, phoneType),
         correctPortion = 100*mean(correct),
         se = 100*sd(correct)/sqrt(length(correct))
     )
 )
-test_summary <- merge(test_summary, exposure_counts_by_phoneType, by=c('condition', 'pid', 'phone_type'))
+test_summary <- merge(test_summary, exposure_counts_by_phoneType, by=c('condition', 'pid', 'phoneType'))
 
-ggplot2::ggplot(test_summary, ggplot2::aes(x=phonemeExposures, y=correctPortion, shape=phone_type, group=phone_type, color=phone_type)) +
-#    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+ggplot2::ggplot(test_summary, ggplot2::aes(x=phonemeExposures, y=correctPortion, shape=phoneType, group=phoneType, color=phoneType)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
     ggplot2::geom_hline(yintercept=100/9, linetype='dashed', color='gray') +
     ggplot2::geom_line() +
     ggplot2::geom_point(size = 3) +
@@ -528,12 +659,13 @@ ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/phoneme-recognition.pn
 ### Post-test only phoneme performance
 ```{r}
 
-pilot_phone_gm0 <- glm(correct ~ phonemeExposures, data=post_test_only, family='binomial')
+#pilot_phone_gm0 <- glm(correct ~ phonemeExposures, data=post_test_only, family='binomial')
+pilot_phone_gm0 <- glm(correct ~ phonemeExposures + pid, data=post_test_only, family='binomial')
 summary(pilot_phone_gm0)
 
 test_summary <- data.frame(
     dplyr::summarise(
-        dplyr::group_by(post_test_only, pid, phone_type, test_phone),
+        dplyr::group_by(post_test_only, pid, phoneType, test_phone),
         correctPortion = 100*mean(correct),
         phonemeExposures = mean(phonemeExposures),
         se = 100*sd(correct)/sqrt(length(correct))
@@ -541,18 +673,19 @@ test_summary <- data.frame(
 )
 pilot_phone_m0 <- lm(correctPortion ~ phonemeExposures, data=test_summary)
 summary(pilot_phone_m0)
-pilot_phone_m1 <- lm(correctPortion ~ phonemeExposures + phone_type, data=test_summary)
+pilot_phone_m1 <- lm(correctPortion ~ phonemeExposures + phoneType, data=test_summary)
 summary(pilot_phone_m1)
 
 #test_summary_plot_data <- data.frame(dplyr::summarise(
-#    dplyr::group_by(test_summary, correctPortion, phonemeExposures, phone_type),
+#    dplyr::group_by(test_summary, correctPortion, phonemeExposures, phoneType),
 #    test_phone = paste(test_phone, collapse=","),
 #    overlaps = dplyr::n()
 #))
 
 fitLine <- data.frame(predict(pilot_phone_m0, test_summary, interval='confidence'))
 
-ggplot2::ggplot(test_summary, ggplot2::aes(x=phonemeExposures, y=correctPortion, label=test_phone, color=phone_type)) +
+ggplot2::ggplot(test_summary, ggplot2::aes(x=phonemeExposures, y=correctPortion, label=test_phone, color=phoneType)) +
+    ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
     ggplot2::geom_hline(yintercept=100/9, linetype='dashed', color='gray') +
     ggplot2::geom_line(ggplot2::aes(y=fitLine$fit), color='black') +
     ggplot2::geom_ribbon(ggplot2::aes(ymin=fitLine$lwr, ymax=fitLine$upr), alpha = .15, color='gray') +
@@ -563,7 +696,7 @@ ggplot2::ggplot(test_summary, ggplot2::aes(x=phonemeExposures, y=correctPortion,
         colour = "Phoneme Type",
         x = "Phoneme Exposures",
         y = "Percentage Correct",
-        title = "Phoneme Identification - Training vs Performance (post-test only)"
+        title = "Post-test Phoneme Identification"
     ) +
     ggplot2::theme_classic(base_size=10) +
     ggplot2::theme(legend.position = c(0.85, 0.85))
@@ -582,12 +715,12 @@ ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/post-test-phoneme-resu
 ### Training vs pre-test data
 ```{r}
 
-pilot_phone_gm0p <- glm(correct ~ phonemeExposures + phone_type, data=pre_test_only, family='binomial')
+pilot_phone_gm0p <- glm(correct ~ phonemeExposures + phoneType, data=pre_test_only, family='binomial')
 summary(pilot_phone_gm0p)
 
 test_summary <- data.frame(
     dplyr::summarise(
-        dplyr::group_by(pre_test_only, pid, phone_type, test_phone),
+        dplyr::group_by(pre_test_only, pid, phoneType, test_phone),
         correctPortion = 100*mean(correct),
         phonemeExposures = mean(phonemeExposures),
         se = 100*sd(correct)/sqrt(length(correct))
@@ -597,14 +730,14 @@ test_summary <- data.frame(
 pilot_phone_m0p <- lm(correctPortion ~ phonemeExposures, data=test_summary)
 
 test_summary_plot_data <- data.frame(dplyr::summarise(
-    dplyr::group_by(test_summary, correctPortion, phonemeExposures, phone_type),
+    dplyr::group_by(test_summary, correctPortion, phonemeExposures, phoneType),
     test_phone = paste(test_phone, collapse=","),
     overlaps = dplyr::n()
 ))
 
 fitLine <- data.frame(predict(pilot_phone_m0p, test_summary_plot_data, interval='confidence'))
 
-ggplot2::ggplot(test_summary_plot_data, ggplot2::aes(x=phonemeExposures, y=correctPortion, label=test_phone, color=phone_type)) +
+ggplot2::ggplot(test_summary_plot_data, ggplot2::aes(x=phonemeExposures, y=correctPortion, label=test_phone, color=phoneType)) +
     ggplot2::geom_hline(yintercept=100/9, linetype='dashed', color='gray') +
     ggplot2::geom_line(ggplot2::aes(y=fitLine$fit), color='black') +
     ggplot2::geom_ribbon(ggplot2::aes(ymin=fitLine$lwr, ymax=fitLine$upr), alpha = .15, color='gray') +
@@ -637,13 +770,13 @@ ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/pre-test-phoneme-resul
 ```{r}
 test_summary <- data.frame(
     dplyr::summarise(
-        dplyr::group_by(test_df, test_phone, phone_type, condition),
+        dplyr::group_by(test_df, test_phone, phoneType, condition),
         correctPortion = 100*mean(correct),
         phonemeExposures = mean(phonemeExposures)
     )
 )
 test_summary_plot_data <- data.frame(dplyr::summarise(
-    dplyr::group_by(test_summary, correctPortion, phonemeExposures, test_phone, phone_type, condition),
+    dplyr::group_by(test_summary, correctPortion, phonemeExposures, test_phone, phoneType, condition),
     overlaps = dplyr::n()
 ))
 ggplot2::ggplot(test_summary_plot_data, ggplot2::aes(x=phonemeExposures, y=correctPortion)) +
@@ -672,10 +805,10 @@ ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/phone-id-by-exposure_p
 
 # Post-test prosody
 ```{r}
-focus_m0 = lm(portionCorrect ~ totalTrainStimExposuresForPID, data=focusDF)
+focus_m0 = lm(portionCorrect ~ trainingWordExposures, data=focusDF)
 summary(focus_m0)
 
-phrase_m0 = lm(portionCorrect ~ totalTrainStimExposuresForPID, data=phraseDF)
+phrase_m0 = lm(portionCorrect ~ trainingWordExposures, data=phraseDF)
 summary(phrase_m0)
 
 
@@ -794,7 +927,7 @@ ggplot2::ggplot(phone_distribution_delta, ggplot2::aes(x=phoneme, y=diff, fill=a
 
 ggplot2::ggsave(plot=ggplot2::last_plot(), file="../plots/phone_distribution_delta.png", width=20, height=4)
 
-write.csv(phone_distribution_delta, 'phone_distribution_delta.csv')
+write.csv(phone_distribution_delta, 'output/phone_distribution_delta.csv')
 ```
 
 BUT that's all using a linear model that collapses each participants 10 trials per phoneme into 1 datum

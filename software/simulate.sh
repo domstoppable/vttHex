@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CONDITIONS=( "Pre-test" "Post-test")
-PARTICIPANTS=( "000" "001" "002" "003" "004" "005" )
+PARTICIPANTS=( "8000" "8001" "8002" "8003" "8004" "8005" )
 TESTS=( "phonemes" "integration" "prosody")
 
 for CONDITION in "${CONDITIONS[@]}"; do

@@ -1,0 +1,39 @@
+test_phone,train_phone,test_word,phone_type,phone_example,Arpabet,IPA
+AE,AE,hAd,Vowel,at,AE,æ
+AH,AO,hOd,Vowel,ought,AA ,ɑ
+AW,AA,hAWEd,Vowel,odd,AO ,ɔ
+B,B,aBa,Consonant,be,B,b
+CH,CH,aCHa,Consonant,cheese,CH,tʃ
+D,D,aDa,Consonant,dee,D,d
+DH,TH,aTHa,Consonant,thee,DH,ð
+EH,EH,hEAd,Vowel,Ed,EH ,ɛ
+EI,EY,hAYEd,Vowel,ate,EY,eɪ
+ER,ER,hERd,Vowel,hurt,ER ,ɝ
+F,F,aFa,Consonant,fee,F,f
+G,G,aGa,Consonant,green,G,ɡ
+IH,IH,hId,Vowel,it,IH ,ɪ
+IY,IY,hEEd,Vowel,eat,IY ,i
+J,JH,aJa,Consonant,gee,JH,dʒ
+K,K,aKa,Consonant,key,K,k
+L,L,aLa,Consonant,lee,L,l
+M,M,aMa,Consonant,me,M,m
+N,N,aNa,Consonant,knee,N,n
+OA,OW,hOEd,Vowel,oat,AO ,ɔ
+OO,UH,hOOd,Vowel,hood,UH ,ʊ
+P,P,aPa,Consonant,pee,P,p
+R,R,aRa,Consonant,read,R,ɹ
+S,S,aSa,Consonant,sea,S,s
+SH,SH,aSHa,Consonant,she,SH,ʃ
+T,T,aTa,Consonant,tea,T,t
+UH,AH,hUd,Vowel,hut,AH,ʌ
+UW,UW,whO'd,Vowel,two,UW ,u
+V,V,aVa,Consonant,vee,V,v
+W,W,aWa,Consonant,we,W,w
+Y,Y,aYa,Consonant,yield,Y,j
+Z,Z,aZa,Consonant,zee,Z,z
+,HH,,Consonant,he,HH,h
+,NG,,Consonant,ping,NG,ŋ
+,ZH,,Consonant,seizure,ZH,ʒ
+,AW,,Vowel,cow,AW,aʊ
+,AY,,Vowel,hide,AY,aɪ
+,OY,,Vowel,toy,OY,ɔɪ
