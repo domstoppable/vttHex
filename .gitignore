@@ -148,5 +148,9 @@ software/vttHex/assets/MBOPP/audio/
 
 # Gerbers
 hardware/*/output/
-software/data
+software/analysis-output
 software/vtEval/data
+software/results-analysis.html
+software/data
+software/vtEval/assets/participants.csv
+firmware/src/WIFI_Credentials.h
