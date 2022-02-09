@@ -12,6 +12,7 @@ R code for processing vibey-transcribey data
 
     # Load helper funcs and dataframes and set directory
     phone_translate <- read.csv("aux-data/phoneme-translate.csv")
+    phone_translate$phone_type <- as.factor(phone_translate$phone_type)
     training_lexicon <- read.csv("aux-data/training-lexicon.csv")
 
     load_eval_files <- function(file_pattern, create_correct_column = TRUE) {
@@ -47,7 +48,7 @@ R code for processing vibey-transcribey data
 
     merge_eval_files_with_training <- function(eval_df, train_df) {
         df <- merge(eval_df, train_df, key = "pid", all.x = TRUE)
-        df$trainingWordExposures <- ifelse(df$condition == "Pre-test", 0, df$trainingWordExposures)
+        df$training_word_exposures <- ifelse(df$condition == "Pre-test", 0, df$training_word_exposures)
 
         return(df)
     }
@@ -99,44 +100,44 @@ R code for processing vibey-transcribey data
 
     # Compute training session idx's
     # we consider a gap of 1 hour or more to count as a new training session
-    training_data$trainingSessionInc <- ifelse(training_data$timedelta == Inf, 0, as.integer(training_data$timedelta > 3600))
-    training_data$trainingSessionIdx <- cumsum(training_data$trainingSessionInc)
+    training_data$training_session_inc <- ifelse(training_data$timedelta == Inf, 0, as.integer(training_data$timedelta > 3600))
+    training_data$training_session_idx <- cumsum(training_data$training_session_inc)
 
-    tmp_firstDay <- data.frame(dplyr::summarise(
+    tmp_first_day <- data.frame(dplyr::summarise(
         dplyr::group_by(training_data, PID),
-        firstDay = min(trainingSessionIdx)
+        firstDay = min(training_session_idx)
     ))
 
-    training_data <- dplyr::left_join(training_data, tmp_firstDay, c("PID"))
-    training_data$trainingSessionIdx <- training_data$trainingSessionIdx - training_data$firstDay
+    training_data <- dplyr::left_join(training_data, tmp_first_day, c("PID"))
+    training_data$training_session_idx <- training_data$training_session_idx - training_data$firstDay
 
     # Compute level attempt idx's
-    training_data$levelAttemptIdx <- ifelse(
-        is.na(lag(training_data$trainingSessionIdx)) | training_data$PID != lag(training_data$PID) | is.na(dplyr::lag(training_data$LevelAttemptGuid)),
+    training_data$level_attempt_idx <- ifelse(
+        is.na(lag(training_data$training_session_idx)) | training_data$PID != lag(training_data$PID) | is.na(dplyr::lag(training_data$LevelAttemptGuid)),
         1,
         training_data$LevelAttemptGuid != dplyr::lag(training_data$LevelAttemptGuid)
     )
-    training_data$levelAttemptIdx <- cumsum(training_data$levelAttemptIdx)
+    training_data$level_attempt_idx <- cumsum(training_data$level_attempt_idx)
 
     # trunc file extension from stimulus column
-    training_data$Stimulus <- sub("\\..*", "", training_data$Stimulus)
+    training_data$stimulus <- sub("\\..*", "", training_data$Stimulus)
 
     # parse speaker/phrase from stimulus filename
-    stimuli_info <- data.frame(do.call("rbind", strsplit(training_data$Stimulus, "-")))
+    stimuli_info <- data.frame(do.call("rbind", strsplit(training_data$stimulus, "-")))
     training_data$speaker <- stimuli_info$X1
     training_data$phrase <- stimuli_info$X2
 
     # configure data types
     training_data <- within(training_data, {
         pid <- as.factor(PID)
-        stimulus <- as.factor(Stimulus)
+        stimulus <- as.factor(stimulus)
         speaker <- as.factor(speaker)
     })
     training_data <- merge(training_data, training_lexicon, by = "stimulus", all.x = TRUE)
     training_data <- training_data[order(training_data$pid, training_data$Timestamp), ]
 
     # clear unneeded columns
-    training_data <- subset(training_data, select = c(Timestamp, datetime, pid, stimulus, Ok, speaker, phrase.y, trainingSessionIdx, levelAttemptIdx, LevelAttemptGuid))
+    training_data <- subset(training_data, select = c(Timestamp, datetime, pid, stimulus, Ok, speaker, phrase.y, training_session_idx, level_attempt_idx, LevelAttemptGuid))
     training_data <- dplyr::rename(training_data, phrase = phrase.y)
 
     # Count exposures by VTT file
@@ -156,9 +157,9 @@ R code for processing vibey-transcribey data
     write.csv(exposure_counts_by_phrase, "analysis-output/exposure_counts_by_phrase.csv")
 
     # Count how many total words each participant received
-    trainWord_exposure_counts_by_pid <- data.frame(dplyr::summarise(
+    traing_word_exposures <- data.frame(dplyr::summarise(
         dplyr::group_by(training_data, pid),
-        trainingWordExposures = sum(Ok)
+        training_word_exposures = sum(Ok)
     ))
 
     # Given how many of which stimuli each participant was exposed to,
@@ -187,10 +188,10 @@ R code for processing vibey-transcribey data
     exposure_counts_by_phoneme <- dplyr::mutate(exposure_counts_by_phoneme, across(AA:ZH, ~ .x * stimulusExposures))
     write.csv(exposure_counts_by_phoneme, "analysis-output/exposure_counts_by_phoneme_0.csv")
 
-    p_exposures <- tidyr::gather(exposure_counts_by_phoneme, phoneme, phonemeExposures, AA:ZH)
+    p_exposures <- tidyr::gather(exposure_counts_by_phoneme, phoneme, phoneme_exposures, AA:ZH)
     p_exposures <- data.frame(dplyr::summarise(
         dplyr::group_by(p_exposures, pid, phoneme),
-        phonemeExposures = sum(phonemeExposures)
+        phoneme_exposures = sum(phoneme_exposures)
     ))
 
     write.csv(p_exposures, "analysis-output/exposure_counts_by_phoneme.csv")
@@ -199,7 +200,7 @@ R code for processing vibey-transcribey data
     rm(idx)
     rm(tmp_df)
     rm(training_files)
-    rm(tmp_firstDay)
+    rm(tmp_first_day)
     rm(stimuli_info)
     rm(exposure_counts_by_stimulus)
     rm(words_not_in_lexicon)
@@ -210,7 +211,7 @@ R code for processing vibey-transcribey data
 ## Training Reports
 ```{r create-training-reports, echo = FALSE}
     training_day_summary <- data.frame(dplyr::summarise(
-        dplyr::group_by(training_data, pid, trainingSessionIdx),
+        dplyr::group_by(training_data, pid, training_session_idx),
         startTime = min(datetime),
         stopTime = max(datetime),
         phraseStimCount = sum(Ok),
@@ -231,13 +232,13 @@ R code for processing vibey-transcribey data
 
     total_p_exposures_by_pid <- data.frame(dplyr::summarise(
         dplyr::group_by(p_exposures, pid),
-        totalPhonemeExposures = sum(phonemeExposures),
-        meanPhonemeExposures = mean(phonemeExposures),
-        stdevPhonemeExposures = sd(phonemeExposures)
+        totalPhonemeExposures = sum(phoneme_exposures),
+        meanPhonemeExposures = mean(phoneme_exposures),
+        stdevPhonemeExposures = sd(phoneme_exposures)
     ))
 
     untrained_phones <- data.frame(dplyr::summarise(
-        dplyr::group_by(dplyr::filter(p_exposures, phonemeExposures == 0), pid),
+        dplyr::group_by(dplyr::filter(p_exposures, phoneme_exposures == 0), pid),
         untrainedPhones = paste(phoneme, collapse = "|")
     ))
 
@@ -245,7 +246,7 @@ R code for processing vibey-transcribey data
         dplyr::group_by(training_data, pid),
         firstDay = min(datetime),
         lastDay = max(datetime),
-        uniqueSessions = max(trainingSessionIdx),
+        uniqueSessions = max(training_session_idx),
         dateRange = as.integer(max(datetime) - min(datetime)),
         totalPhraseStimExposures = sum(Ok)
     ))
@@ -262,7 +263,7 @@ R code for processing vibey-transcribey data
 
     training_report <- merge(training_report, level_attempts_by_pid, by = "pid", keep.x = TRUE)
     training_report <- merge(training_report, training_day_summary_by_pid, by = "pid", keep.x = TRUE)
-    training_report$levelAttemptsPerSession <- training_report$levelAttempts / training_report$uniqueSessions
+    training_report$level_attempts_per_session <- training_report$levelAttempts / training_report$uniqueSessions
     training_report <- merge(training_report, total_p_exposures_by_pid, by = "pid", keep.x = TRUE)
     training_report <- merge(training_report, untrained_phones, by = "pid", keep.x = TRUE)
     training_report <- merge(training_report, uniq_phrases, by = "pid", keep.x = TRUE)
@@ -282,63 +283,61 @@ R code for processing vibey-transcribey data
 # PHONEMES
 ## Load data
 ```{r load-phoneme-data, echo = FALSE}
-    phoneDF <- load_eval_files("_phonemes_")
-    phoneDF <- merge_eval_files_with_training(phoneDF, trainWord_exposure_counts_by_pid)
+    phone_df <- load_eval_files("_phonemes_")
+    phone_df <- merge_eval_files_with_training(phone_df, traing_word_exposures)
 
-    phoneDF <- within(phoneDF, {
-        phoneType <- as.factor(ifelse(substring(stimulus, 1, 1) == "a", "Consonant", "Vowel"))
-        speakerGender <- as.factor(toupper(substring(stimfile, 1, 1)))
+    phone_df <- within(phone_df, {
+        speaker_gender <- as.factor(toupper(substring(stimfile, 1, 1)))
         stimfile <- as.factor(stimfile)
     })
 
     # Manually check ratios
-    summary(phoneDF$correct)
-    table(phoneDF$pid, phoneDF$correct, phoneDF$condition)
-    table(phoneDF$pid, phoneDF$correct)
-    table(phoneDF$phoneType, phoneDF$correct)
-    table(phoneDF$condition, phoneDF$correct)
+    summary(phone_df$correct)
+    table(phone_df$pid, phone_df$correct, phone_df$condition)
+    table(phone_df$pid, phone_df$correct)
+    table(phone_df$condition, phone_df$correct)
 ```
 
 ## Explore and visualize 📈
 ```{r plot-phoneme-data, echo = FALSE}
-    phoneDF_with_phoneExposures <- merge(
-        phoneDF, phone_translate,
+    phone_df_with_phone_exposures <- merge(
+        phone_df, phone_translate,
         by.x = "stimulus", by.y = "test_word",
         keep.x = TRUE
     )
-    phoneDF_with_phoneExposures <- dplyr::left_join(phoneDF_with_phoneExposures, p_exposures, c("train_phone" = "phoneme", "pid"))
+    phone_df_with_phone_exposures <- dplyr::left_join(phone_df_with_phone_exposures, p_exposures, c("train_phone" = "phoneme", "pid"))
 
-    pre_test_only <- dplyr::filter(phoneDF_with_phoneExposures, condition == "Pre-test")
+    pre_test_only <- dplyr::filter(phone_df_with_phone_exposures, condition == "Pre-test")
 
-    phoneDF_with_phoneExposures$phonemeExposures <- ifelse(phoneDF_with_phoneExposures$condition == "Pre-test", 0, phoneDF_with_phoneExposures$phonemeExposures)
+    phone_df_with_phone_exposures$phoneme_exposures <- ifelse(phone_df_with_phone_exposures$condition == "Pre-test", 0, phone_df_with_phone_exposures$phoneme_exposures)
 
-    post_test_only <- dplyr::filter(phoneDF_with_phoneExposures, condition == "Post-test")
+    post_test_only <- dplyr::filter(phone_df_with_phone_exposures, condition == "Post-test")
 
-    exposure_counts_by_phoneType <- data.frame(
+    exposure_counts_by_phone_type <- data.frame(
         dplyr::summarise(
-            dplyr::group_by(phoneDF_with_phoneExposures, pid, condition, test_phone, phoneType),
-            phonemeExposures = mean(phonemeExposures),
+            dplyr::group_by(phone_df_with_phone_exposures, pid, condition, test_phone, phone_type),
+            phoneme_exposures = mean(phoneme_exposures),
         )
     )
 
-    exposure_counts_by_phoneType <- data.frame(
+    exposure_counts_by_phone_type <- data.frame(
         dplyr::summarise(
-            dplyr::group_by(exposure_counts_by_phoneType, pid, phoneType, condition),
-            phonemeExposures = sum(phonemeExposures),
+            dplyr::group_by(exposure_counts_by_phone_type, pid, phone_type, condition),
+            phoneme_exposures = sum(phoneme_exposures),
         )
     )
 
     test_summary <- data.frame(
         dplyr::summarise(
-            dplyr::group_by(phoneDF_with_phoneExposures, condition, pid, phoneType),
+            dplyr::group_by(phone_df_with_phone_exposures, condition, pid, phone_type),
             correctPortion = 100 * mean(correct),
             se = 100 * sd(correct) / sqrt(length(correct))
         )
     )
 
-    phone_summary_by_type_and_pid <- merge(test_summary, exposure_counts_by_phoneType, by = c("condition", "pid", "phoneType"))
+    phone_summary_by_type_and_pid <- merge(test_summary, exposure_counts_by_phone_type, by = c("condition", "pid", "phone_type"))
 
-    ggplot2::ggplot(phone_summary_by_type_and_pid, ggplot2::aes(x = phonemeExposures, y = correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
+    ggplot2::ggplot(phone_summary_by_type_and_pid, ggplot2::aes(x = phoneme_exposures, y = correctPortion, shape = phone_type, group = phone_type, color = phone_type)) +
         ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
         ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
         ggplot2::geom_line() +
@@ -366,14 +365,14 @@ R code for processing vibey-transcribey data
 
     post_test_summary_by_type <- data.frame(
         dplyr::summarise(
-            dplyr::group_by(phone_summary_by_type_and_pid, phoneType, condition),
+            dplyr::group_by(phone_summary_by_type_and_pid, phone_type, condition),
             correctPortion = mean(correctPortion),
-            phonemeExposures = mean(phonemeExposures),
+            phoneme_exposures = mean(phoneme_exposures),
             se = sd(correctPortion) / sqrt(length(correctPortion))
         )
     )
 
-    ggplot2::ggplot(post_test_summary_by_type, ggplot2::aes(x = phonemeExposures, y = correctPortion, shape = phoneType, group = phoneType, color = phoneType)) +
+    ggplot2::ggplot(post_test_summary_by_type, ggplot2::aes(x = phoneme_exposures, y = correctPortion, shape = phone_type, group = phone_type, color = phone_type)) +
         ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
         ggplot2::geom_line() +
         ggplot2::geom_point(size = 3) +
@@ -401,14 +400,14 @@ R code for processing vibey-transcribey data
 
     post_test_summary <- data.frame(
         dplyr::summarise(
-            dplyr::group_by(post_test_only, phoneType, test_phone),
+            dplyr::group_by(post_test_only, phone_type, test_phone),
             correctPortion = 100 * mean(correct),
-            phonemeExposures = mean(phonemeExposures),
+            phoneme_exposures = mean(phoneme_exposures),
             se = 100 * sd(correct) / sqrt(length(correct))
         )
     )
 
-    ggplot2::ggplot(post_test_summary, ggplot2::aes(x = phonemeExposures, y = correctPortion, label = test_phone, color = phoneType)) +
+    ggplot2::ggplot(post_test_summary, ggplot2::aes(x = phoneme_exposures, y = correctPortion, label = test_phone, color = phone_type)) +
         ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
     #    ggplot2::geom_line(ggplot2::aes(y = fitLine$fit), color = 'black') +
     #    ggplot2::geom_ribbon(ggplot2::aes(ymin = fitLine$lwr, ymax = fitLine$upr), alpha = .15, color = 'gray') +
@@ -434,14 +433,14 @@ R code for processing vibey-transcribey data
 
     post_test_summary_by_pid <- data.frame(
         dplyr::summarise(
-            dplyr::group_by(post_test_only, pid, phoneType, test_phone),
+            dplyr::group_by(post_test_only, pid, phone_type, test_phone),
             correctPortion = 100 * mean(correct),
-            phonemeExposures = mean(phonemeExposures),
+            phoneme_exposures = mean(phoneme_exposures),
             se = 100 * sd(correct) / sqrt(length(correct))
         )
     )
 
-    ggplot2::ggplot(post_test_summary_by_pid, ggplot2::aes(x = phonemeExposures, y = correctPortion, label = test_phone, color = phoneType)) +
+    ggplot2::ggplot(post_test_summary_by_pid, ggplot2::aes(x = phoneme_exposures, y = correctPortion, label = test_phone, color = phone_type)) +
         ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
         ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
     #    ggplot2::geom_line(ggplot2::aes(y = fitLine$fit), color = 'black') +
@@ -471,13 +470,13 @@ R code for processing vibey-transcribey data
 ```{r model-phoneme-data, echo = FALSE}
     phone_model <- function(formula) bin_lme(formula = formula, data = post_test_only)
 
-    phone_m0 <- phone_model(correct ~ 1 + (phonemeExposures | pid))
-    phone_m1 <- phone_model(correct ~ phonemeExposures + (phonemeExposures | pid))
-    phone_m2 <- phone_model(correct ~ phonemeExposures + phoneType + (phonemeExposures | pid))
+    phone_m0 <- phone_model(correct ~ 1 + (phoneme_exposures | pid))
+    phone_m1 <- phone_model(correct ~ phoneme_exposures + (phoneme_exposures | pid))
+    phone_m2 <- phone_model(correct ~ phoneme_exposures + phone_type + (phoneme_exposures | pid))
 
     #plot(ggeffects::ggeffect(phone_m1, terms = c("training [0:50]"), type = "re"))
-    #plot(ggeffects::ggeffect(phone_m2, terms = c("training [0:50]", "phoneType"), type = "re"))
-    #plot(ggeffects::ggeffect(phone_m3, terms = c("training [0:50]", "phoneType"), type = "re"))
+    #plot(ggeffects::ggeffect(phone_m2, terms = c("training [0:50]", "phone_type"), type = "re"))
+    #plot(ggeffects::ggeffect(phone_m3, terms = c("training [0:50]", "phone_type"), type = "re"))
 
     anova(phone_m0, phone_m1, phone_m2)
 ```
@@ -485,36 +484,36 @@ R code for processing vibey-transcribey data
 # Prosody
 ## Load Data
 ```{r load-prosody-data, echo = FALSE}
-    prosodyDF <- load_eval_files("_prosody_")
-    prosodyDF <- merge_eval_files_with_training(prosodyDF, trainWord_exposure_counts_by_pid)
+    prosody_df <- load_eval_files("_prosody_")
+    prosody_df <- merge_eval_files_with_training(prosody_df, traing_word_exposures)
 
-    prosodyDF <- tidyr::separate(data = prosodyDF, col = stimfile, into = "sentenceID", sep = "_", extra = "drop", remove = FALSE)
-    prosodyDF$prosodyType <- as.factor(ifelse(substring(prosodyDF$stimfile, 1, 1) == "f", "Focus", "Phrase"))
-    prosodyDF$stimfile <- as.factor(prosodyDF$stimfile)
+    prosody_df <- tidyr::separate(data = prosody_df, col = stimfile, into = "sentence_id", sep = "_", extra = "drop", remove = FALSE)
+    prosody_df$prosody_type <- as.factor(ifelse(substring(prosody_df$stimfile, 1, 1) == "f", "Focus", "Phrase"))
+    prosody_df$stimfile <- as.factor(prosody_df$stimfile)
 
-    #prosodyDF <- data.frame(dplyr::summarise(
-    #    dplyr::group_by(prosodyDF, pid, condition, sentenceID, prosodyType),
-    #    trainingWordExposures = mean(trainingWordExposures),
+    #prosody_df <- data.frame(dplyr::summarise(
+    #    dplyr::group_by(prosody_df, pid, condition, sentence_id, prosody_type),
+    #    training_word_exposures = mean(training_word_exposures),
     #    portionCorrect = mean(correct)
     #))
 
-    focusDF <- dplyr::filter(prosodyDF, prosodyDF$prosodyType == "Focus")
-    focusDF$sentenceID <- as.factor(focusDF$sentenceID)
+    focus_df <- dplyr::filter(prosody_df, prosody_df$prosody_type == "Focus")
+    focus_df$sentence_id <- as.factor(focus_df$sentence_id)
 
-    phraseDF <- dplyr::filter(prosodyDF, prosodyDF$prosodyType == "Phrase")
-    phraseDF$sentenceID <- as.factor(phraseDF$sentenceID)
+    phrase_df <- dplyr::filter(prosody_df, prosody_df$prosody_type == "Phrase")
+    phrase_df$sentence_id <- as.factor(phrase_df$sentence_id)
 ```
 
 ## Plot
 ```{r plot-prosody-data, echo = FALSE}
-    prosodySummary <- dplyr::summarise(
-        dplyr::group_by(prosodyDF, pid, prosodyType, condition),
+    prosody_summary <- dplyr::summarise(
+        dplyr::group_by(prosody_df, pid, prosody_type, condition),
         correctPortion = 100 * mean(correct),
         se = 100 * sd(correct) / sqrt(length(correct)),
-        trainingWordExposures = mean(trainingWordExposures)
+        training_word_exposures = mean(training_word_exposures)
     )
 
-    ggplot2::ggplot(prosodySummary, ggplot2::aes(x = trainingWordExposures, y = correctPortion, shape = prosodyType, group = prosodyType, color = prosodyType)) +
+    ggplot2::ggplot(prosody_summary, ggplot2::aes(x = training_word_exposures, y = correctPortion, shape = prosody_type, group = prosody_type, color = prosody_type)) +
         ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
         ggplot2::geom_hline(yintercept = 50, linetype = "dashed", color = "gray") +
         ggplot2::geom_line() +
@@ -541,18 +540,18 @@ R code for processing vibey-transcribey data
 
 ## Focus - Model & Test
 ```{r model-focus-data, echo = FALSE}
-    focus_model <- function(formula) bin_lme(formula = formula, data = focusDF)
+    focus_model <- function(formula) bin_lme(formula = formula, data = focus_df)
     #
-    focus_m0 <- focus_model(correct ~ 1 + (trainingWordExposures | pid))
-    focus_m1 <- focus_model(correct ~ trainingWordExposures + (trainingWordExposures | pid))
-    focus_m2 <- focus_model(correct ~ trainingWordExposures + (trainingWordExposures | pid) + (1 | sentenceID))
+    focus_m0 <- focus_model(correct ~ 1 + (training_word_exposures | pid))
+    focus_m1 <- focus_model(correct ~ training_word_exposures + (training_word_exposures | pid))
+    focus_m2 <- focus_model(correct ~ training_word_exposures + (training_word_exposures | pid) + (1 | sentence_id))
 
-    #focus_model <- function(formula) lme(formula = formula, data = focusDF)
-    #lme4::lmer(portionCorrect ~ 1 + (trainingWordExposures|pid), data = focusDF)
+    #focus_model <- function(formula) lme(formula = formula, data = focus_df)
+    #lme4::lmer(portionCorrect ~ 1 + (training_word_exposures|pid), data = focus_df)
     #
-    #focus_m0 = focus_model(correct ~ 1 + (trainingWordExposures | pid))
-    #focus_m1 = focus_model(correct ~ trainingWordExposures + (trainingWordExposures | pid))
-    #focus_m2 = focus_model(correct ~ trainingWordExposures + (trainingWordExposures | pid) + (1 | sentenceID))
+    #focus_m0 = focus_model(correct ~ 1 + (training_word_exposures | pid))
+    #focus_m1 = focus_model(correct ~ training_word_exposures + (training_word_exposures | pid))
+    #focus_m2 = focus_model(correct ~ training_word_exposures + (training_word_exposures | pid) + (1 | sentence_id))
 
 
     anova(focus_m0, focus_m1, focus_m2)
@@ -561,11 +560,11 @@ R code for processing vibey-transcribey data
 
 ## Phrase Boundary - Model & Test
 ```{r model-phrase-data, echo = FALSE}
-    phrase_model <- function(formula) bin_lme(formula = formula, data = phraseDF)
+    phrase_model <- function(formula) bin_lme(formula = formula, data = phrase_df)
 
-    phrase_m0 <- phrase_model(correct ~ 1 + (trainingWordExposures | pid))
-    phrase_m1 <- phrase_model(correct ~ trainingWordExposures + (trainingWordExposures | pid))
-    phrase_m2 <- phrase_model(correct ~ trainingWordExposures + (trainingWordExposures | pid) + (1 | sentenceID))
+    phrase_m0 <- phrase_model(correct ~ 1 + (training_word_exposures | pid))
+    phrase_m1 <- phrase_model(correct ~ training_word_exposures + (training_word_exposures | pid))
+    phrase_m2 <- phrase_model(correct ~ training_word_exposures + (training_word_exposures | pid) + (1 | sentence_id))
 
     anova(phrase_m0, phrase_m1, phrase_m2)
 ```
@@ -573,30 +572,30 @@ R code for processing vibey-transcribey data
 # Perceptual Integration
 ## Load Data
 ```{r load-integration-data, echo = FALSE}
-    integrationDF <- load_eval_files("_integration_", create_correct_column = FALSE)
-    integrationDF <- merge_eval_files_with_training(integrationDF, trainWord_exposure_counts_by_pid)
+    integration_df <- load_eval_files("_integration_", create_correct_column = FALSE)
+    integration_df <- merge_eval_files_with_training(integration_df, traing_word_exposures)
 
-    integrationDF <- within(integrationDF, {
+    integration_df <- within(integration_df, {
         integrated <- 1 - as.integer(mapply(grepl, pattern = selection, x = stimulus))
-        auditoryStim <- as.factor(substring(stimulus, 1, 2))
-        tactileStim <- as.factor(substring(stimulus, 4, 5))
+        auditory_stim <- as.factor(substring(stimulus, 1, 2))
+        tactile_stim <- as.factor(substring(stimulus, 4, 5))
         speaker <- as.integer(substring(audibleFile, 8, 9))
     })
 
     # filter out bad speakers
-    #integrationDF <- dplyr::filter(integrationDF, speaker > 3 & speaker != 7)
+    #integration_df <- dplyr::filter(integration_df, speaker > 3 & speaker != 7)
 ```
 
 ## Explore & Visualize 📈
 ```{r plot-integration-data, echo = FALSE}
-    integrationSummary <- dplyr::summarise(
-        dplyr::group_by(integrationDF, pid, condition),
+    integration_summary <- dplyr::summarise(
+        dplyr::group_by(integration_df, pid, condition),
         correctPortion = 100 * mean(integrated),
         se = 100 * sd(integrated) / sqrt(length(integrated)),
-        trainingWordExposures = mean(trainingWordExposures),
+        training_word_exposures = mean(training_word_exposures),
     )
 
-    ggplot2::ggplot(integrationSummary, ggplot2::aes(x = trainingWordExposures, y = correctPortion)) +
+    ggplot2::ggplot(integration_summary, ggplot2::aes(x = training_word_exposures, y = correctPortion)) +
         ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
         ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
         ggplot2::geom_line() +
@@ -618,11 +617,11 @@ R code for processing vibey-transcribey data
 
 ## Model & Test
 ```{r model-integration-data, echo = FALSE}
-    integration_model <- function(formula) bin_lme(formula = formula, data = integrationDF)
+    integration_model <- function(formula) bin_lme(formula = formula, data = integration_df)
 
-    integration_m0 <- integration_model(integrated ~ 1 + (trainingWordExposures | pid))
-    integration_m1 <- integration_model(integrated ~ trainingWordExposures + (trainingWordExposures | pid))
-    integration_m2 <- integration_model(integrated ~ trainingWordExposures + (trainingWordExposures | pid) + (1 | stimulus))
+    integration_m0 <- integration_model(integrated ~ 1 + (training_word_exposures | pid))
+    integration_m1 <- integration_model(integrated ~ training_word_exposures + (training_word_exposures | pid))
+    integration_m2 <- integration_model(integrated ~ training_word_exposures + (training_word_exposures | pid) + (1 | stimulus))
 
     anova(integration_m0, integration_m1, integration_m2)
 ```
