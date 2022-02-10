@@ -6,6 +6,9 @@ output: html_document
 R code for processing vibey-transcribey data
 
 ```{r load-helpers, include = FALSE}
+    # helper functions and folder setup
+
+    # ensure output plots exist
     if (!file.exists("analysis-output/plots")) {
         dir.create("analysis-output/plots", recursive = TRUE)
     }
@@ -70,6 +73,14 @@ R code for processing vibey-transcribey data
         print(summary(model))
 
         return(model)
+    }
+
+    save_last_plot <- function(filename, width = 6, height = 6) {
+        ggplot2::ggsave(
+            plot = ggplot2::last_plot(),
+            file = paste("analysis-output/plots/", filename, sep = "/"),
+            width = width, height = height
+        )
     }
 ```
 
@@ -184,7 +195,8 @@ R code for processing vibey-transcribey data
     exposure_counts_by_phoneme <- dplyr::rename(exposure_counts_by_phoneme, phrase = phrase.y)
 
     # validity checking
-    words_not_in_lexicon <- exposure_counts_by_phoneme[is.na(exposure_counts_by_phoneme$pronounciation), ]
+    missing_pronounciations <- is.na(exposure_counts_by_phoneme$pronounciation)
+    words_not_in_lexicon <- exposure_counts_by_phoneme[missing_pronounciations, ]
     if (nrow(words_not_in_lexicon) > 0) {
         print("### ASSERT FAILED: ###")
         print("Words not in the lexicon:")
@@ -224,6 +236,7 @@ R code for processing vibey-transcribey data
     rm(exposure_counts_by_phoneme)
     rm(is_repeated_pid)
     rm(is_not_first_row)
+    rm(missing_pronounciations)
 ```
 
 ## Training Reports
@@ -323,6 +336,7 @@ R code for processing vibey-transcribey data
         by.x = "stimulus", by.y = "test_word",
         keep.x = TRUE
     )
+
     phone_df_with_phone_exposures <- dplyr::left_join(
         phone_df_with_phone_exposures,
         p_exposures,
@@ -390,11 +404,7 @@ R code for processing vibey-transcribey data
         ggplot2::theme_classic(base_size = 10) +
         ggplot2::theme(legend.position = c(0.85, 0.85))
 
-    ggplot2::ggsave(
-        plot = ggplot2::last_plot(),
-        file = "analysis-output/plots/phoneme-recognition-by-pid.png",
-        width = 6, height = 6
-    )
+    save_last_plot("phoneme-recognition-by-pid.png")
 
     post_test_summary_by_type <- data.frame(
         dplyr::summarise(
@@ -431,11 +441,7 @@ R code for processing vibey-transcribey data
         )
     #    ggplot2::theme(legend.position = c(0.85, 0.85))
 
-    ggplot2::ggsave(
-        plot = ggplot2::last_plot(),
-        file = "analysis-output/plots/phoneme-recognition.png",
-        width = 3, height = 3
-    )
+    save_last_plot("phoneme-recognition.png", width = 3, height = 3)
 
     post_test_summary <- data.frame(
         dplyr::summarise(
@@ -470,11 +476,7 @@ R code for processing vibey-transcribey data
             axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank()
         )
 
-    ggplot2::ggsave(
-        plot = ggplot2::last_plot(),
-        file = "analysis-output/plots/phoneme-recognition-by-phone.png",
-        width = 3, height = 3
-    )
+    save_last_plot("phoneme-recognition-by-phone.png", width = 3, height = 3)
 
     post_test_summary_by_pid <- data.frame(
         dplyr::summarise(
@@ -507,11 +509,7 @@ R code for processing vibey-transcribey data
         ggplot2::theme_classic(base_size = 10) +
         ggplot2::theme(legend.position = c(0.85, 0.85))
 
-    ggplot2::ggsave(
-        plot = ggplot2::last_plot(),
-        file = "analysis-output/plots/phoneme-recognition-by-phone-by-pid.png",
-        width = 6, height = 6
-    )
+    save_last_plot("phoneme-recognition-by-phone-by-pid.png")
 ```
 
 ## Model
@@ -542,7 +540,8 @@ R code for processing vibey-transcribey data
         extra = "drop",
         remove = FALSE
     )
-    prosody_df$prosody_type <- as.factor(ifelse(substring(prosody_df$stimfile, 1, 1) == "f", "Focus", "Phrase"))
+    type_starts_with_f <- substring(prosody_df$stimfile, 1, 1) == "f"
+    prosody_df$prosody_type <- as.factor(ifelse(type_starts_with_f, "Focus", "Phrase"))
     prosody_df$stimfile <- as.factor(prosody_df$stimfile)
 
     #prosody_df <- data.frame(dplyr::summarise(
@@ -556,6 +555,9 @@ R code for processing vibey-transcribey data
 
     phrase_df <- dplyr::filter(prosody_df, prosody_df$prosody_type == "Phrase")
     phrase_df$sentence_id <- as.factor(phrase_df$sentence_id)
+
+    # cleanup
+    rm(type_starts_with_f)
 ```
 
 ## Plot
@@ -592,12 +594,7 @@ R code for processing vibey-transcribey data
         ggplot2::theme_classic(base_size = 10) +
         ggplot2::theme(legend.position = c(0.5, 0.065), legend.direction = "horizontal")
 
-    ggplot2::ggsave(
-        plot = ggplot2::last_plot(),
-        file = "analysis-output/plots/prosody-perception.png",
-        width = 6,
-        height = 6
-    )
+    save_last_plot("prosody-perception.png")
 
 ```
 
@@ -658,7 +655,9 @@ R code for processing vibey-transcribey data
         training_word_exposures = mean(training_word_exposures),
     )
 
-    ggplot2::ggplot(integration_summary, ggplot2::aes(x = training_word_exposures, y = correctPortion)) +
+    ggplot2::ggplot(integration_summary, ggplot2::aes(
+        x = training_word_exposures, y = correctPortion
+    )) +
         ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
         ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
         ggplot2::geom_line() +
@@ -675,7 +674,7 @@ R code for processing vibey-transcribey data
         ) +
         ggplot2::theme_classic(base_size = 10)
 
-    ggplot2::ggsave(plot = ggplot2::last_plot(), file = "analysis-output/plots/integration.png", width = 6, height = 6)
+    save_last_plot("integration.png")
 ```
 
 ## Model & Test
