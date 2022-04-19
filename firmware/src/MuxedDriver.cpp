@@ -56,31 +56,13 @@ bool MuxedDriver::setValue(int channelID, uint8_t value){
 }
 
 void MuxedDriver::calibrate(bool fast){
-	char buffer[255];
-	uint8_t result = 0;
-
 	Wire.begin();
 
 	hapticDriver.writeRegScript(default_jinlong_G1040003D);
-	for(int i=0; i<8; i++){
-		if(setChannel(i)){
-			if(!fast){
+	if(!fast){
+		for(int i=0; i<8; i++){
+			if(setChannel(i)){
 				doFullCalibration();
-			}else{
-				/*
-				if(setValue(i, 255)){
-					delay(250);
-					setValue(i, 0);
-					delay(150);
-				}
-				*/
-				/*
-					// this doesn't work when driving actuators through a mux
-					DeviceStatus status = checkStatus();
-					if(status.ok()){
-						result += 1 << i;
-					}
-				*/
 			}
 		}
 	}
@@ -151,4 +133,8 @@ bool MuxedDriver::setGoAndWait(long timeout){
 	}
 
 	return true;
+}
+
+void MuxedDriver::writeRegister(uint8_t reg, uint8_t val){
+	hapticDriver.writeReg(reg, val);
 }

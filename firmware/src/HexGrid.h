@@ -50,8 +50,9 @@ class HexGrid{
 		void calibrate();
 		void disableAll();
 
-	protected:
 		LRAArray actuators;
+
+	protected:
 		uint8_t currentCell = 255;
 
 		void _setValue(uint8_t idA, uint8_t idB, uint8_t value);

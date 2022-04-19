@@ -14,15 +14,14 @@ class LRAArray {
 		void setDriverChannelValue(int driverID, int channelID, uint8_t value);
 
 		void disableAll();
-
-		Haptic_DRV2605 hapticDriver;
+		void writeRegister(uint8_t reg, uint8_t val);
 
 	protected:
 		MuxedDriver drivers[5];
 
 		int addressPins[3] = {-1, -1, -1};
 		int busPositions[5] = { -1, -1, -1, -1, -1 };
-		int mintensity = 144;
+		int mintensity = 128;
 
 		void switchToDriver(int driverID);
 };

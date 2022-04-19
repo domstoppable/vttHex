@@ -98,7 +98,6 @@ void VTTDevice::setup(){
 }
 
 void VTTDevice::update(){
-
 	#if defined (USE_WIFI)
 		WiFiClient client = server.available();
 		if(client){
