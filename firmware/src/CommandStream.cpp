@@ -2,123 +2,160 @@
 #include "Logger.h"
 
 uint8_t CMD_PAYLOAD_SIZES[NUM_COMMANDS] = {
-	0,
-	0,
-	1,
-	1,
-	1,
-	1,
-	3,
-	0,
-	9,
-	1,
-	2
+	0,	// CMD_HEADER
+	0,	// CMD_CALIBRATE
+	1,	// CMD_CELL_ENABLE
+	1,	// CMD_CELL_DISABLE
+	1,	// CMD_PITCH
+	1,	// CMD_INTENSITY
+	3,	// CMD_COMBINED_SIGNAL
+	0,	// CMD_STOP
+	9,	// CMD_SOUNDBITE
+	1,	// CMD_PLAY_BITE
+	2,	// CMD_SET_ACTUATOR_INT
+	1,	// CMD_PULSE_ACTUATOR
+	0,	// CMD_PING
 };
 
 void CommandStream::update(){
+	long now = millis();
+	char face[45] = FACE_NORMAL;
+
+	if(now - lastPing > 1000l){
+		strcpy(face, FACE_LONELY);
+	}
 
 	if(stream == nullptr){
 		return;
 	}
 
-	if(!flushToLatestCommand()){
-		return;
+	if(flushToLatestCommand()) {
+		everReceivedCommand = true;
+
+		char msg[45];
+		byte cmd = nextByte();
+
+		bool doFlush = false;
+
+		if(cmd == 255 || cmd == 0){
+			// NOP
+		}else if(cmd == CMD_CALIBRATE){
+			grid->calibrate();
+			stream->write("ok\n");
+
+		}else if(cmd == CMD_CELL_ENABLE){
+			byte cellID = nextByte();
+			sprintf(msg, "%02d Enable", cellID);
+			Logger::getGlobal()->debug(msg);
+
+			grid->enable(cellID, 255, 0);
+			doFlush = true;
+			stream->write("ok\n");
+
+		}else if(cmd == CMD_CELL_DISABLE){
+			byte cellID = nextByte();
+			sprintf(msg, "%02d Disable", cellID);
+			Logger::getGlobal()->debug(msg);
+
+			grid->disable(cellID);
+			doFlush = true;
+			stream->write("ok\n");
+
+		}else if(cmd == CMD_PULSE_ACTUATOR){
+			stream->write("ok\n");
+
+			byte actuatorID = nextByte();
+
+			display->showText(FACE_VIBING);
+			long startTime = now;
+			long duration = 500l;
+			while(now-startTime < duration){
+				now = millis();
+				float elapsed = (float)(now-startTime)/(float)duration;
+				elapsed = min(max(elapsed, 0.0f), 1.0f);
+				byte intensity = 255*(1.0f-abs(elapsed*2.0f - 1.0f));
+				grid->setActuatorIntensity(actuatorID, intensity);
+			}
+
+			doFlush = true;
+
+		}else if(cmd == CMD_SET_ACTUATOR_INT){
+			byte actuatorID = nextByte();
+			byte intensity = nextByte();
+
+			grid->setActuatorIntensity(actuatorID, intensity);
+			if(intensity > 0){
+				strcpy(face, FACE_VIBING);
+			}
+			doFlush = true;
+			stream->write("ok\n");
+
+		}else if(cmd == CMD_PITCH){
+			byte pitch = nextByte();
+			stream->write("ok\n");
+
+		}else if(cmd == CMD_COMBINED_SIGNAL){
+			byte phone = nextByte();
+			byte pitch = nextByte();
+			byte intensity = nextByte();
+
+			if(phone != 255){
+				display->showText("\n    ^  ^\n   ~~~~~~");
+				grid->enable(phone, intensity, pitch);
+			}
+			stream->write("ok\n");
+
+		}else if(cmd == CMD_STOP){
+			grid->disableAll();
+			doFlush = true;
+			stream->write("ok\n");
+
+		}else if(cmd == CMD_SOUNDBITE){
+			uint8_t id = nextByte();
+
+			uint32_t period = 0;
+			for(int i=0; i<4; i++){
+				uint8_t b = nextByte();
+				period += b << (i*8);
+			}
+
+			uint32_t sampleCount = 0;
+			for(int i=0; i<4; i++){
+				uint8_t b = nextByte();
+				sampleCount += b << (i*8);
+			}
+
+			soundBites[id].init(period, sampleCount);
+			for(int i=0; i<sampleCount; i++){
+				soundBites[id].samples[i].phone = readBlocking();
+				soundBites[id].samples[i].pitch = readBlocking();
+				soundBites[id].samples[i].intensity = readBlocking();
+			}
+			stream->write("ok\n");
+
+		}else if(cmd == CMD_PLAY_BITE){
+			display->showText(FACE_VIBING);
+			playBite(nextByte());
+			doFlush = true;
+			stream->write("ok\n");
+
+		}else if(cmd == CMD_PING){
+			lastPing = now;
+			stream->write("ok\n");
+
+		}else{
+			sprintf(msg, "Unknown command: 0x%02x", cmd);
+			Logger::getGlobal()->debug(msg);
+			strcpy(face, FACE_CONFUSED);
+		}
+
+		if(doFlush){
+			flush();
+		}
 	}
 
-	char msg[45];
-	byte cmd = nextByte();
-
-	display->showText("\n    >  <\n   \\____/");
-
-	bool doFlush = false;
-
-	if(cmd == 255 || cmd == 0){
-		// NOP
-	}else if(cmd == CMD_CALIBRATE){
-		grid->calibrate();
-	}else if(cmd == CMD_CELL_ENABLE){
-		byte cellID = nextByte();
-		sprintf(msg, "%02d Enable", cellID);
-		Logger::getGlobal()->debug(msg);
-
-		grid->enable(cellID, 255, 0);
-		doFlush = true;
-	}else if(cmd == CMD_CELL_DISABLE){
-		byte cellID = nextByte();
-		sprintf(msg, "%02d Disable", cellID);
-		Logger::getGlobal()->debug(msg);
-
-		grid->disable(cellID);
-		doFlush = true;
-	}else if(cmd == CMD_SET_ACTUATOR_INT){
-		byte actuatorID = nextByte();
-		byte intensity = nextByte();
-
-		grid->setActuatorIntensity(actuatorID, intensity);
-		sprintf(msg, " %02d ON %03d ", actuatorID, intensity);
-		display->showText(msg);
-		doFlush = true;
-	}else if(cmd == CMD_PITCH){
-		byte pitch = nextByte();
-		display->showText("Freq");
-	}else if(cmd == CMD_COMBINED_SIGNAL){
-		byte phone = nextByte();
-		byte pitch = nextByte();
-		byte intensity = nextByte();
-
-		if(phone != 255){
-			grid->enable(phone, intensity, pitch);
-			sprintf(msg, " %02d ON     %03d Pitch  %03d Volume ", phone, pitch, intensity);
-			display->showText(msg);
-		}
-	}else if(cmd == CMD_STOP){
-		grid->disableAll();
-		display->showText("");
-		doFlush = true;
-	}else if(cmd == CMD_SOUNDBITE){
-		uint8_t id = nextByte();
-
-		uint32_t period = 0;
-		for(int i=0; i<4; i++){
-			uint8_t b = nextByte();
-			period += b << (i*8);
-		}
-
-		uint32_t sampleCount = 0;
-		for(int i=0; i<4; i++){
-			uint8_t b = nextByte();
-			sampleCount += b << (i*8);
-		}
-
-		soundBites[id].init(period, sampleCount);
-		for(int i=0; i<sampleCount; i++){
-			soundBites[id].samples[i].phone = readBlocking();
-			soundBites[id].samples[i].pitch = readBlocking();
-			soundBites[id].samples[i].intensity = readBlocking();
-
-			//sprintf(msg, "S %d = % 3d % 3d % 3d", i, soundBites[id].samples[i].phone, soundBites[id].samples[i].pitch, soundBites[id].samples[i].intensity);
-			//stream->println(msg);
-		}
-		stream->println("Bite received");
-
-		//sprintf(msg, "S-Bite in  %03d samples %03d period", sampleCount, period);
-		//Logger::getGlobal()->debug(msg);
-
-	}else if(cmd == CMD_PLAY_BITE){
-		stream->println("Play SoundBite");
-
-		display->showText("\n    ^  ^\n   ~~~~~~");
-		playBite(nextByte());
-		display->showText("\n    O  O\n   \\____/");
-		doFlush = true;
-	}else{
-		sprintf(msg, "??? %d", cmd);
-		Logger::getGlobal()->debug(msg);
-		display->showText("\n    ?  ?\n   ??????");
-	}
-
-	if(doFlush){
-		flush();
+	if(everReceivedCommand){
+		display->showText(face);
 	}
 }
 
@@ -129,7 +166,7 @@ bool CommandStream::flushToLatestCommand(){
 
 	bufferIdx = 0;
 	commandBuffer[0] = 255;
-	int commands = 0;
+
 	while(stream->available() > 0){
 		byte header = readBlocking();
 		if(header != CMD_HEADER){
@@ -138,17 +175,14 @@ bool CommandStream::flushToLatestCommand(){
 		}
 
 		byte cmd = readBlocking();
-		if(cmd > NUM_COMMANDS){
-			stream->print("Unknown command "); stream->println(cmd);
-			return false;
-		}
-
 		commandBuffer[0] = cmd;
 		for(int payloadIdx=0; payloadIdx<CMD_PAYLOAD_SIZES[cmd]; payloadIdx++){
 			commandBuffer[payloadIdx+1] = readBlocking();
 		}
-		commands++;
+
 		if(cmd == CMD_SOUNDBITE){
+			// return now so that calling function can read the rest of the soundbite
+			// @TODO: move that logic into here?
 			return true;
 		}
 	}
@@ -178,10 +212,6 @@ byte CommandStream::nextByte(){
 }
 
 void CommandStream::playBite(uint8_t id){
-//	int phoneList[255];
-//	int phoneListIdx = 0;
-
-	char msg[45];
 	long now = millis();
 	long startTime = now;
 
@@ -195,29 +225,14 @@ void CommandStream::playBite(uint8_t id){
 		now = millis();
 
 		long delta = now - startTime;
-//		delta *= 0.5f;
 		sampleIdx = int(delta / soundBites[id].period);
 		if(sampleIdx >= soundBites[id].sampleCount){
 			break;
 		}
 
 		Sample sample = soundBites[id].samples[sampleIdx];
-//		char msg[255];
-//		sprintf(msg, "SAMPLE % 3d, % 3d, % 3d", sample.phone, sample.pitch, sample.intensity);
-//		stream->println(msg);
 
 		if(sample != lastSample){
-
-			if(sample.phone != lastSample.phone){
-				if(sample.phone != 255){
-//					phoneList[phoneListIdx++] = sample.phone;
-//					char msg[45] = "";
-//					sprintf(msg, "Play clip\n% 3d\n% 3d", sample.phone, sample.intensity);
-//					display->showText(msg);
-//					stream->println(msg);
-				}
-			}
-
 			if(sample.phone < 255 && sample.intensity > 0){
 				grid->enable(sample.phone, sample.intensity, sample.pitch);
 			}
@@ -226,27 +241,4 @@ void CommandStream::playBite(uint8_t id){
 		}
 	}
 	grid->disableAll();
-
-/*
-	for(int i=0; i<phoneListIdx; i++){
-		sprintf(msg, "phones[%d] = %d", i, phoneList[i]);
-		display->showText(msg);
-		delay(1000);
-	}
-*/
-
-//	sprintf(msg, "/SoundBite %d", id);
-//	stream->println(msg);
 }
-
-/*
-26  jh
-39  eh
-23  l
-36  iy
-0   b
-36  iy
-13  n
-
-Jelly bean
-*/

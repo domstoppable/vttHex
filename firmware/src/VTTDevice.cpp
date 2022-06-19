@@ -33,7 +33,7 @@ void VTTDevice::setup(){
 
 	char startScreen[64];
 	esp_reset_reason_t resetReason = esp_reset_reason();
-	sprintf(startScreen, "   Vibey\nTranscribey\n\n% 11s", resetReasonText[resetReason]);
+	sprintf(startScreen, "   Vibey\nTranscribey\n  v2.6.1\n% 11s", resetReasonText[resetReason]);
 	display.showText(startScreen);
 
 	#if defined (USE_WIFI)
@@ -45,7 +45,7 @@ void VTTDevice::setup(){
 
 	//delay(2000);
 
-	Logger* GlobalLogger = new CombinedLogger(&display);
+	Logger* GlobalLogger = new SerialLogger();
 	Logger::setGlobal(GlobalLogger);
 
 	grid.setup();
@@ -91,9 +91,9 @@ void VTTDevice::setup(){
 		sprintf(msg, "  Ready :)\n%s.local\n%s", hostname, ipAsChars);
 		Logger::getGlobal()->info(msg);
 	#else
-		//Logger::getGlobal()->info("\n  Ready :)");
-		sprintf(startScreen, "   Vibey\nTranscribey\n  v2.6.1\n% 11s", resetReasonText[resetReason]);
-		display.showText(startScreen);
+		char msg[45];
+		sprintf(msg, "\nReady :) [0x%02x]", resetReason);
+		Logger::getGlobal()->info(msg);
 	#endif
 }
 
@@ -109,7 +109,8 @@ void VTTDevice::update(){
 		}
 	#endif
 
-	for(int i=0; i<2; i++){
-		commandStreams[i].update();
-	}
+	commandStreams[0].update();
+	#if defined (USE_WIFI)
+		commandStreams[1].update();
+	#endif
 }

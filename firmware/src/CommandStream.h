@@ -16,12 +16,20 @@
 #define CMD_SOUNDBITE         0x08
 #define CMD_PLAY_BITE         0x09
 #define CMD_SET_ACTUATOR_INT  0x0A
+#define CMD_PULSE_ACTUATOR    0x0B
+#define CMD_PING              0x0C
 
+#define NUM_COMMANDS 13
 
 #define MAX_CMD_SIZE 32768
-#define NUM_COMMANDS 11
+
+#define FACE_VIBING     "\n    ^  ^\n   ~~~~~~\0"
+#define FACE_NORMAL     "\n    O  O\n   \\____/\0"
+#define FACE_LONELY     "\n    x  x\n    ----\0"
+#define FACE_CONFUSED   "\n    ?  ?\n    ----\0"
 
 extern uint8_t CMD_PAYLOAD_SIZES[NUM_COMMANDS];
+
 extern uint8_t commandBuffer[MAX_CMD_SIZE];
 
 class CommandStream {
@@ -30,6 +38,8 @@ public:
 	Display* display = nullptr;
 	Stream* stream = nullptr;
 	SoundBite* soundBites = nullptr;
+
+	long lastPing = 0l;
 
 	CommandStream(){}
 
@@ -55,6 +65,8 @@ private:
 	byte readBlocking();
 	void flush();
 	void playBite(uint8_t id);
+
+	bool everReceivedCommand = false;
 };
 
 #endif
