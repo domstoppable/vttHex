@@ -21,10 +21,6 @@ void CommandStream::update(){
 	long now = millis();
 	char face[45] = FACE_NORMAL;
 
-	if(now - lastPing > 1000l){
-		strcpy(face, FACE_LONELY);
-	}
-
 	if(stream == nullptr){
 		return;
 	}
@@ -41,7 +37,7 @@ void CommandStream::update(){
 			// NOP
 		}else if(cmd == CMD_CALIBRATE){
 			grid->calibrate();
-			stream->write("ok\n");
+			sendOk();
 
 		}else if(cmd == CMD_CELL_ENABLE){
 			byte cellID = nextByte();
@@ -50,7 +46,7 @@ void CommandStream::update(){
 
 			grid->enable(cellID, 255, 0);
 			doFlush = true;
-			stream->write("ok\n");
+			sendOk();
 
 		}else if(cmd == CMD_CELL_DISABLE){
 			byte cellID = nextByte();
@@ -59,10 +55,10 @@ void CommandStream::update(){
 
 			grid->disable(cellID);
 			doFlush = true;
-			stream->write("ok\n");
+			sendOk();
 
 		}else if(cmd == CMD_PULSE_ACTUATOR){
-			stream->write("ok\n");
+			sendOk();
 
 			byte actuatorID = nextByte();
 
@@ -88,11 +84,13 @@ void CommandStream::update(){
 				strcpy(face, FACE_VIBING);
 			}
 			doFlush = true;
-			stream->write("ok\n");
+			sendOk();
 
 		}else if(cmd == CMD_PITCH){
-			byte pitch = nextByte();
-			stream->write("ok\n");
+			//@TODO: implement pitch changing
+			//byte pitch = nextByte();
+			nextByte();
+			sendOk();
 
 		}else if(cmd == CMD_COMBINED_SIGNAL){
 			byte phone = nextByte();
@@ -103,12 +101,12 @@ void CommandStream::update(){
 				display->showText("\n    ^  ^\n   ~~~~~~");
 				grid->enable(phone, intensity, pitch);
 			}
-			stream->write("ok\n");
+			sendOk();
 
 		}else if(cmd == CMD_STOP){
 			grid->disableAll();
 			doFlush = true;
-			stream->write("ok\n");
+			sendOk();
 
 		}else if(cmd == CMD_SOUNDBITE){
 			uint8_t id = nextByte();
@@ -131,17 +129,18 @@ void CommandStream::update(){
 				soundBites[id].samples[i].pitch = readBlocking();
 				soundBites[id].samples[i].intensity = readBlocking();
 			}
-			stream->write("ok\n");
+			sendOk();
 
 		}else if(cmd == CMD_PLAY_BITE){
+			sendOk();
 			display->showText(FACE_VIBING);
 			playBite(nextByte());
 			doFlush = true;
-			stream->write("ok\n");
+			lastPing = millis();
 
 		}else if(cmd == CMD_PING){
 			lastPing = now;
-			stream->write("ok\n");
+			sendOk();
 
 		}else{
 			sprintf(msg, "Unknown command: 0x%02x", cmd);
@@ -154,9 +153,17 @@ void CommandStream::update(){
 		}
 	}
 
+	if(now - lastPing > 1000l){
+		strcpy(face, FACE_LONELY);
+	}
+
 	if(everReceivedCommand){
 		display->showText(face);
 	}
+}
+
+void CommandStream::sendOk(){
+	//stream->println("ok");
 }
 
 bool CommandStream::flushToLatestCommand(){

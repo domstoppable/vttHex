@@ -55,6 +55,7 @@ public:
 	}
 
 	void update();
+	void sendOk();
 
 private:
 	int bufferIdx = 0;
