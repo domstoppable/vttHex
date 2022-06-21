@@ -6,29 +6,29 @@
 #include "Arduino.h"
 #include "LRAArray.h"
 
-#define R1  0
-#define R2  1
-#define R3  2
-#define R4  3
+#define ACT_R1  0
+#define ACT_R2  1
+#define ACT_R3  2
+#define ACT_R4  3
 
-#define G1  4
-#define G2  5
-#define G3  6
-#define G4  7
+#define ACT_G1  4
+#define ACT_G2  5
+#define ACT_G3  6
+#define ACT_G4  7
 
-#define B1  8
-#define B2  9
-#define B3 10
-#define B4 11
+#define ACT_B1  8
+#define ACT_B2  9
+#define ACT_B3 10
+#define ACT_B4 11
 
 const int activationMap[][2] = {
-	{R1,R1}, {R1,G1}, {G1,G1}, {G1,B1}, {B1,B1}, {B1,R1},
-	{R1,G2}, {R1,B2}, {G1,B2}, {G1,R2}, {R2,B1}, {B1,G2},
-	{G2,B2}, {B2,B2}, {B2,R2}, {R2,R2}, {R2,G2}, {G2,G2},
-	{G2,R3}, {R3,B2}, {B2,G3}, {G3,R2}, {R2,B3}, {B3,G2},
-	{R3,R3}, {R3,G3}, {G3,G3}, {G3,B3}, {B3,B3}, {B3,R3},
-	{G4,R3}, {R3,B4}, {B4,G3}, {G3,R4}, {R4,B3}, {B3,G4},
-	{G4,B4}, {B4,B4}, {B4,R4}, {R4,R4}, {R4,G4}, {G4,G4},
+	{ACT_R1, ACT_R1}, {ACT_R1, ACT_G1}, {ACT_G1, ACT_G1}, {ACT_G1, ACT_B1}, {ACT_B1, ACT_B1}, {ACT_B1, ACT_R1},
+	{ACT_R1, ACT_G2}, {ACT_R1, ACT_B2}, {ACT_G1, ACT_B2}, {ACT_G1, ACT_R2}, {ACT_R2, ACT_B1}, {ACT_B1, ACT_G2},
+	{ACT_G2, ACT_B2}, {ACT_B2, ACT_B2}, {ACT_B2, ACT_R2}, {ACT_R2, ACT_R2}, {ACT_R2, ACT_G2}, {ACT_G2, ACT_G2},
+	{ACT_G2, ACT_R3}, {ACT_R3, ACT_B2}, {ACT_B2, ACT_G3}, {ACT_G3, ACT_R2}, {ACT_R2, ACT_B3}, {ACT_B3, ACT_G2},
+	{ACT_R3, ACT_R3}, {ACT_R3, ACT_G3}, {ACT_G3, ACT_G3}, {ACT_G3, ACT_B3}, {ACT_B3, ACT_B3}, {ACT_B3, ACT_R3},
+	{ACT_G4, ACT_R3}, {ACT_R3, ACT_B4}, {ACT_B4, ACT_G3}, {ACT_G3, ACT_R4}, {ACT_R4, ACT_B3}, {ACT_B3, ACT_G4},
+	{ACT_G4, ACT_B4}, {ACT_B4, ACT_B4}, {ACT_B4, ACT_R4}, {ACT_R4, ACT_R4}, {ACT_R4, ACT_G4}, {ACT_G4, ACT_G4},
 };
 
 const float easeFunc_linear[]     = { 0.000,0.012,0.024,0.036,0.048,0.060,0.071,0.083,0.095,0.107,0.119,0.131,0.143,0.155,0.167,0.179,0.190,0.202,0.214,0.226,0.238,0.250,0.262,0.274,0.286,0.298,0.310,0.321,0.333,0.345,0.357,0.369,0.381,0.393,0.405,0.417,0.429,0.440,0.452,0.464,0.476,0.488,0.500,0.512,0.524,0.536,0.548,0.560,0.571,0.583,0.595,0.607,0.619,0.631,0.643,0.655,0.667,0.679,0.690,0.702,0.714,0.726,0.738,0.750,0.762,0.774,0.786,0.798,0.810,0.821,0.833,0.845,0.857,0.869,0.881,0.893,0.905,0.917,0.929,0.940,0.952,0.964,0.976,0.988,1.000 };

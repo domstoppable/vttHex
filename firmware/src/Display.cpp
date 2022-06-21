@@ -17,7 +17,7 @@ bool Display::setup(){
 	return true;
 }
 
-void Display::showText(char* text){
+void Display::showText(const char* text){
 	clearDisplay();
 	setCursor(0, 10);
 	println(text);

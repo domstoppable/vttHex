@@ -18,7 +18,7 @@ class DisplayLogger: public Logger{
 				}else{
 					char buffer[255];
 
-					sprintf(buffer, "%s: %s", levelNames[level], msg);
+					sprintf(buffer, "%s: %s", getLevelName(level), msg);
 					display->showText(buffer);
 				}
 			}

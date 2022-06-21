@@ -5,10 +5,6 @@ enum LogLevel {
 	DEBUG, INFO, WARNING, ERROR, CRITICAL
 };
 
-static const char* levelNames[] = {
-	"DEBUG", "INFO" , "WARNING", "ERROR", "CRITICAL"
-};
-
 class Logger {
 	protected:
 		LogLevel filterLevel = DEBUG;
@@ -26,31 +22,49 @@ class Logger {
 			return global;
 		}
 
-		virtual void log(LogLevel level, char* msg){
+		virtual void log(LogLevel level, const char* msg){
 		}
 
 		void setLevel(LogLevel level){
 			filterLevel = level;
 		}
 
-		void critical(char* msg){
+		void critical(const char* msg){
 			log(LogLevel::CRITICAL, msg);
 		}
 
-		void error(char* msg){
+		void error(const char* msg){
 			log(LogLevel::ERROR, msg);
 		}
 
-		void warning(char* msg){
+		void warning(const char* msg){
 			log(LogLevel::WARNING, msg);
 		}
 
-		void info(char* msg){
+		void info(const char* msg){
 			log(LogLevel::INFO, msg);
 		}
 
-		void debug(char* msg){
+		void debug(const char* msg){
 			log(LogLevel::DEBUG, msg);
+		}
+
+		const char* getLevelName(LogLevel level){
+			switch(level){
+				case DEBUG:
+					return "DEBUG";
+				case INFO:
+					return "INFO";
+				case WARNING:
+					return "WARNING";
+				case ERROR:
+					return "ERROR";
+				case CRITICAL:
+					return "CRITICAL";
+
+				default:
+					return "LOG";
+			}
 		}
 };
 

@@ -13,7 +13,7 @@
 	char hostname[] = "vt00";
 #endif
 
-char* resetReasonText[] = {
+const char* resetReasonText[] = {
 	"UNKNOWN\0",    //!< Reset reason can not be determined
     "\0",           //!< Reset due to power-on event
     "EXT\0",        //!< Reset by external pin (not applicable for ESP32)
@@ -33,15 +33,15 @@ void VTTDevice::setup(){
 
 	char startScreen[64];
 	esp_reset_reason_t resetReason = esp_reset_reason();
-	sprintf(startScreen, "   Vibey\nTranscribey\n  v2.6.1\n% 11s", resetReasonText[resetReason]);
+	sprintf(startScreen, "   Vibey\nTranscribey\n  v2.6.1\n%11s", resetReasonText[resetReason]);
 	display.showText(startScreen);
 
 	#if defined (USE_WIFI)
 		WiFi.begin(WIFI_SSID, WIFI_KEY);
 	#endif
 
-	Serial.begin(115200);
 	Serial.setRxBufferSize(16384);
+	Serial.begin(115200);
 
 	//delay(2000);
 

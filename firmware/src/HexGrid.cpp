@@ -64,21 +64,11 @@ void HexGrid::enable(uint8_t cellID, uint8_t intensity, uint8_t pitch){
 	int actuatorIdxA = min(2, (int)(pitch/255.0f * (actuatorCount-1)));
 	int overlapWidth = 255 / (actuatorCount-1);
 
-	float distanceFromFirstNode = ((float)(pitch % overlapWidth) / (float)overlapWidth);
 	int transitionIdx = pitch % overlapWidth;
 	float values[] = {
 		intensity*easeFunc[overlapWidth - transitionIdx - 1],
 		intensity*easeFunc[transitionIdx]
 	};
-
-//	Serial.print("Pitch ");
-//	Serial.print(pitch);
-//	Serial.print(" : ");
-//	Serial.print((int)values[0]);
-//	Serial.print("  ");
-//	Serial.print((int)values[1]);
-//	Serial.print("  idx = ");
-//	Serial.println(transitionIdx);
 
 	for(int i=0; i<2; i++){
 		int actuatorIdx = actuatorIdxA+i;

@@ -57,8 +57,6 @@ void LRAArray::setup(
 }
 
 void LRAArray::switchToDriver(int driverID){
-	char buffer[128];
-
 	int busPosition = busPositions[driverID];
 
 	for(int i=0; i<3; i++){
