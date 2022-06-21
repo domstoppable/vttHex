@@ -7,7 +7,7 @@ class Display : Adafruit_SSD1306{
 	public:
 		Display();
 		bool setup();
-		void showText(const char* text);
+		void showText(const char* fmt, ...);
 };
 
 #endif

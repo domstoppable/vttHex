@@ -17,9 +17,17 @@ bool Display::setup(){
 	return true;
 }
 
-void Display::showText(const char* text){
+void Display::showText(const char *fmt, ...) {
+	va_list args;
+
+	char text[45];
+	va_start(args, fmt);
+	vsprintf(text, fmt, args);
+
 	clearDisplay();
 	setCursor(0, 10);
 	println(text);
 	display();
+
+	va_end(args);
 }
