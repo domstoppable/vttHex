@@ -36,8 +36,7 @@ class VTTDevice {
 		LoopTimer loopTimer;
 
 		HexGrid grid;
-//		RingArray ring;
-		SoundBite soundBites[1];
+		SoundBite soundBite;
 
 		Display display;
 
@@ -49,7 +48,6 @@ class VTTDevice {
 		void update();
 
 	protected:
-		//void playBite(SoundBite* bite);
 		void displayDebugMessage(char* msg);
 		CommandStream commandStreams[2];
 };

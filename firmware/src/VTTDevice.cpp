@@ -31,17 +31,15 @@ const char* resetReasonText[] = {
 void VTTDevice::setup(){
 	display.setup();
 
-	char startScreen[64];
 	esp_reset_reason_t resetReason = esp_reset_reason();
-	sprintf(startScreen, "   Vibey\nTranscribey\n  v2.6.1\n%11s", resetReasonText[resetReason]);
-	display.showText(startScreen);
+	display.showText("   Vibey\nTranscribey\n  v2.6.1\n%11s", resetReasonText[resetReason]);
 
 	#if defined (USE_WIFI)
 		WiFi.begin(WIFI_SSID, WIFI_KEY);
 	#endif
 
-	Serial.setRxBufferSize(16384);
 	Serial.begin(115200);
+	Serial.setRxBufferSize(16384);
 
 	//delay(2000);
 
@@ -84,7 +82,7 @@ void VTTDevice::setup(){
 		Serial.read();
 	}
 
-	commandStreams[0].configure(&Serial, &grid, &display, soundBites);
+	commandStreams[0].configure(&Serial, &grid, &display, &soundBite);
 
 	#if defined (USE_WIFI)
 		char msg[45];

@@ -37,17 +37,17 @@ public:
 	HexGrid* grid = nullptr;
 	Display* display = nullptr;
 	Stream* stream = nullptr;
-	SoundBite* soundBites = nullptr;
+	SoundBite* soundBite = nullptr;
 
 	long lastPing = 0l;
 
 	CommandStream(){}
 
-	void configure(Stream* stream, HexGrid* hexGrid, Display* display, SoundBite* soundBites){
+	void configure(Stream* stream, HexGrid* hexGrid, Display* display, SoundBite* soundBite){
 		this->stream = stream;
 		this->grid = hexGrid;
 		this->display = display;
-		this->soundBites = soundBites;
+		this->soundBite = soundBite;
 
 		for(int i=0; i<MAX_CMD_SIZE; i++){
 			commandBuffer[i] = 0;
@@ -61,9 +61,9 @@ private:
 	int bufferIdx = 0;
 	uint8_t commandBuffer[MAX_CMD_SIZE];
 
-	byte nextByte();
+	uint8_t nextByteFromBuffer();
 	bool flushToLatestCommand();
-	byte readBlocking();
+	uint8_t readBlocking();
 	void flush();
 	void playBite(uint8_t id);
 

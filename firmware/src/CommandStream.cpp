@@ -29,7 +29,7 @@ void CommandStream::update(){
 		everReceivedCommand = true;
 
 		char msg[45];
-		byte cmd = nextByte();
+		uint8_t cmd = nextByteFromBuffer();
 
 		bool doFlush = false;
 
@@ -40,7 +40,7 @@ void CommandStream::update(){
 			sendOk();
 
 		}else if(cmd == CMD_CELL_ENABLE){
-			byte cellID = nextByte();
+			uint8_t cellID = nextByteFromBuffer();
 			sprintf(msg, "%02d Enable", cellID);
 			Logger::getGlobal()->debug(msg);
 
@@ -49,7 +49,7 @@ void CommandStream::update(){
 			sendOk();
 
 		}else if(cmd == CMD_CELL_DISABLE){
-			byte cellID = nextByte();
+			uint8_t cellID = nextByteFromBuffer();
 			sprintf(msg, "%02d Disable", cellID);
 			Logger::getGlobal()->debug(msg);
 
@@ -60,7 +60,7 @@ void CommandStream::update(){
 		}else if(cmd == CMD_PULSE_ACTUATOR){
 			sendOk();
 
-			byte actuatorID = nextByte();
+			uint8_t actuatorID = nextByteFromBuffer();
 
 			display->showText(FACE_VIBING);
 			long startTime = now;
@@ -69,15 +69,15 @@ void CommandStream::update(){
 				now = millis();
 				float elapsed = (float)(now-startTime)/(float)duration;
 				elapsed = min(max(elapsed, 0.0f), 1.0f);
-				byte intensity = 255*(1.0f-abs(elapsed*2.0f - 1.0f));
+				uint8_t intensity = 255*(1.0f-abs(elapsed*2.0f - 1.0f));
 				grid->setActuatorIntensity(actuatorID, intensity);
 			}
 
 			doFlush = true;
 
 		}else if(cmd == CMD_SET_ACTUATOR_INT){
-			byte actuatorID = nextByte();
-			byte intensity = nextByte();
+			uint8_t actuatorID = nextByteFromBuffer();
+			uint8_t intensity = nextByteFromBuffer();
 
 			grid->setActuatorIntensity(actuatorID, intensity);
 			if(intensity > 0){
@@ -88,17 +88,17 @@ void CommandStream::update(){
 
 		}else if(cmd == CMD_PITCH){
 			//@TODO: implement pitch changing
-			//byte pitch = nextByte();
-			nextByte();
+			//uint8_t pitch = nextByteFromBuffer();
+			nextByteFromBuffer();
 			sendOk();
 
 		}else if(cmd == CMD_COMBINED_SIGNAL){
-			byte phone = nextByte();
-			byte pitch = nextByte();
-			byte intensity = nextByte();
+			uint8_t phone = nextByteFromBuffer();
+			uint8_t pitch = nextByteFromBuffer();
+			uint8_t intensity = nextByteFromBuffer();
 
 			if(phone != 255){
-				display->showText("\n    ^  ^\n   ~~~~~~");
+				display->showText(FACE_VIBING);
 				grid->enable(phone, intensity, pitch);
 			}
 			sendOk();
@@ -109,32 +109,13 @@ void CommandStream::update(){
 			sendOk();
 
 		}else if(cmd == CMD_SOUNDBITE){
-			uint8_t id = nextByte();
-
-			uint32_t period = 0;
-			for(int i=0; i<4; i++){
-				uint8_t b = nextByte();
-				period += b << (i*8);
-			}
-
-			uint32_t sampleCount = 0;
-			for(int i=0; i<4; i++){
-				uint8_t b = nextByte();
-				sampleCount += b << (i*8);
-			}
-
-			soundBites[id].init(period, sampleCount);
-			for(int i=0; i<sampleCount; i++){
-				soundBites[id].samples[i].phone = readBlocking();
-				soundBites[id].samples[i].pitch = readBlocking();
-				soundBites[id].samples[i].intensity = readBlocking();
-			}
 			sendOk();
+			lastPing = now;
 
 		}else if(cmd == CMD_PLAY_BITE){
 			sendOk();
 			display->showText(FACE_VIBING);
-			playBite(nextByte());
+			playBite(nextByteFromBuffer());
 			doFlush = true;
 			lastPing = millis();
 
@@ -153,7 +134,7 @@ void CommandStream::update(){
 		}
 	}
 
-	if(now - lastPing > 1000l){
+	if(now - lastPing > 2000l){
 		strcpy(face, FACE_LONELY);
 	}
 
@@ -175,29 +156,54 @@ bool CommandStream::flushToLatestCommand(){
 	commandBuffer[0] = 255;
 
 	while(stream->available() > 0){
-		byte header = readBlocking();
+		uint8_t header = readBlocking();
 		if(header != CMD_HEADER){
 			stream->print("out of sync "); stream->println(header);
 			return false;
 		}
 
-		byte cmd = readBlocking();
+		uint8_t cmd = readBlocking();
 		commandBuffer[0] = cmd;
+
 		for(int payloadIdx=0; payloadIdx<CMD_PAYLOAD_SIZES[cmd]; payloadIdx++){
 			commandBuffer[payloadIdx+1] = readBlocking();
 		}
 
 		if(cmd == CMD_SOUNDBITE){
-			// return now so that calling function can read the rest of the soundbite
-			// @TODO: move that logic into here?
-			return true;
+			bufferIdx = 1;
+			uint8_t id = nextByteFromBuffer(); // dump the ID
+
+			uint32_t period = 0;
+			for(int i=0; i<4; i++){
+				uint8_t b = nextByteFromBuffer();
+				period += b << (i*8);
+			}
+
+			uint32_t sampleCount = 0;
+			for(int i=0; i<4; i++){
+				uint8_t b = nextByteFromBuffer();
+				sampleCount += b << (i*8);
+			}
+
+			soundBite->init(period, sampleCount);
+			for(int i=0; i<sampleCount; i++){
+				if(i < MAX_SAMPLES){
+					soundBite->samples[i].phone = readBlocking();
+					soundBite->samples[i].pitch = readBlocking();
+					soundBite->samples[i].intensity = readBlocking();
+				}else{
+					readBlocking();
+					readBlocking();
+					readBlocking();
+				}
+			}
 		}
 	}
 
 	return true;
 }
 
-byte CommandStream::readBlocking(){
+uint8_t CommandStream::readBlocking(){
 	while(stream->available() == 0){}
 
 	return stream->read();
@@ -209,7 +215,7 @@ void CommandStream::flush(){
 	}
 }
 
-byte CommandStream::nextByte(){
+uint8_t CommandStream::nextByteFromBuffer(){
 	if(bufferIdx >= MAX_CMD_SIZE){
 		Logger::getGlobal()->error("BUFFER OVER");
 		return 0;
@@ -228,16 +234,16 @@ void CommandStream::playBite(uint8_t id){
 	lastSample.pitch = 0;
 	lastSample.intensity = 0;
 
-	while(sampleIdx < soundBites[id].sampleCount){
+	while(sampleIdx < soundBite->sampleCount){
 		now = millis();
 
 		long delta = now - startTime;
-		sampleIdx = int(delta / soundBites[id].period);
-		if(sampleIdx >= soundBites[id].sampleCount){
+		sampleIdx = int(delta / soundBite->period);
+		if(sampleIdx >= soundBite->sampleCount){
 			break;
 		}
 
-		Sample sample = soundBites[id].samples[sampleIdx];
+		Sample sample = soundBite->samples[sampleIdx];
 
 		if(sample != lastSample){
 			if(sample.phone < 255 && sample.intensity > 0){
