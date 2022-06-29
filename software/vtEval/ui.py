@@ -17,11 +17,16 @@ class MainWindow(QtWidgets.QWidget):
 	resetRequested = QtCore.Signal()
 	evalRequested = QtCore.Signal(str, str, Participant, str, serial.SerialInfo)
 
-	def __init__(self, parent=None):
+	def __init__(self, simulateEnabled=False, parent=None):
 		super().__init__(parent=parent)
 
 		self.setWindowTitle('Vibey Transcribey Eval')
 		self.setLayout(QtWidgets.QVBoxLayout())
+
+		if simulateEnabled:
+			label = QtWidgets.QLabel('<h2><center>Simulation Mode Enabled</center></h2>')
+			label.setStyleSheet('QLabel { background: #c44; color: #eee; padding: 1em }')
+			self.layout().addWidget(label)
 
 		participants = self.loadParticipants()
 

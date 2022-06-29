@@ -9,11 +9,13 @@ from .participant import Participant
 
 class VtEvalController():
 	def __init__(self):
+		self.simulateEnabled = '--simulate' in sys.argv
+
 		self.app = QtWidgets.QApplication()
 		self.setupGui()
 
 	def setupGui(self):
-		self.mainWindow = ui.MainWindow()
+		self.mainWindow = ui.MainWindow(simulateEnabled=self.simulateEnabled)
 		self.mainWindow.resetRequested.connect(self.resetMainWindow)
 		self.mainWindow.evalRequested.connect(self.onEvalRequested)
 
@@ -25,16 +27,17 @@ class VtEvalController():
 		self.mainWindow.show()
 
 	def onEvalRequested(self, evalName, facilitator, participant, condition, device):
-		proc = subprocess.Popen(
-			[
-				sys.executable, '-m', f'vtEval.{evalName.lower()}',
-				'--facilitator', facilitator,
-				'--pid', participant.id,
-				'--condition', condition,
-				'--device', device.systemLocation(),
-			],
-			text=True
-		)
+		args = [
+			sys.executable, '-m', f'vtEval.{evalName.lower()}',
+			'--facilitator', facilitator,
+			'--pid', participant.id,
+			'--condition', condition,
+			'--device', device.systemLocation(),
+		]
+		if self.simulateEnabled:
+			args.append('--simulate')
+
+		proc = subprocess.Popen(args, text=True)
 
 		execDialog = ui.ExecutionDialog(proc=proc, textDescription=evalName, parent=self.mainWindow)
 		execDialog.exec_()
