@@ -147,16 +147,37 @@ class PhonemeEvalApp(VtEvalApp):
 		(self.vowels, self.vowelSet) = self.loadVowels()
 
 	def simulate(self):
-		isPostTest = self.arguments['condition'] == 'Post-test'
-		targetRates = {
-			'c': 3/9,
-			'v': 3/9,
-		}
+		phoneFreqs = {}
+		trainToTestPhones = {}
+
+		with open('aux-data/phoneme-translate.csv') as phoneTransFile:
+			reader = csv.DictReader(phoneTransFile)
+			for row in reader:
+				if row['test_phone'] != '':
+					trainToTestPhones[row['train_phone']] = row['test_phone']
+
+		with open('aux-data/buckeye-phone-frequencies.csv') as freqFile:
+			reader = csv.DictReader(freqFile)
+			for row in reader:
+				if row['trainPhoneme'] != '' and row['trainPhoneme'] in trainToTestPhones:
+					phone = trainToTestPhones[row['trainPhoneme']]
+					stimWord = phoneToHumanMap[phone]
+
+					if stimWord != '':
+						if stimWord not in phoneFreqs:
+							phoneFreqs[stimWord] = 0
+
+						phoneFreqs[stimWord] += float(row['phonemeExposures'])
+
+			maxExposures = max(phoneFreqs.values())
+			for stimWord,count in phoneFreqs.items():
+				phoneFreqs[stimWord] = count/maxExposures * 1/4
+
+		isPreTest = self.arguments['condition'] == 'Pre-test'
 
 		for w in self.widgetStack:
 			if isinstance(w, AFCWidget):
-				consonantOrVowel = w.name[0]
-				if not isPostTest or random.random() > targetRates[consonantOrVowel]:
+				if isPreTest or random.random() > phoneFreqs[w.stimulus.id]:
 					w.selection = random.choice(w.options)
 				else:
 					w.selection = w.stimulus.id
