@@ -5,6 +5,21 @@ output: html_document
 
 R code for processing vibey-transcribey data
 
+
+can't use between variable as random slope - only random intercept
+
+by item random effect
+
+ryan last year - crowding study in eye perception
+	by item and by speaker
+	item / speaker
+
+
+Correct ~ Training*Condition + (Condition|Subject) + (1|Stim)
+
+McGurk
+Correct ~ Training*Condition + (Condition|Subject) + (1|stim/speaker)
+
 ```{r load-helpers, include = FALSE}
     # helper functions and folder setup
 
@@ -51,11 +66,18 @@ R code for processing vibey-transcribey data
 
     merge_eval_files_with_training <- function(eval_df, train_df) {
         df <- merge(eval_df, train_df, key = "pid", all.x = TRUE)
-        df$training_word_exposures <- ifelse(
-            df$condition == "Pre-test",
-            0,
-            df$training_word_exposures
+
+        df$group <- ifelse(is.na(df$training_word_exposures), "Control", "Experimental")
+        df$group <- as.factor(df$group)
+
+        df$training_word_exposures <- replace(
+            df$training_word_exposures,
+            is.na(df$training_word_exposures),
+            0
         )
+
+        # normalize training_word_exposures
+        df$training_word_exposures_n <- df$training_word_exposures / max(df$training_word_exposures, na.rm = TRUE)
 
         return(df)
     }
@@ -75,12 +97,43 @@ R code for processing vibey-transcribey data
         return(model)
     }
 
-    save_last_plot <- function(filename, width = 6, height = 6) {
+    save_plot <- function(plot = NULL, path = NULL, filename = NULL, width = 6, height = 6) {
+        if (is.null(plot)) {
+            plot <- ggplot2::last_plot()
+        }
+
+        if (is.null(path)) {
+            path <- "analysis-output/plots"
+        }
+
+        if (is.null(filename)) {
+            filename <- stringr::str_replace_all(tolower(plot$labels$title), " ", "_")
+        }
+
+        filename <- sprintf("%s/%s.png", path, filename)
+
         ggplot2::ggsave(
-            plot = ggplot2::last_plot(),
-            file = paste("analysis-output/plots/", filename, sep = "/"),
+            plot = plot,
+            file = filename,
             width = width, height = height
         )
+    }
+
+    get_logistic_odds_results <- function(model, effect_index = NULL) {
+        # https://www.statology.org/how-to-report-logistic-regression-results/
+
+        coeffs <- summary(model)$coefficients
+
+        effect_index <- ifelse(is.null(effect_index), nrow(coeffs))
+
+        coeff <- coeffs[effect_index, 1]
+        err <- coeffs[effect_index, 1]
+
+        return(c(
+            (exp(coeff)-1)*100,
+            exp(coeff + (1.96*err)),
+            exp(coeff - (1.96*err))
+        ))
     }
 ```
 
@@ -217,6 +270,7 @@ R code for processing vibey-transcribey data
     write.csv(exposure_counts_by_phoneme, "analysis-output/exposure_counts_by_phoneme_0.csv")
 
     p_exposures <- tidyr::gather(exposure_counts_by_phoneme, phoneme, phoneme_exposures, AA:ZH)
+    p_exposures$phoneme <- as.factor(p_exposures$phoneme)
     p_exposures <- data.frame(dplyr::summarise(
         dplyr::group_by(p_exposures, pid, phoneme),
         phoneme_exposures = sum(phoneme_exposures)
@@ -327,10 +381,7 @@ R code for processing vibey-transcribey data
     table(phone_df$pid, phone_df$correct, phone_df$condition)
     table(phone_df$pid, phone_df$correct)
     table(phone_df$condition, phone_df$correct)
-```
 
-## Explore and visualize 📈
-```{r plot-phoneme-data, echo = FALSE}
     phone_df_with_phone_exposures <- merge(
         phone_df, phone_translate,
         by.x = "stimulus", by.y = "test_word",
@@ -342,145 +393,166 @@ R code for processing vibey-transcribey data
         p_exposures,
         c("train_phone" = "phoneme", "pid")
     )
+    phone_df_with_phone_exposures$train_phone <- as.factor(phone_df_with_phone_exposures$train_phone)
 
-    pre_test_only <- dplyr::filter(phone_df_with_phone_exposures, condition == "Pre-test")
-
-    phone_df_with_phone_exposures$phoneme_exposures <- ifelse(
-        phone_df_with_phone_exposures$condition == "Pre-test",
-        0,
-        phone_df_with_phone_exposures$phoneme_exposures
+    # Question: Should control group training predictors be converted from NA to 0??
+    phone_df_with_phone_exposures$phoneme_exposures <- replace(
+        phone_df_with_phone_exposures$phoneme_exposures,
+        is.na(phone_df_with_phone_exposures$phoneme_exposures),
+        0
     )
 
-    post_test_only <- dplyr::filter(phone_df_with_phone_exposures, condition == "Post-test")
+    # normalize phoneme exposure counts
+    phoneme_exposures <- phone_df_with_phone_exposures$phoneme_exposures
+    phone_df_with_phone_exposures$phoneme_exposures_n <- phoneme_exposures / max(phoneme_exposures, na.rm = TRUE)
 
-    exposure_counts_by_phone_type <- data.frame(
-        dplyr::summarise(
-            dplyr::group_by(phone_df_with_phone_exposures, pid, condition, test_phone, phone_type),
-            phoneme_exposures = mean(phoneme_exposures),
-        )
-    )
+    ordered_phones <- phone_translate[order(phone_translate$phone_type, phone_translate$test_phone), ]$test_phone
+    ordered_phones <- stringi::stri_remove_empty(ordered_phones)
+    phone_df_with_phone_exposures <- within(phone_df_with_phone_exposures, {test_phone <- factor(
+        test_phone,
+        levels = ordered_phones,
+        labels = ordered_phones
+    )})
+```
 
-    exposure_counts_by_phone_type <- data.frame(
-        dplyr::summarise(
-            dplyr::group_by(exposure_counts_by_phone_type, pid, phone_type, condition),
-            phoneme_exposures = sum(phoneme_exposures),
-        )
-    )
+## Explore and visualize 📈
+```{r plot-phoneme-data, echo = FALSE}
+#    exposure_counts_by_phone_type <- data.frame(
+#        dplyr::summarise(
+#            dplyr::group_by(phone_df_with_phone_exposures, pid, condition, test_phone, phone_type),
+#            phoneme_exposures = mean(phoneme_exposures),
+#        )
+#    )
+#
+#    exposure_counts_by_phone_type <- data.frame(
+#        dplyr::summarise(
+#            dplyr::group_by(exposure_counts_by_phone_type, pid, phone_type, condition),
+#            phoneme_exposures = sum(phoneme_exposures),
+#        )
+#    )
+#
+#    test_summary <- data.frame(
+#        dplyr::summarise(
+#            dplyr::group_by(phone_df_with_phone_exposures, condition, pid, phone_type),
+#            correctPortion = 100 * mean(correct),
+#            se = 100 * sd(correct) / sqrt(length(correct))
+#        )
+#    )
+#
+#    phone_summary_by_type_and_pid <- merge(
+#        test_summary,
+#        exposure_counts_by_phone_type,
+#        by = c("condition", "pid", "phone_type")
+#    )
+#
+#    phone_summary_exp_by_pid <- dplyr::filter(phone_summary_by_type_and_pid, !is.na(phoneme_exposures))
+#
+#    ggplot2::ggplot(phone_summary_exp_by_pid, ggplot2::aes(
+#        x = phoneme_exposures, y = correctPortion,
+#        shape = phone_type, group = phone_type, color = phone_type
+#    )) +
+#        ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
+#        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
+#        ggplot2::geom_line() +
+#        ggplot2::geom_point(size = 3) +
+#        ggplot2::geom_errorbar(
+#            ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
+#            width = 500,
+#        ) +
+#        ggplot2::ylim(0, 100) +
+#        ggplot2::labs(
+#            colour = "Phoneme Type",
+#            shape = "Phoneme Type",
+#            x = "Phoneme Exposures",
+#            y = "Percentage Correct",
+#            title = "Phoneme Recognition (experimental group individuals)"
+#        ) +
+#        ggplot2::theme_classic() +
+#        ggplot2::theme(legend.position = c(0.85, 0.85))
+#
+#    save_last_plot("phoneme-recognition-exp-group-by-pid.png")
+#
+#    post_test_summary <- data.frame(
+#        dplyr::summarise(
+#            dplyr::group_by(phone_df_with_phone_exposures, phone_type, test_phone),
+#            correctPortion = 100 * mean(correct),
+#            phoneme_exposures = mean(phoneme_exposures),
+#            se = 100 * sd(correct) / sqrt(length(correct))
+#        )
+#    )
+#
+#    ggplot2::ggplot(post_test_summary, ggplot2::aes(
+#        x = phoneme_exposures, y = correctPortion,
+#        label = test_phone, color = phone_type
+#    )) +
+#        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
+#    #    ggplot2::geom_line(ggplot2::aes(y = fitLine$fit), color = 'black') +
+#    #    ggplot2::geom_ribbon(ggplot2::aes(ymin = fitLine$lwr, ymax = fitLine$upr), alpha = .15, color = 'gray') +
+#    #    ggplot2::geom_point(show.legend = FALSE) +
+#    #    ggrepel::geom_text_repel(max.overlaps = Inf) +
+#        ggplot2::geom_text(size = 3) +
+#        #ggplot2::ylim(min(fitLine$lwr), 100) +
+#        ggplot2::ylim(0, 100) +
+#        ggplot2::labs(
+#            colour = "Phoneme Type",
+#            x = "Mean Training Exposures",
+#            y = "Mean Percentage Correct",
+#            title = "Phoneme Recognition (experimental group)"
+#        ) +
+#        ggplot2::theme_classic() +
+#        ggplot2::theme(
+#            legend.position = "none",
+#            axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank()
+#        )
+#
+#    save_last_plot("phoneme-recognition-by-phone.png", width = 3, height = 3)
 
-    test_summary <- data.frame(
+    post_test_summary_by_condition <- data.frame(
         dplyr::summarise(
-            dplyr::group_by(phone_df_with_phone_exposures, condition, pid, phone_type),
+            dplyr::group_by(phone_df_with_phone_exposures, group, condition),
             correctPortion = 100 * mean(correct),
             se = 100 * sd(correct) / sqrt(length(correct))
         )
     )
 
-    phone_summary_by_type_and_pid <- merge(
-        test_summary,
-        exposure_counts_by_phone_type,
-        by = c("condition", "pid", "phone_type")
-    )
+    dodge <- ggplot2::position_dodge(width = 0.125)
 
-    ggplot2::ggplot(phone_summary_by_type_and_pid, ggplot2::aes(
-        x = phoneme_exposures, y = correctPortion,
-        shape = phone_type, group = phone_type, color = phone_type
+    ggplot2::ggplot(post_test_summary_by_condition, ggplot2::aes(
+        x = condition, y = correctPortion,
+        group = group, color = group, shape = group
     )) +
-        ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
         ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
-        ggplot2::geom_line() +
-        ggplot2::geom_point(size = 3) +
+        ggplot2::geom_line(position = dodge) +
+        ggplot2::geom_point(position = dodge, size = 4) +
         ggplot2::geom_errorbar(
             ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
-            width = 500,
+            position = dodge,
+            width = .125,
+            color = "#555555"
         ) +
         ggplot2::ylim(0, 100) +
         ggplot2::labs(
-            colour = "Phoneme Type",
-            shape = "Phoneme Type",
-            x = "Phoneme Exposures",
+            x = "Test Session",
             y = "Percentage Correct",
-            title = "Phoneme Recognition (pre vs post-test)"
+            title = "Phoneme Identification Before and After Training Period",
+            color = "Group", shape = "Group"
         ) +
-        ggplot2::theme_classic(base_size = 10) +
-        ggplot2::theme(legend.position = c(0.85, 0.85))
-
-    save_last_plot("phoneme-recognition-by-pid.png")
-
-    post_test_summary_by_type <- data.frame(
-        dplyr::summarise(
-            dplyr::group_by(phone_summary_by_type_and_pid, phone_type, condition),
-            correctPortion = mean(correctPortion),
-            phoneme_exposures = mean(phoneme_exposures),
-            se = sd(correctPortion) / sqrt(length(correctPortion))
-        )
-    )
-
-    ggplot2::ggplot(post_test_summary_by_type, ggplot2::aes(
-        x = phoneme_exposures, y = correctPortion,
-        shape = phone_type, group = phone_type, color = phone_type
-    )) +
-        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
-        ggplot2::geom_line() +
-        ggplot2::geom_point(size = 3) +
-        ggplot2::geom_errorbar(
-            ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
-            width = 500,
-        ) +
-        ggplot2::ylim(0, 100) +
-        ggplot2::labs(
-            colour = "Phoneme Type",
-            shape = "Phoneme Type",
-    #        x = "Phoneme Exposures"
-    #       y = "Percentage Correct",
-            title = "All Participants"
-        ) +
-        ggplot2::theme_classic(base_size = 10) +
+        ggplot2::theme_classic() +
         ggplot2::theme(
-            legend.position = "none",
-            axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank()
+            legend.position = c(0.85, 0.85),
+            legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
         )
-    #    ggplot2::theme(legend.position = c(0.85, 0.85))
 
-    save_last_plot("phoneme-recognition.png", width = 3, height = 3)
+    save_plot()
 
-    post_test_summary <- data.frame(
-        dplyr::summarise(
-            dplyr::group_by(post_test_only, phone_type, test_phone),
-            correctPortion = 100 * mean(correct),
-            phoneme_exposures = mean(phoneme_exposures),
-            se = 100 * sd(correct) / sqrt(length(correct))
-        )
+    phone_exp_post_only <- dplyr::filter(
+        phone_df_with_phone_exposures,
+        group == "Experimental" & condition == "Post-test"
     )
-
-    ggplot2::ggplot(post_test_summary, ggplot2::aes(
-        x = phoneme_exposures, y = correctPortion,
-        label = test_phone, color = phone_type
-    )) +
-        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
-    #    ggplot2::geom_line(ggplot2::aes(y = fitLine$fit), color = 'black') +
-    #    ggplot2::geom_ribbon(ggplot2::aes(ymin = fitLine$lwr, ymax = fitLine$upr), alpha = .15, color = 'gray') +
-    #    ggplot2::geom_point(show.legend = FALSE) +
-    #    ggrepel::geom_text_repel(max.overlaps = Inf) +
-        ggplot2::geom_text(size = 3) +
-        #ggplot2::ylim(min(fitLine$lwr), 100) +
-        ggplot2::ylim(0, 100) +
-        ggplot2::labs(
-            colour = "Phoneme Type",
-    #        x = "Phoneme Exposures",
-    #        y = "Percentage Correct",
-            title = "All Participants"
-        ) +
-        ggplot2::theme_classic(base_size = 10) +
-        ggplot2::theme(
-            legend.position = "none",
-            axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank()
-        )
-
-    save_last_plot("phoneme-recognition-by-phone.png", width = 3, height = 3)
 
     post_test_summary_by_pid <- data.frame(
         dplyr::summarise(
-            dplyr::group_by(post_test_only, pid, phone_type, test_phone),
+            dplyr::group_by(phone_exp_post_only, pid, group, phone_type, test_phone),
             correctPortion = 100 * mean(correct),
             phoneme_exposures = mean(phoneme_exposures),
             se = 100 * sd(correct) / sqrt(length(correct))
@@ -501,33 +573,153 @@ R code for processing vibey-transcribey data
         #ggplot2::ylim(min(fitLine$lwr), 100) +
         ggplot2::ylim(0, 100) +
         ggplot2::labs(
-            colour = "Phoneme Type",
+            color = "Phone type",
+            x = "Phoneme Exposures",
+            y = "Percentage Correct",
+            title = "(Individual's) Effect of Stimulus Exposures on Phoneme Identification"
+        ) +
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+            legend.position = c(0.9, 0.9),
+            legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
+        )
+
+    save_plot(width = 12)
+
+    post_test_summary_by_phone <- data.frame(
+        dplyr::summarise(
+            dplyr::group_by(phone_exp_post_only, phone_type, test_phone),
+            correctPortion = 100 * mean(correct),
+            phoneme_exposures = mean(phoneme_exposures),
+            se = 100 * sd(correct) / sqrt(length(correct))
+        )
+    )
+
+    ggplot2::ggplot(post_test_summary_by_phone, ggplot2::aes(
+        x = phoneme_exposures, y = correctPortion,
+        label = test_phone, color = phone_type
+    )) +
+        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
+    #    ggplot2::geom_line(ggplot2::aes(y = fitLine$fit), color = 'black') +
+    #    ggplot2::geom_ribbon(ggplot2::aes(ymin = fitLine$lwr, ymax = fitLine$upr), alpha = .15, color = 'gray') +
+    #    ggplot2::geom_point(show.legend = FALSE) +
+        ggplot2::geom_text(size = 3) +
+    #    ggrepel::geom_text_repel(max.overlaps = Inf) +
+        #ggplot2::ylim(min(fitLine$lwr), 100) +
+        ggplot2::ylim(0, 100) +
+        ggplot2::labs(
+            colour = "Phone Type",
+            x = "Phoneme Exposures",
+            y = "Percentage Correct",
+            title = "Effect of Stimulus Exposures on Phoneme Identification"
+        ) +
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+            legend.position = c(0.85, 0.85),
+            legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
+        )
+
+    save_plot()
+```
+
+```{r plot-phoneme-data2, include = FALSE}
+    # extra plots
+
+    # Consonants vs vowels
+    post_test_summary_by_type <- data.frame(
+        dplyr::summarise(
+            dplyr::group_by(phone_df_with_phone_exposures, group, phone_type),
+            correctPortion = 100 * mean(correct),
+            phoneme_exposures = mean(phoneme_exposures),
+            se = 100 * sd(correct) / sqrt(length(correct))
+        )
+    )
+
+    ggplot2::ggplot(post_test_summary_by_type, ggplot2::aes(
+        x = phone_type, y = correctPortion,
+        label = phone_type, fill = group
+    )) +
+        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
+        ggplot2::geom_bar(stat = "identity", , position = ggplot2::position_dodge()) +
+        ggplot2::ylim(0, 100) +
+        ggplot2::labs(
+            fill = "Group",
             x = "Phoneme Exposures",
             y = "Percentage Correct",
             title = "Post-test Phoneme Identification"
         ) +
-        ggplot2::theme_classic(base_size = 10) +
-        ggplot2::theme(legend.position = c(0.85, 0.85))
+        ggplot2::theme_classic()
 
-    save_last_plot("phoneme-recognition-by-phone-by-pid.png")
+    save_plot()
+
+    post_test_summary_by_group <- data.frame(
+        dplyr::summarise(
+            dplyr::group_by(phone_df_with_phone_exposures, group, phone_type, test_phone),
+            correctPortion = 100 * mean(correct),
+            phoneme_exposures = mean(phoneme_exposures),
+            se = 100 * sd(correct) / sqrt(length(correct))
+        )
+    )
+
+    ggplot2::ggplot(post_test_summary_by_group, ggplot2::aes(
+        x = test_phone, y = correctPortion,
+        label = test_phone, fill = group
+    )) +
+        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
+        ggplot2::geom_bar(stat = "identity", , position = ggplot2::position_dodge()) +
+        ggplot2::ylim(0, 100) +
+        ggplot2::labs(
+            fill = "Group",
+            x = "Phoneme Exposures",
+            y = "Percentage Correct",
+            title = "Post-test Phoneme Identification (by phoneme)"
+        ) +
+        ggplot2::theme_classic()
+
+    save_plot()
+
 ```
 
 ## Model
 ```{r model-phoneme-data, echo = FALSE}
-    phone_model <- function(formula) bin_lme(formula = formula, data = post_test_only)
+    # Question here: should training_word_exposures be NA or 0 for the control group?
 
-    phone_m0 <- phone_model(correct ~ 1 + (phoneme_exposures | pid))
-    phone_m1 <- phone_model(correct ~ phoneme_exposures + (phoneme_exposures | pid))
-    phone_m2 <- phone_model(correct ~ phoneme_exposures + phone_type + (phoneme_exposures | pid))
+    phone_m0 <- bin_lme(
+        data = phone_df_with_phone_exposures,
+        formula = correct
+            ~ training_word_exposures_n * condition
+            + (0 + condition | pid)
+            + (0 + condition | phone_type / test_phone)
+    )
 
-    #plot(ggeffects::ggeffect(phone_m1, terms = c("training [0:50]"), type = "re"))
-    #plot(ggeffects::ggeffect(phone_m2, terms = c("training [0:50]", "phone_type"), type = "re"))
-    #plot(ggeffects::ggeffect(phone_m3, terms = c("training [0:50]", "phone_type"), type = "re"))
+    results_phone_m0 <- get_logistic_odds_results(phone_m0)
 
-    anova(phone_m0, phone_m1, phone_m2)
+    print(sprintf(
+        "The odds of correctly specifying a phoneme on the post-test, when trained, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
+        results_phone_m0[1], results_phone_m0[2], results_phone_m0[3]
+    ))
+
+    # @TODO: Question - do the lines above need to be de-transformed? training_word_exposures_n is min-max normalized
+
+    exp_post_only <- dplyr::filter(phone_df_with_phone_exposures, group == "Experimental", condition == "Post-test")
+    phone_m1 <- bin_lme(
+        data = exp_post_only,
+        formula = correct
+            ~ phoneme_exposures_n
+            + (1 | pid)
+            + (1 | phone_type / test_phone)
+    )
+
+    results_phone_m1 <- get_logistic_odds_results(phone_m1)
+
+    print(sprintf(
+        "The odds of correctly specifying a phoneme on the post-test, when trained, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
+        results_phone_m1[1], results_phone_m1[2], results_phone_m1[3]
+    ))
+
 ```
 
-# Prosody
+# PROSODY
 ## Load Data
 ```{r load-prosody-data, echo = FALSE}
     prosody_df <- load_eval_files("_prosody_")
@@ -560,76 +752,185 @@ R code for processing vibey-transcribey data
     rm(type_starts_with_f)
 ```
 
-## Plot
-```{r plot-prosody-data, echo = FALSE}
-    prosody_summary <- dplyr::summarise(
-        dplyr::group_by(prosody_df, pid, prosody_type, condition),
+## Plot Focus Discrimination
+```{r plot-focus-data, echo = FALSE}
+
+    focus_test_session_comparison_by_group <- dplyr::summarise(
+        dplyr::group_by(focus_df, group, condition),
         correctPortion = 100 * mean(correct),
-        se = 100 * sd(correct) / sqrt(length(correct)),
-        training_word_exposures = mean(training_word_exposures)
+        se = 100 * sd(correct) / sqrt(length(correct))
     )
 
-    ggplot2::ggplot(prosody_summary, ggplot2::aes(
-        x = training_word_exposures, y = correctPortion,
-        shape = prosody_type,
-        group = prosody_type,
-        color = prosody_type
+    dodge <- ggplot2::position_dodge(width = 0.125)
+
+    ggplot2::ggplot(focus_test_session_comparison_by_group, ggplot2::aes(
+        x = condition, y = correctPortion,
+        group = group, color = group, shape = group
     )) +
-        ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
         ggplot2::geom_hline(yintercept = 50, linetype = "dashed", color = "gray") +
-        ggplot2::geom_line() +
-        ggplot2::geom_point(size = 4) +
+        ggplot2::geom_line(position = dodge) +
+        ggplot2::geom_point(position = dodge, size = 4) +
         ggplot2::geom_errorbar(
             ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
-            width = 250
+            position = dodge,
+            width = .125,
+            color = "#555555"
         ) +
         ggplot2::ylim(0, 100) +
         ggplot2::labs(
-            colour = "",
-            shape = "",
+            x = "Test Session",
+            y = "Percentage Correct",
+            title = "Focus Discrimination Before and After Training",
+            color = "Group", shape = "Group"
+        ) +
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+            legend.position = c(0.85, 0.85),
+            legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
+        )
+
+    save_plot()
+
+    focus_post_experimental_only <- dplyr::filter(focus_df, group == "Experimental", condition == "Post-test")
+
+    focus_post_experimental_only_summary <- dplyr::summarise(
+        dplyr::group_by(focus_post_experimental_only, pid, training_word_exposures),
+        correctPortion = 100 * mean(correct),
+        se = 100 * sd(correct) / sqrt(length(correct))
+    )
+
+    ggplot2::ggplot(focus_post_experimental_only_summary, ggplot2::aes(
+        x = training_word_exposures, y = correctPortion
+    )) +
+        ggplot2::geom_hline(yintercept = 50, linetype = "dashed", color = "gray") +
+        ggplot2::geom_point(position = dodge, size = 4) +
+        ggplot2::geom_errorbar(
+            ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
+            position = dodge,
+            width = .125,
+            color = "#555555"
+        ) +
+        ggplot2::ylim(0, 100) +
+        ggplot2::xlim(0, NA) +
+        ggplot2::labs(
             x = "Training Word Exposures",
             y = "Percentage Correct",
-            title = "Prosody Perception"
+            title = "Word Exposure Effect on Focus Discrimination"
         ) +
-        ggplot2::theme_classic(base_size = 10) +
-        ggplot2::theme(legend.position = c(0.5, 0.065), legend.direction = "horizontal")
+        ggplot2::theme_classic()
 
-    save_last_plot("prosody-perception.png")
-
+    save_plot()
 ```
 
 ## Focus - Model & Test
 ```{r model-focus-data, echo = FALSE}
     focus_model <- function(formula) bin_lme(formula = formula, data = focus_df)
-    #
-    focus_m0 <- focus_model(correct ~ 1 + (training_word_exposures | pid))
-    focus_m1 <- focus_model(correct ~ training_word_exposures + (training_word_exposures | pid))
-    focus_m2 <- focus_model(correct ~ training_word_exposures + (training_word_exposures | pid) + (1 | sentence_id))
 
-    #focus_model <- function(formula) lme(formula = formula, data = focus_df)
-    #lme4::lmer(portionCorrect ~ 1 + (training_word_exposures|pid), data = focus_df)
-    #
-    #focus_m0 = focus_model(correct ~ 1 + (training_word_exposures | pid))
-    #focus_m1 = focus_model(correct ~ training_word_exposures + (training_word_exposures | pid))
-    #focus_m2 = focus_model(correct ~ training_word_exposures + (training_word_exposures | pid) + (1 | sentence_id))
+    focus_m0 <- bin_lme(
+        data = focus_df,
+        formula = correct
+            ~ training_word_exposures_n * condition
+            + (condition | pid)
+            + (1 | sentence_id / stimulus)
+    )
 
+    results_focus_m0 <- get_logistic_odds_results(focus_m0)
+    print(sprintf(
+        "The odds of correctly identifying the emphasized word after training, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
+        results_focus_m0[1], results_focus_m0[2], results_focus_m0[3]
+    ))
 
-    anova(focus_m0, focus_m1, focus_m2)
+```
 
+## Plot Phrase Discrimination
+```{r plot-phrase-data, echo = FALSE}
+
+    phrase_test_session_by_group <- dplyr::summarise(
+        dplyr::group_by(phrase_df, group, condition),
+        correctPortion = 100 * mean(correct),
+        se = 100 * sd(correct) / sqrt(length(correct))
+    )
+
+    dodge <- ggplot2::position_dodge(width = 0.125)
+
+    ggplot2::ggplot(phrase_test_session_by_group, ggplot2::aes(
+        x = condition, y = correctPortion,
+        group = group, color = group, shape = group
+    )) +
+        ggplot2::geom_hline(yintercept = 50, linetype = "dashed", color = "gray") +
+        ggplot2::geom_line(position = dodge) +
+        ggplot2::geom_point(position = dodge, size = 4) +
+        ggplot2::geom_errorbar(
+            ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
+            position = dodge,
+            width = .125,
+            color = "#555555"
+        ) +
+        ggplot2::ylim(0, 100) +
+        ggplot2::labs(
+            x = "Test Session",
+            y = "Percentage Correct",
+            title = "Phrase Discrimination Before and After Training",
+            color = "Group", shape = "Group"
+        ) +
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+            legend.position = c(0.85, 0.85),
+            legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
+        )
+
+    save_plot()
+
+    phrase_post_exp_only <- dplyr::filter(phrase_df, group == "Experimental", condition == "Post-test")
+
+    phrase_post_exp_only_summary <- dplyr::summarise(
+        dplyr::group_by(phrase_post_exp_only, pid, training_word_exposures),
+        correctPortion = 100 * mean(correct),
+        se = 100 * sd(correct) / sqrt(length(correct))
+    )
+
+    ggplot2::ggplot(phrase_post_exp_only_summary, ggplot2::aes(
+        x = training_word_exposures, y = correctPortion
+    )) +
+        ggplot2::geom_hline(yintercept = 50, linetype = "dashed", color = "gray") +
+        ggplot2::geom_point(position = dodge, size = 4) +
+        ggplot2::geom_errorbar(
+            ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
+            position = dodge,
+            width = .125,
+            color = "#555555"
+        ) +
+        ggplot2::ylim(0, 100) +
+        ggplot2::xlim(0, NA) +
+        ggplot2::labs(
+            x = "Training Word Exposures",
+            y = "Percentage Correct",
+            title = "Word Exposure Effect on Phrase Boundary Discrimination"
+        ) +
+        ggplot2::theme_classic()
+
+    save_plot()
 ```
 
 ## Phrase Boundary - Model & Test
 ```{r model-phrase-data, echo = FALSE}
-    phrase_model <- function(formula) bin_lme(formula = formula, data = phrase_df)
+    phrase_m0 <- bin_lme(
+        data = phrase_df,
+        formula = correct
+            ~ training_word_exposures_n * condition
+            + (training_word_exposures_n | pid)
+            + (condition | pid)
+            + (1 | sentence_id / stimulus)
+    )
 
-    phrase_m0 <- phrase_model(correct ~ 1 + (training_word_exposures | pid))
-    phrase_m1 <- phrase_model(correct ~ training_word_exposures + (training_word_exposures | pid))
-    phrase_m2 <- phrase_model(correct ~ training_word_exposures + (training_word_exposures | pid) + (1 | sentence_id))
-
-    anova(phrase_m0, phrase_m1, phrase_m2)
+    results_phrase_m0 <- get_logistic_odds_results(phrase_m0)
+    print(sprintf(
+        "The odds of correctly identifying the phrase boundary word after training, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
+        results_phrase_m0[1], results_phrase_m0[2], results_phrase_m0[3]
+    ))
 ```
 
-# Perceptual Integration
+# INTEGRATION
 ## Load Data
 ```{r load-integration-data, echo = FALSE}
     integration_df <- load_eval_files("_integration_", create_correct_column = FALSE)
@@ -640,52 +941,95 @@ R code for processing vibey-transcribey data
         auditory_stim <- as.factor(substring(stimulus, 1, 2))
         tactile_stim <- as.factor(substring(stimulus, 4, 5))
         speaker <- as.integer(substring(audibleFile, 8, 9))
+        speaker_gender <- as.factor(substring(stimfile, 1, 1))
     })
-
-    # filter out bad speakers
-    #integration_df <- dplyr::filter(integration_df, speaker > 3 & speaker != 7)
 ```
 
 ## Explore & Visualize 📈
 ```{r plot-integration-data, echo = FALSE}
     integration_summary <- dplyr::summarise(
-        dplyr::group_by(integration_df, pid, condition),
+        dplyr::group_by(integration_df, group, condition),
         correctPortion = 100 * mean(integrated),
         se = 100 * sd(integrated) / sqrt(length(integrated)),
         training_word_exposures = mean(training_word_exposures),
     )
 
     ggplot2::ggplot(integration_summary, ggplot2::aes(
-        x = training_word_exposures, y = correctPortion
+        x = condition, y = correctPortion,
+        group = group, color = group, shape = group
     )) +
-        ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
         ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
-        ggplot2::geom_line() +
-        ggplot2::geom_point(size = 4) +
+        ggplot2::geom_line(position = dodge) +
+        ggplot2::geom_point(position = dodge, size = 4) +
         ggplot2::geom_errorbar(
             ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
-            width = 250
+            position = dodge,
+            width = .125,
+            color = "#555555"
         ) +
         ggplot2::ylim(0, 100) +
         ggplot2::labs(
-            title = "Perceptual Integration",
-            x = "Training Word Exposures",
-            y = "Percentage Integrated"
+            x = "Test Session",
+            y = "Percentage Integrated",
+            title = "Perceptual Integration Before and After Training",
+            color = "Group", shape = "Group"
         ) +
-        ggplot2::theme_classic(base_size = 10)
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+            legend.position = c(0.85, 0.85),
+            legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
+        )
 
-    save_last_plot("integration.png")
+    save_plot()
+
+    integration_post_exp_only <- dplyr::filter(integration_df, group == "Experimental", condition == "Post-test")
+
+    integration_post_exp_only_summary <- dplyr::summarise(
+        dplyr::group_by(integration_post_exp_only, pid, training_word_exposures),
+        integratedPortion = 100 * mean(integrated),
+        se = 100 * sd(integrated) / sqrt(length(integrated))
+    )
+
+    ggplot2::ggplot(integration_post_exp_only_summary, ggplot2::aes(
+        x = training_word_exposures, y = integratedPortion
+    )) +
+        ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+        ggplot2::geom_point(position = dodge, size = 4) +
+        ggplot2::geom_errorbar(
+            ggplot2::aes(ymin = integratedPortion - se, ymax = integratedPortion + se),
+            position = dodge,
+            width = .125,
+            color = "#555555"
+        ) +
+        ggplot2::ylim(0, 100) +
+        ggplot2::xlim(0, NA) +
+        ggplot2::labs(
+            x = "Training Word Exposures",
+            y = "Percentage Integrated",
+            title = "Word Exposure Effect on Perceptual Integration"
+        ) +
+        ggplot2::theme_classic()
+
+    save_plot()
+
 ```
 
 ## Model & Test
 ```{r model-integration-data, echo = FALSE}
-    integration_model <- function(formula) bin_lme(formula = formula, data = integration_df)
-
-    integration_m0 <- integration_model(integrated ~ 1 + (training_word_exposures | pid))
-    integration_m1 <- integration_model(integrated ~ training_word_exposures + (training_word_exposures | pid))
-    integration_m2 <- integration_model(
-        integrated ~ training_word_exposures + (training_word_exposures | pid) + (1 | stimulus)
+    integration_m0 <- bin_lme(
+        data = integration_df,
+        formula = integrated
+            ~ training_word_exposures_n * condition
+            + (condition | pid)
+            + (1 | tactile_stim)
+            + (1 | auditory_stim)
+            + (1 | speaker_gender / speaker)
     )
 
-    anova(integration_m0, integration_m1, integration_m2)
+    results_integration_m0 <- get_logistic_odds_results(integration_m0)
+    print(sprintf(
+        "The odds of integrating percepts after training, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
+        results_integration_m0[1], results_integration_m0[2], results_integration_m0[3]
+    ))
+
 ```
