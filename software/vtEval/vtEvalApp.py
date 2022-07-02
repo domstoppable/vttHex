@@ -126,6 +126,13 @@ class VtEvalApp():
 		self.currentStateWidget = self.widgetStack.pop(0)
 		self.window.layout().addWidget(self.currentStateWidget)
 		self.currentStateWidget.finished.connect(lambda: self.onStateWidgetFinished(self.currentStateWidget))
+
+		try:
+			self.device.ping()
+		except Exception as exc:
+			self.handleSerialError()
+			return
+
 		self.currentStateWidget.onStarted()
 
 	def parseArgs(self):

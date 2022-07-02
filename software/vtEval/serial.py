@@ -14,6 +14,7 @@ class SerialCommand(IntEnum):
 	STOP             = 0x07
 	SOUNDBITE        = 0x08
 	PLAY_BITE        = 0x09
+	PING             = 0x0C
 
 preferredDevice = {
 	'vendorID': 4292,
@@ -37,6 +38,9 @@ class SerialInfo(QtSerialPort.QSerialPortInfo):
 
 	def __repr__(self):
 		return f'{self.manufacturer()} - {self.description()} [{self.portName()}]'
+
+def formatPacket_Ping():
+	return bytearray([ SerialCommand.HEADER, SerialCommand.PING ])
 
 def formatPacket_PlayBite(soundBiteID=0):
 	return bytearray([ SerialCommand.HEADER, SerialCommand.PLAY_BITE, soundBiteID ])
@@ -83,6 +87,9 @@ class SerialDevice():
 
 	def play(self):
 		self.send(formatPacket_PlayBite())
+
+	def ping(self):
+		self.send(formatPacket_Ping())
 
 	def send(self, bytes):
 		if not self.port.isOpen():
