@@ -95,16 +95,20 @@ class AFCWidget(StateWidget):
 		self.buttonContainer.setLayout(QtWidgets.QGridLayout())
 		self.buttonContainer.layout().setSpacing(20)
 
+		buttonPositions = [(0,1), (1,0), (1,2), (2,1)]
+
 		self.options = list(self.stimulus.getResponseOptions())
 		random.shuffle(self.options)
 		for idx,opt in enumerate(self.options):
-			row = int(idx / horizontalCount)
-			col = idx % horizontalCount
+			row,col = buttonPositions[idx]
 
 			button = QtWidgets.QPushButton(parent=self, text=opt)
 			button.clicked.connect(lambda _=None, opt=opt: self.onChoiceMade(opt))
 			button.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 			self.buttonContainer.layout().addWidget(button, row, col)
+
+		self.orButton = GhostButton('✣')
+		self.buttonContainer.layout().addWidget(self.orButton, 1, 1, QtCore.Qt.AlignCenter)
 
 		self.layout().addWidget(self.buttonContainer)
 
@@ -130,10 +134,25 @@ class AFCWidget(StateWidget):
 		self.buttonContainer.setDisabled(False)
 
 		noise.stop()
+		self.orButton.setFocus()
 
 	def onChoiceMade(self, option):
 		self.selection = option
 		self.finished.emit()
+
+	def keyPressEvent(self, event):
+		super().keyPressEvent(event)
+
+		buttonToKeyMap = [
+			QtCore.Qt.Key_W,
+			QtCore.Qt.Key_A,
+			QtCore.Qt.Key_D,
+			QtCore.Qt.Key_S,
+		]
+
+		if event.key() in buttonToKeyMap:
+			idx = buttonToKeyMap.index(event.key())
+			self.buttonContainer.layout().itemAt(idx).widget().setFocus()
 
 class IntegrationDataLogger(DataLogger):
 	def getFieldNames(self):

@@ -128,8 +128,11 @@ class AFCWidget(StateWidget):
 			self.setupButton('B', choices[1]),
 		]
 
-		for b in self.choiceButtons:
-			self.buttonContainer.layout().addWidget(b)
+		self.orButton = GhostButton(text='⇔')
+
+		self.buttonContainer.layout().addWidget(self.choiceButtons[0])
+		self.buttonContainer.layout().addWidget(self.orButton)
+		self.buttonContainer.layout().addWidget(self.choiceButtons[1])
 
 		self.layout().addWidget(self.buttonContainer, stretch=3)
 		self.layout().addWidget(self.promptLabel, stretch=1)
@@ -186,10 +189,20 @@ class AFCWidget(StateWidget):
 		self.promptLabel.setText('Which version was a better match?')
 		self.buttonContainer.setDisabled(False)
 		noise.stop()
+		self.orButton.setFocus()
 
 	def onChoiceMade(self, option):
 		self.selection = option
 		self.finished.emit()
+
+	def keyPressEvent(self, keyEvent):
+		super().keyPressEvent(keyEvent)
+
+		if keyEvent.key() == QtCore.Qt.Key_A:
+			self.choiceButtons[0].setFocus()
+
+		elif keyEvent.key() == QtCore.Qt.Key_D:
+			self.choiceButtons[1].setFocus()
 
 class ProsodyEvalApp(VtEvalApp):
 	def __init__(self):

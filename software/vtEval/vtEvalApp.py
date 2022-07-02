@@ -6,6 +6,9 @@ import random
 
 from PySide2 import QtCore, QtGui, QtWidgets, QtMultimedia, QtMultimediaWidgets
 
+from universal_gamepad.eventDaemon import getGamepadDaemon
+from universal_gamepad.gamepad import Button
+
 import argparse
 import argparseqt.gui
 
@@ -13,6 +16,16 @@ from . import serial
 from .asset import locateAsset
 from .ui import SerialSelector
 from vttHex.parseVTT import loadVTTFile
+
+
+gamepadButtonMap = {
+	Button.SOUTH: QtCore.Qt.Key_Space,
+
+	Button.UP: QtCore.Qt.Key_W,
+	Button.LEFT: QtCore.Qt.Key_A,
+	Button.DOWN: QtCore.Qt.Key_S,
+	Button.RIGHT: QtCore.Qt.Key_D,
+}
 
 def nowStamp():
 	now = datetime.datetime.now()
@@ -30,7 +43,7 @@ class VtEvalApp():
 
 		self.window = QtWidgets.QWidget()
 		self.window.setLayout(QtWidgets.QVBoxLayout())
-		self.app.setStyleSheet('* { font-size: 18pt; }')
+		self.app.setStyleSheet('* { font-size: 18pt; }\n*:focus { background-color: #222288; }')
 		self.window.setContentsMargins(100, 50, 100, 50)
 
 		self.progressBar = QtWidgets.QProgressBar()
@@ -41,6 +54,32 @@ class VtEvalApp():
 		self.serialErrorWidget = SerialErrorWidget()
 		self.serialErrorWidget.finished.connect(self.resumeFromSerialError)
 		self.serialErrorWidget.deviceSelected.connect(self.connectNewDevice)
+
+		self.gamepadDaemon = getGamepadDaemon()
+		self.gamepadDaemon.gamepadConnected.connect(self.useGamepad)
+
+	def useGamepad(self, gamepad):
+		self.gamepad = gamepad
+		gamepad.buttonPressed.connect(self.onGamepadButtonPressed)
+		gamepad.buttonReleased.connect(self.onGamepadButtonReleased)
+
+	def onGamepadButtonPressed(self, button):
+		if button in gamepadButtonMap:
+			focusedWidget = self.app.focusWidget()
+			if focusedWidget is not None:
+				key = gamepadButtonMap[button]
+				event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, key, QtCore.Qt.NoModifier)
+
+				self.app.postEvent(focusedWidget, event)
+
+	def onGamepadButtonReleased(self, button):
+		if button in gamepadButtonMap:
+			focusedWidget = self.app.focusWidget()
+			if focusedWidget is not None:
+				key = gamepadButtonMap[button]
+				event = QtGui.QKeyEvent(QtCore.QEvent.KeyRelease, key, QtCore.Qt.NoModifier)
+
+				self.app.postEvent(focusedWidget, event)
 
 	def initialize(self, arguments):
 		raise Exception(f'{self.app.applicationName()} is not configured!')
@@ -114,6 +153,7 @@ class VtEvalApp():
 		if self.arguments['simulate']:
 			self.simulate()
 		else:
+			self.gamepadDaemon.start()
 			self.app.exec_()
 
 	def connectNewDevice(self, device):
@@ -249,7 +289,11 @@ class ButtonPromptWidget(PromptWidget):
 
 	def showEvent(self, event):
 		super().showEvent(event)
-		QtCore.QTimer.singleShot(self.enabledDelaySeconds*1000, lambda: self.button.setDisabled(False))
+		QtCore.QTimer.singleShot(self.enabledDelaySeconds*1000, self.onDelayFinished)
+
+	def onDelayFinished(self):
+		self.button.setDisabled(False)
+		self.button.setFocus()
 
 class ButtonPromptWidgetWithVideo(ButtonPromptWidget):
 	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=5, videoURL=None, videoStartDelaySeconds=0.5, parent=None):
@@ -287,6 +331,15 @@ class ButtonPromptWidgetWithVideo(ButtonPromptWidget):
 	def showEvent(self, event):
 		super().showEvent(event)
 		QtCore.QTimer.singleShot(self.videoStartDelaySeconds*1000, self.replayVideo)
+
+	def keyPressEvent(self, keyEvent):
+		super().keyPressEvent(keyEvent)
+
+		if keyEvent.key() == QtCore.Qt.Key_W:
+			self.playButton.setFocus()
+
+		elif keyEvent.key() == QtCore.Qt.Key_S:
+			self.button.setFocus()
 
 class CenteredContainer(QtWidgets.QWidget):
 	def __init__(self, widget=None, *args, **kwargs):
@@ -330,7 +383,7 @@ class SoundCollectionButton(QtWidgets.QPushButton):
 		self.soundEffect.play()
 
 class ButtonPromptWidgetWithSoundBoard(ButtonPromptWidget):
-	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=5, sounds=None, buttonsPerRow=4, parent=None):
+	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=0, sounds=None, buttonsPerRow=4, parent=None):
 		super().__init__(name, text, buttonText, enabledDelaySeconds, parent)
 
 		if sounds is None:
@@ -358,6 +411,25 @@ class ButtonPromptWidgetWithSoundBoard(ButtonPromptWidget):
 		self.layout().insertStretch(0)
 		self.layout().insertStretch(2)
 		self.layout().insertStretch(4)
+
+	def showEvent(self, event):
+		super().showEvent(event)
+
+		firstButton = self.widgetContainer.layout().itemAt(0).widget()
+		QtCore.QTimer.singleShot(10, firstButton.setFocus)
+
+	def keyPressEvent(self, event):
+		super().keyPressEvent(event)
+
+		newFocusIndex = navigateGridLayout(self.widgetContainer, event)
+		if newFocusIndex > -1:
+			self.lastFocusedButtonIdx = newFocusIndex
+		else:
+			if event.key() == QtCore.Qt.Key_W:
+				self.widgetContainer.layout().itemAt(self.lastFocusedButtonIdx).widget().setFocus()
+
+			elif event.key() == QtCore.Qt.Key_S:
+				self.button.setFocus()
 
 class DataLogger:
 	def __init__(self, arguments, evalType):
@@ -414,3 +486,45 @@ class Stimulus(FileStimulus):
 		super().__init__(file, id)
 
 		self.vtt = loadVTTFile(file)
+
+def navigateGridLayout(containerWidget, keyEvent):
+	focusedWidget = QtWidgets.QApplication.instance().focusWidget()
+
+	layout = containerWidget.layout()
+	focusedIdx = layout.indexOf(focusedWidget)
+	newFocusIdx = -1
+
+	if focusedIdx > -1:
+		if keyEvent.key() == QtCore.Qt.Key_W:
+			newFocusIdx = focusedIdx - layout.columnCount()
+
+		elif keyEvent.key() == QtCore.Qt.Key_A:
+			if focusedIdx % layout.columnCount() > 0:
+				newFocusIdx = focusedIdx - 1
+
+		elif keyEvent.key() == QtCore.Qt.Key_S:
+			newFocusIdx = focusedIdx + layout.columnCount()
+
+		elif keyEvent.key() == QtCore.Qt.Key_D:
+			if focusedIdx % layout.columnCount() < layout.columnCount() - 1:
+				newFocusIdx = focusedIdx + 1
+
+	if newFocusIdx > -1 and newFocusIdx < layout.count():
+		layout.itemAt(newFocusIdx).widget().setFocus()
+	else:
+		newFocusIdx = -1
+
+	return newFocusIdx
+
+class GhostButton(QtWidgets.QToolButton):
+	def __init__(self, text=None, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+		self.setText(text)
+		sp_retain = self.sizePolicy()
+		sp_retain.setRetainSizeWhenHidden(True)
+		self.setSizePolicy(sp_retain)
+
+	def focusOutEvent(self, event):
+		super().focusOutEvent(event)
+		self.hide()

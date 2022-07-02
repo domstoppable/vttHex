@@ -135,9 +135,16 @@ class AFCWidget(StateWidget):
 		self.buttonContainer.setDisabled(False)
 		noise.stop()
 
+		layout = self.buttonContainer.layout()
+		layout.itemAt(layout.count()//2).widget().setFocus()
+
 	def onChoiceMade(self, option):
 		self.selection = option
 		self.finished.emit()
+
+	def keyPressEvent(self, event):
+		super().keyPressEvent(event)
+		navigateGridLayout(self.buttonContainer, event)
 
 class PhonemeEvalApp(VtEvalApp):
 	def __init__(self):
