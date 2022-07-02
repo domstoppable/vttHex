@@ -20,8 +20,33 @@ class MainWindow(QtWidgets.QWidget):
 	def __init__(self, simulateEnabled=False, parent=None):
 		super().__init__(parent=parent)
 
-		self.setWindowTitle('Vibey Transcribey Eval')
+		self.setWindowTitle('Vibey Transcribey Evaluations')
 		self.setLayout(QtWidgets.QVBoxLayout())
+		self.setStyleSheet('''
+			* {
+				padding: 5px;
+				font-size: 14pt;
+			}
+
+			QPushButton {
+				margin: 5px;
+				padding: 20px;
+			}
+
+			QDialog QPushButton {
+				margin: 0px 5px;
+				padding: 5px 10px;
+			}
+
+			QPushButton:focus {
+				background-color: #8888ff;
+				color: #111111;
+			}
+
+			QToolButton {
+				font-weight: bold;
+			}
+		''')
 
 		if simulateEnabled:
 			label = QtWidgets.QLabel('<h2><center>Simulation Mode Enabled</center></h2>')
@@ -135,10 +160,10 @@ class MainWindow(QtWidgets.QWidget):
 			return
 		else:
 			confirmed = QtWidgets.QMessageBox.question(
-				self, 'Run Eval',
+				self, 'Run Evaluation',
 				f'''
 					<html>
-						<p>You are about to run the following eval:</p>
+						<p>You are about to run the following evaluation:</p>
 						<br/>
 						<table>
 							<tr><td>Facilitator </td><td><strong>{facilitator}</strong></td></tr>

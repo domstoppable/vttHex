@@ -36,6 +36,15 @@ class VtEvalApp():
 		self.app = QtWidgets.QApplication()
 		self.app.setApplicationName(appName)
 		self.app.aboutToQuit.connect(self.onAboutToQuit)
+		self.app.setStyleSheet('''
+			* {
+				font-size: 18pt;
+			}
+			QPushButton:focus {
+				background-color: #4444cc;
+				color: #eee;
+			}
+		''')
 
 		self.currentStateWidget = None
 		self.arguments = {}
@@ -43,7 +52,6 @@ class VtEvalApp():
 
 		self.window = QtWidgets.QWidget()
 		self.window.setLayout(QtWidgets.QVBoxLayout())
-		self.app.setStyleSheet('* { font-size: 18pt; }\n*:focus { background-color: #222288; }')
 		self.window.setContentsMargins(100, 50, 100, 50)
 
 		self.progressBar = QtWidgets.QProgressBar()
@@ -201,7 +209,7 @@ class SerialErrorWidget(QtWidgets.QWidget):
 		self.contents.setLayout(QtWidgets.QVBoxLayout())
 		self.contents.layout().setSpacing(50)
 		self.contents.layout().addWidget(QtWidgets.QLabel('<h1 style="color: #900"><center>Device error!</center></h1>', self))
-		self.contents.layout().addWidget(QtWidgets.QLabel('<center>There was an error communicating with the device. Please check the device connection.</center>', self))
+		self.contents.layout().addWidget(QtWidgets.QLabel('<center>There was an error communicating with the device. Please alert the researcher!</center>', self))
 
 		self.serialSelector = SerialSelector(self)
 		self.serialSelector.selectionChanged.connect(self.onDeviceSelected)
@@ -260,9 +268,6 @@ class PromptWidget(StateWidget):
 		label = QtWidgets.QLabel(text)
 		label.setWordWrap(True)
 		self.layout().addWidget(label)
-
-	def showEvent(self, event):
-		self.setFocus(QtCore.Qt.FocusReason.OtherFocusReason)
 
 class KeyPromptWidget(PromptWidget):
 	def __init__(self, name, text, dismissKey=QtCore.Qt.Key_Space, parent=None):
