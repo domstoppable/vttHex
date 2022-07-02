@@ -1,3 +1,4 @@
+import sys
 import datetime
 import re
 import time
@@ -237,3 +238,6 @@ class IntegrationEvalApp(VtEvalApp):
 def run():
 	app = IntegrationEvalApp()
 	app.execute()
+
+	if len(app.widgetStack) > 0:
+		sys.exit(1)

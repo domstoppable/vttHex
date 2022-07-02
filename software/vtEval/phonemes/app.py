@@ -1,3 +1,4 @@
+import sys
 import datetime
 import re
 import time
@@ -283,3 +284,6 @@ class PhonemeEvalApp(VtEvalApp):
 def run():
 	app = PhonemeEvalApp()
 	app.execute()
+
+	if len(app.widgetStack) > 0:
+		sys.exit(1)

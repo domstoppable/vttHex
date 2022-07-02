@@ -1,3 +1,4 @@
+import sys
 import re
 import time
 import random
@@ -311,3 +312,6 @@ class ProsodyEvalApp(VtEvalApp):
 def run():
 	app = ProsodyEvalApp()
 	app.execute()
+
+	if len(app.widgetStack) > 0:
+		sys.exit(1)
