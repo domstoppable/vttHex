@@ -205,6 +205,9 @@ class AFCWidget(StateWidget):
 		elif keyEvent.key() == QtCore.Qt.Key_D:
 			self.choiceButtons[1].setFocus()
 
+	def __setstate__(self, state):
+		self.__init__(state['name'], state['stimPair'], state['earlyOrLate'])
+
 class ProsodyEvalApp(VtEvalApp):
 	def __init__(self):
 		super().__init__('Prosody Evaluation')
@@ -241,7 +244,8 @@ class ProsodyEvalApp(VtEvalApp):
 		else:
 			self.widgetStack += phraseStack + focusStack
 
-		self.dataLogger = DataLogger(arguments, 'prosody')
+	def startDataLogger(self):
+		self.dataLogger = DataLogger(self.arguments, 'prosody')
 
 	def buildSubStack(self, name):
 		stack = []

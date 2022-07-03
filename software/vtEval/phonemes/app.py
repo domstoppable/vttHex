@@ -147,6 +147,9 @@ class AFCWidget(StateWidget):
 		super().keyPressEvent(event)
 		navigateGridLayout(self.buttonContainer, event)
 
+	def __setstate__(self, state):
+		self.__init__(state['name'], state['stimulus'], state['options'])
+
 class PhonemeEvalApp(VtEvalApp):
 	def __init__(self):
 		super().__init__('Phoneme Evaluation')
@@ -240,7 +243,9 @@ class PhonemeEvalApp(VtEvalApp):
 			stack += vowelStack + consonantStack
 
 		self.widgetStack = stack
-		self.dataLogger = DataLogger(arguments, 'phonemes')
+
+	def startDataLogger(self):
+		self.dataLogger = DataLogger(self.arguments, 'phonemes')
 
 	def makeRandomSubset(self, fullSet, correctOption, size=9):
 		options = list(fullSet)
@@ -251,7 +256,6 @@ class PhonemeEvalApp(VtEvalApp):
 		options.insert(random.randint(0, size-1), correctOption)
 
 		return options
-
 
 	def _loadStimuliFromFolder(self, pattern, folder, stimClass):
 		path = Path(locateAsset(folder))

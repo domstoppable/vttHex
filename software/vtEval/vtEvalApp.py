@@ -1,8 +1,10 @@
+import pickle
 import sys
 import datetime
 from pathlib import Path
 import csv
 import random
+import re
 
 from PySide2 import QtCore, QtGui, QtWidgets, QtMultimedia, QtMultimediaWidgets
 
@@ -17,6 +19,11 @@ from .asset import locateAsset
 from .ui import SerialSelector
 from vttHex.parseVTT import loadVTTFile
 
+unserializableClasses = [
+	QtCore.QObject,
+	QtCore.SignalInstance,
+	QtMultimedia.QSoundEffect
+]
 
 gamepadButtonMap = {
 	Button.SOUTH: QtCore.Qt.Key_Space,
@@ -26,6 +33,20 @@ gamepadButtonMap = {
 	Button.DOWN: QtCore.Qt.Key_S,
 	Button.RIGHT: QtCore.Qt.Key_D,
 }
+
+def isSerializable(value):
+	if isinstance(value, list):
+		for subValue in value:
+			if not isSerializable(subValue):
+				return False
+		else:
+			return True
+
+	for class_ in unserializableClasses:
+		if isinstance(value, class_):
+			return False
+
+	return True
 
 def nowStamp():
 	now = datetime.datetime.now()
@@ -40,7 +61,7 @@ class VtEvalApp():
 			* {
 				font-size: 18pt;
 			}
-			QPushButton:focus {
+			QAbstractButton:focus {
 				background-color: #4444cc;
 				color: #eee;
 			}
@@ -109,6 +130,8 @@ class VtEvalApp():
 		if self.dataLogger is not None:
 			self.dataLogger.logWidgetCompletion(finishedWidget)
 
+		self.saveState()
+
 		if len(self.widgetStack) > 0:
 			self.popNextState()
 		else:
@@ -118,7 +141,10 @@ class VtEvalApp():
 		self.app.exit()
 
 	def popNextState(self):
-		self.progressBar.setValue(self.progressBar.maximum() - len(self.widgetStack) + 1)
+		progressValue = self.progressBar.maximum() - len(self.widgetStack) + 1
+		self.progressBar.setValue(progressValue)
+		print(f'Progress at {progressValue}/{self.progressBar.maximum()}')
+
 		while self.window.layout().count() > 1:
 			widget = self.window.layout().takeAt(1).widget()
 			widget.setParent(None)
@@ -160,8 +186,21 @@ class VtEvalApp():
 		self.parseArgs()
 
 		self.device = serial.SerialDevice(self.arguments['device'])
-		self.initialize(self.arguments)
-		self.widgetStack.append(KeyPromptWidget(name='finished', text='<center>You are finished!<br/><br/>Please let the facilitator know.</center>', dismissKey=QtCore.Qt.Key_F4))
+		if self.openState():
+			self.widgetStack.insert(0, ButtonPromptWidget(name='restore', text='<center>Wnen you are ready, the evaluation will immediately resume from where you left off.'))
+			for widget in self.widgetStack:
+				if hasattr(widget, 'stimulusBraced'):
+					widget.stimulusBraced.connect(self.prepareStimulus)
+					
+				if hasattr(widget, 'stimulusTriggered'):
+					widget.stimulusTriggered.connect(self.playStimulus)
+
+		else:
+			self.initialize(self.arguments)
+			self.widgetStack.append(KeyPromptWidget(name='finished', text='<center>You are finished!<br/><br/>Please let the facilitator know.</center>', dismissKey=QtCore.Qt.Key_F4))
+
+		self.startDataLogger()
+
 		self.window.showFullScreen()
 		QtCore.QTimer.singleShot(0, self.onStarted)
 
@@ -202,6 +241,47 @@ class VtEvalApp():
 			self.device.play()
 		except Exception as exc:
 			self.handleSerialError()
+
+	def openState(self):
+		stateFilePath = self.getSaveStatePath()
+		if stateFilePath.exists():
+			state = pickle.load(stateFilePath.open('rb'))
+			for key,value in state.items():
+				self.__dict__[key] = value
+
+			return True
+
+		return False
+
+	def saveState(self):
+		stateFilePath = self.getSaveStatePath()
+		if not stateFilePath.parent.exists():
+			stateFilePath.parent.mkdir(exist_ok=True)
+
+		if len(self.widgetStack) < 2:
+			stateFilePath.unlink()
+		else:
+			state = {
+				'widgetStack': self.widgetStack,
+			}
+
+			try:
+				stateFile = stateFilePath.open('wb')
+				pickle.dump(state, stateFile)
+				stateFile.close()
+			except Exception as exc:
+				try:
+					stateFile.unlink()
+				except:
+					pass
+
+				raise exc
+
+			
+
+	def getSaveStatePath(self):
+		nameBits = [self.arguments['pid'], self.arguments['condition'], self.app.applicationName(), self.arguments['facilitator']]
+		return Path(f'states/' + '_'.join(nameBits) + '.savestate')
 
 
 class SerialErrorWidget(QtWidgets.QWidget):
@@ -266,9 +346,27 @@ class StateWidget(QtWidgets.QWidget):
 	def onStarted(self):
 		pass
 
+	def __getstate__(self):
+		props = self.__dict__.keys()
+
+		data = {}
+		for key,value in self.__dict__.items():
+			if key == '__METAOBJECT__':
+				continue
+
+			if isSerializable(value):
+				data[key] = self.__dict__[key]
+
+		return data
+	
+	def __setstate__(self, state):
+		self.__dict__.update(state)
+
 class PromptWidget(StateWidget):
 	def __init__(self, name, text, parent=None):
 		super().__init__(name=name, parent=parent)
+
+		self.text = text
 
 		self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
 		self.setLayout(QtWidgets.QVBoxLayout())
@@ -285,10 +383,14 @@ class KeyPromptWidget(PromptWidget):
 		if event.key() == self.dismissKey:
 			self.finished.emit()
 
+	def __setstate__(self, state):
+		self.__init__(state['name'], state['text'], state['dismissKey'])
+
 class ButtonPromptWidget(PromptWidget):
 	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=5, parent=None):
 		super().__init__(name=name, text=text, parent=parent)
 
+		self.buttonText = buttonText
 		self.enabledDelaySeconds = enabledDelaySeconds
 
 		self.button = QtWidgets.QPushButton(parent=self, text=buttonText)
@@ -307,10 +409,15 @@ class ButtonPromptWidget(PromptWidget):
 		self.button.setDisabled(False)
 		self.button.setFocus()
 
+	def __setstate__(self, state):
+		self.__init__(state['name'], state['text'], state['buttonText'], state['enabledDelaySeconds'])
+
+
 class ButtonPromptWidgetWithVideo(ButtonPromptWidget):
 	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=5, videoURL=None, videoStartDelaySeconds=0.5, parent=None):
 		super().__init__(name, text, buttonText, enabledDelaySeconds, parent)
 
+		self.videoURL = videoURL
 		self.videoStartDelaySeconds = videoStartDelaySeconds
 
 		self.widgetContainer = QtWidgets.QWidget()
@@ -352,6 +459,9 @@ class ButtonPromptWidgetWithVideo(ButtonPromptWidget):
 
 		elif keyEvent.key() == QtCore.Qt.Key_S:
 			self.button.setFocus()
+
+	def __setstate__(self, state):
+		self.__init__(state['name'], state['text'], state['buttonText'], state['enabledDelaySeconds'], state['videoURL'], state['videoStartDelaySeconds'])
 
 class CenteredContainer(QtWidgets.QWidget):
 	def __init__(self, widget=None, *args, **kwargs):

@@ -72,6 +72,15 @@ class StimPair(Stimulus):
 	def __repr__(self):
 		return f'{self.getAudiblePhone()}-{self.getTactilePhone()}'
 
+	def __getstate__(self):
+		return {
+			'vttFile': self.vttFile,
+			'wavFile': self.wavFile
+		}
+
+	def __setstate__(self, state):
+		self.__init__(state['wavFile'], state['vttFile'])
+
 class AFCWidget(StateWidget):
 	stimulusBraced = QtCore.Signal(object)
 	stimulusTriggered = QtCore.Signal(object)
@@ -155,6 +164,9 @@ class AFCWidget(StateWidget):
 			idx = buttonToKeyMap.index(event.key())
 			self.buttonContainer.layout().itemAt(idx).widget().setFocus()
 
+	def __setstate__(self, state):
+		self.__init__(state['name'], state['stimulus'])
+
 class IntegrationDataLogger(DataLogger):
 	def getFieldNames(self):
 		return super().getFieldNames() + ['audibleFile', 'options']
@@ -229,7 +241,9 @@ class IntegrationEvalApp(VtEvalApp):
 		breakWidget = ButtonPromptWidget('break', '<center>Time for a break!<br/><br/>Press the button below when you are ready to continue.</center>')
 
 		self.widgetStack += tactileAuditoryStack
-		self.dataLogger = IntegrationDataLogger(arguments, 'integration')
+
+	def startDataLogger(self):
+		self.dataLogger = IntegrationDataLogger(self.arguments, 'integration')
 
 	def playStimulus(self, stimulus):
 		stimulus.sound.play()
