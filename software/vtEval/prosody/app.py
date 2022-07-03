@@ -19,8 +19,8 @@ instructions = {
 			<p>This evaluation is separated into two parts measuring your perception of different aspects of sentence structure. Both parts of this evaluation follow a similar structure:</p>
 			<ul>
 				<li>A sentence will appear in a box on the screen, and you will have a short time to read it silently and consider it.</li>
-				<li>Two different versions of the underlined section of that sentence will be vibrated on your arm. One will match the underlined part of the sentence on the screen, the other will not. They will be similar but not identical, and they cannot be repeated.</li>
-				<li>You will then be asked to select which of the two vibrations felt most like the underlined section of the sentence on the screen. If you are uncertain, make a guess.</li>
+				<li>Two different versions of the <u>underlined</u> section of that sentence will be vibrated on your arm. One will match the <u>underlined</u> part of the sentence on the screen, the other will not. They will be similar but not identical, and they cannot be repeated.</li>
+				<li>You will then be asked to select which of the two vibrations felt most like the <u>underlined</u> section of the sentence on the screen. If you are uncertain, make a guess.</li>
 			</ul>
 			<p>You will hear static to cover-up sounds made by the vibrations of the device. You should rely solely on the vibrating sensations themselves when making decisions.</p>
 			<p>Opportunities for breaks will be provided as you proceed.</p>
@@ -33,7 +33,7 @@ instructions = {
 			<p>For this part of the evaluation, a sentence will appear in the box with an emphasized word as indicated with <i>ITALIC, CAPITALIZED</i> letters.</p>
 			<p>When the vibration options are presented, one option will emphasize the italicized word, and the other will emphasize a different word in the sentence.</p>
 			<p>You should select the vibration option which emphasizes the italicized word. If you are uncertain, make a guess.</p>
-			<p>Remember, only the underlined section of the sentence will be vibrated, and the options cannot be repeated.</p>
+			<p>Remember, only the <u>underlined</u> section of the sentence will be vibrated, and the options cannot be repeated.</p>
 			<hr/>
 			<p>If you have any questions, please ask them now. Otherwise, click the button below when you are ready to begin.</p>
 		</html>
@@ -41,10 +41,10 @@ instructions = {
 	'phrase': '''
 		<html>
 			<h2>Phrase Boundary Evaluation</h2>
-			<p>For this part of the evaluation, each sentence will contain a phrase boundary indicated by a comma, which will either be in the middle or at the end of the underlined section.</p>
+			<p>For this part of the evaluation, each sentence will contain a phrase boundary indicated by a comma, which will either be in the middle or at the end of the <u>underlined</u> section.</p>
 			<p>When the vibration options are presented, one option will have the comma in the same place as the sentence in the box, and the other will have a comma in a different place.</p>
 			<p>You should select the vibration option which matches the comma placement of the sentence in the box. If you are uncertain, make a guess.</p>
-			<p>Remember, only the underlined section of the sentence will be vibrated, and the options cannot be repeated.</p>
+			<p>Remember, only the <u>underlined</u> section of the sentence will be vibrated, and the options cannot be repeated.</p>
 			<hr/>
 			<p>If you have any questions, please ask them now. Otherwise, click the button below when you are ready to begin.</p>
 		</html>
@@ -97,7 +97,7 @@ class AFCWidget(StateWidget):
 		textWidgetContainer.setLayout(QtWidgets.QVBoxLayout())
 
 		label = QtWidgets.QLabel(parent=self)
-		label.setText('Read the sentence in the box below silently and imagine how the underlined part should feel:')
+		label.setText(' ')
 		label.setAlignment(QtCore.Qt.AlignCenter)
 		label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 		textWidgetContainer.layout().addWidget(label)
@@ -113,6 +113,10 @@ class AFCWidget(StateWidget):
 		self.promptLabel.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
 		self.layout().addWidget(textWidgetContainer, stretch=2)
+
+		self.timerProgressBar = TimerProgressBar()
+		self.layout().addWidget(self.timerProgressBar)
+		self.layout().setAlignment(self.timerProgressBar, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
 
 		self.buttonContainer = QtWidgets.QWidget()
 		self.buttonContainer.setLayout(QtWidgets.QHBoxLayout())
@@ -167,9 +171,17 @@ class AFCWidget(StateWidget):
 
 	def showSentence(self):
 		sentence = getSentence(self.stimPair.type, self.stimPair.typeIdx, self.earlyOrLate)
-		self.sentenceLabel.setText(sentence)
+		self.sentenceLabel.setText(sentence.replace('</u>', '</u><span style="color: #888">') + '</span>')
 		self.stimulusBraced.emit(self.stims[0])
-		QtCore.QTimer.singleShot(5000, self.nextStep)
+
+		self.userReadingTimer = QtCore.QTimer()
+		self.userReadingTimer.setInterval(5000)
+		self.userReadingTimer.timeout.connect(self.nextStep)
+		self.userReadingTimer.setSingleShot(True)
+
+		self.timerProgressBar.watch(self.userReadingTimer)
+
+		self.userReadingTimer.start()
 
 	def playStim(self, idx):
 		self.choiceButtons[idx].setStyleSheet('background-color: #6cc')
@@ -187,7 +199,7 @@ class AFCWidget(StateWidget):
 		QtCore.QTimer.singleShot(500, self.nextStep)
 
 	def getInput(self):
-		self.promptLabel.setText('Which version was a better match?')
+		self.promptLabel.setText('Which version was a better match for the <u>underlined</u> section?')
 		self.buttonContainer.setDisabled(False)
 		noise.stop()
 		self.orButton.setFocus()
@@ -207,6 +219,44 @@ class AFCWidget(StateWidget):
 
 	def __setstate__(self, state):
 		self.__init__(state['name'], state['stimPair'], state['earlyOrLate'])
+
+class TimerProgressBar(QtWidgets.QProgressBar):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+
+		self.observedTimer = None
+
+		self.refreshTimer = QtCore.QTimer()
+		self.refreshTimer.setInterval(1000//60)
+		self.refreshTimer.timeout.connect(self.refresh)
+
+		self.setMaximumWidth(800)
+		self.setMinimumWidth(800)
+
+		self.setTextVisible(False)
+		self.setMaximum(800)
+
+		sp_retain = self.sizePolicy()
+		sp_retain.setRetainSizeWhenHidden(True)
+		self.setSizePolicy(sp_retain)
+
+	def watch(self, timer):
+		self.observedTimer = timer
+
+		self.refreshTimer.start()
+		self.observedTimer.timeout.connect(self.onTimerFinished)
+
+	def refresh(self):
+		margin = 500
+		maxTime = self.observedTimer.interval() - margin
+		elapsedTime = self.observedTimer.interval() - self.observedTimer.remainingTime()
+		value = elapsedTime / maxTime
+		self.setValue(min(value, 1.0) * self.maximum())
+
+	def onTimerFinished(self):
+		self.refreshTimer.stop()
+		self.setValue(self.maximum())
+		self.hide()
 
 class ProsodyEvalApp(VtEvalApp):
 	def __init__(self):
