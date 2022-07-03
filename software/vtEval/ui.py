@@ -205,6 +205,9 @@ class MainWindow(QtWidgets.QWidget):
 
 		return facilitators
 
+	def showButtonFeedback(self, exitOk):
+		self.evalButtons.showButtonFeedback(exitOk)
+
 class ComboWithButton(QtWidgets.QWidget):
 	buttonClicked = QtCore.Signal()
 	selectionChanged = QtCore.Signal(object)
@@ -387,13 +390,15 @@ class ButtonList(QtWidgets.QWidget):
 
 		self.group = QtWidgets.QButtonGroup()
 		self.addOptions(options)
+		self.lastButtonClicked = None
 
 	def addOption(self, option):
 		button = QtWidgets.QPushButton(option, self)
 		self.group.addButton(button)
 		self.layout().addWidget(button)
 
-		button.clicked.connect(lambda checked=None, option=option: self.clicked.emit(option))
+		button.clicked.connect(lambda checked=None, option=option, button=button: self.onButtonClicked(option, button))
+
 		self.setFocusProxy(button)
 
 	def addOptions(self, options):
@@ -408,6 +413,16 @@ class ButtonList(QtWidgets.QWidget):
 			button = self.layout().takeAt(0).widget()
 			self.group.removeButton(button)
 			button.setParent(None)
+
+	def onButtonClicked(self, option, button):
+		self.lastButtonClicked = button
+		self.clicked.emit(option)
+
+	def showButtonFeedback(self, exitOk):
+		if exitOk:
+			self.lastButtonClicked.setStyleSheet('background-color: #e44; color: #111;')
+		else:
+			self.lastButtonClicked.setStyleSheet('background-color: #4e4; color: #111')
 
 class ExecutionDialog(QtWidgets.QDialog):
 	def __init__(self, proc, textDescription, parent=None):

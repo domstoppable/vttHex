@@ -42,6 +42,8 @@ class VtEvalController():
 		execDialog = ui.ExecutionDialog(proc=proc, textDescription=evalName, parent=self.mainWindow)
 		execDialog.exec_()
 
+		self.mainWindow.showButtonFeedback(proc.returncode != 0)
+
 	def exec_(self):
 		self.mainWindow.show()
 		self.app.exec_()
