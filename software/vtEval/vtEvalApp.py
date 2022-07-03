@@ -468,6 +468,10 @@ class ButtonPromptWidgetWithVideo(ButtonPromptWidget, InstructionsScreen):
 		super().showEvent(event)
 		QtCore.QTimer.singleShot(self.videoStartDelaySeconds*1000, self.replayVideo)
 
+	def hideEvent(self, event):
+		super().hideEvent(event)
+		self.mediaPlayer.stop()
+
 	def keyPressEvent(self, keyEvent):
 		super().keyPressEvent(keyEvent)
 
