@@ -65,6 +65,9 @@ class VtEvalApp():
 				background-color: #4444cc;
 				color: #eee;
 			}
+			QAbstractButton:disabled {
+				background-color: #888;
+			}
 		''')
 
 		self.currentStateWidget = None
