@@ -198,7 +198,7 @@ class VtEvalApp():
 			else:
 				self.widgetStack.insert(0, self.lastInstructionsScreen)
 				restoredText = 'The last instructions you saw will be repeated on the next screen.'
-			
+
 			self.widgetStack.insert(0, ButtonPromptWidget(name='restore', text=f'<center>Your session has been restored!<br/><br/>{restoredText}<br/><br/><p style="font-size: 10pt">State file: <span style="font-family: \'Courier New\', Courier, monospace;">{self.getSaveStatePath()}</span></p></center>'))
 
 			for widget in self.widgetStack:
@@ -370,7 +370,7 @@ class StateWidget(QtWidgets.QWidget):
 				data[key] = self.__dict__[key]
 
 		return data
-	
+
 	def __setstate__(self, state):
 		self.__dict__.update(state)
 
@@ -409,7 +409,7 @@ class ButtonPromptWidget(PromptWidget):
 		self.enabledDelaySeconds = enabledDelaySeconds
 
 		self.button = QtWidgets.QPushButton(parent=self, text=buttonText)
-		self.button.clicked.connect(self.finished.emit)
+		self.button.clicked.connect(self.onButtonClicked)
 		self.button.setDisabled(True)
 		self.button.setStyleSheet('QPushButton { padding: 15px }')
 
@@ -423,6 +423,10 @@ class ButtonPromptWidget(PromptWidget):
 	def onDelayFinished(self):
 		self.button.setDisabled(False)
 		self.button.setFocus()
+
+	def onButtonClicked(self):
+		self.setDisabled(True) # prevent double clicks
+		self.finished.emit()
 
 	def __setstate__(self, state):
 		self.__init__(state['name'], state['text'], state['buttonText'], state['enabledDelaySeconds'])
