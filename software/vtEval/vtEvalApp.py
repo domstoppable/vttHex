@@ -75,6 +75,8 @@ class VtEvalApp():
 		self.window.setLayout(QtWidgets.QVBoxLayout())
 		self.window.setContentsMargins(100, 50, 100, 50)
 
+		self.lastInstructionsScreen = None
+
 		self.progressBar = QtWidgets.QProgressBar()
 		self.window.layout().addWidget(self.progressBar)
 
@@ -153,6 +155,9 @@ class VtEvalApp():
 		self.window.layout().addWidget(self.currentStateWidget)
 		self.currentStateWidget.finished.connect(lambda: self.onStateWidgetFinished(self.currentStateWidget))
 
+		if isinstance(self.currentStateWidget, InstructionsScreen):
+			self.lastInstructionsScreen = self.currentStateWidget
+
 		try:
 			self.device.ping()
 		except Exception as exc:
@@ -187,11 +192,19 @@ class VtEvalApp():
 
 		self.device = serial.SerialDevice(self.arguments['device'])
 		if self.openState():
-			self.widgetStack.insert(0, ButtonPromptWidget(name='restore', text='<center>Wnen you are ready, the evaluation will immediately resume from where you left off.'))
+
+			if self.lastInstructionsScreen is None:
+				restoredText = 'Wnen you are ready, the evaluation will immediately resume from where you left off.'
+			else:
+				self.widgetStack.insert(0, self.lastInstructionsScreen)
+				restoredText = 'The last instructions you saw will be repeated on the next screen.'
+			
+			self.widgetStack.insert(0, ButtonPromptWidget(name='restore', text=f'<center>Your session has been restored!<br/><br/>{restoredText}<br/><br/><p style="font-size: 10pt">State file: <span style="font-family: \'Courier New\', Courier, monospace;">{self.getSaveStatePath()}</span></p></center>'))
+
 			for widget in self.widgetStack:
 				if hasattr(widget, 'stimulusBraced'):
 					widget.stimulusBraced.connect(self.prepareStimulus)
-					
+
 				if hasattr(widget, 'stimulusTriggered'):
 					widget.stimulusTriggered.connect(self.playStimulus)
 
@@ -263,6 +276,7 @@ class VtEvalApp():
 		else:
 			state = {
 				'widgetStack': self.widgetStack,
+				'lastInstructionsScreen': self.lastInstructionsScreen
 			}
 
 			try:
@@ -282,7 +296,6 @@ class VtEvalApp():
 	def getSaveStatePath(self):
 		nameBits = [self.arguments['pid'], self.arguments['condition'], self.app.applicationName(), self.arguments['facilitator']]
 		return Path(f'states/' + '_'.join(nameBits) + '.savestate')
-
 
 class SerialErrorWidget(QtWidgets.QWidget):
 	finished = QtCore.Signal()
@@ -362,6 +375,9 @@ class StateWidget(QtWidgets.QWidget):
 	def __setstate__(self, state):
 		self.__dict__.update(state)
 
+class InstructionsScreen:
+	pass
+
 class PromptWidget(StateWidget):
 	def __init__(self, name, text, parent=None):
 		super().__init__(name=name, parent=parent)
@@ -412,8 +428,10 @@ class ButtonPromptWidget(PromptWidget):
 	def __setstate__(self, state):
 		self.__init__(state['name'], state['text'], state['buttonText'], state['enabledDelaySeconds'])
 
+class TextInstructionsScreen(ButtonPromptWidget, InstructionsScreen):
+	pass
 
-class ButtonPromptWidgetWithVideo(ButtonPromptWidget):
+class ButtonPromptWidgetWithVideo(ButtonPromptWidget, InstructionsScreen):
 	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=5, videoURL=None, videoStartDelaySeconds=0.5, parent=None):
 		super().__init__(name, text, buttonText, enabledDelaySeconds, parent)
 
@@ -504,12 +522,15 @@ class SoundCollectionButton(QtWidgets.QPushButton):
 		self.soundEffect.setSource(QtCore.QUrl.fromLocalFile(str(soundFile)))
 		self.soundEffect.play()
 
-class ButtonPromptWidgetWithSoundBoard(ButtonPromptWidget):
+class ButtonPromptWidgetWithSoundBoard(ButtonPromptWidget, InstructionsScreen):
 	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=0, sounds=None, buttonsPerRow=4, parent=None):
 		super().__init__(name, text, buttonText, enabledDelaySeconds, parent)
 
 		if sounds is None:
 			return
+
+		self.sounds = sounds
+		self.buttonsPerRow = buttonsPerRow
 
 		self.widgetContainer = QtWidgets.QWidget()
 		self.widgetContainer.setLayout(QtWidgets.QGridLayout())
@@ -552,6 +573,9 @@ class ButtonPromptWidgetWithSoundBoard(ButtonPromptWidget):
 
 			elif event.key() == QtCore.Qt.Key_S:
 				self.button.setFocus()
+
+	def __setstate__(self, state):
+		self.__init__(state['name'], state['text'], state['buttonText'], state['enabledDelaySeconds'], state['sounds'], state['buttonsPerRow'])
 
 class DataLogger:
 	def __init__(self, arguments, evalType):

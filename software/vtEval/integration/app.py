@@ -229,7 +229,7 @@ class IntegrationEvalApp(VtEvalApp):
 			self.dataLogger.logWidgetCompletion(w)
 
 	def initialize(self, arguments):
-		self.widgetStack.append(ButtonPromptWidget('instructions', instructions))
+		self.widgetStack.append(TextInstructionsScreen('instructions', instructions))
 
 		tactileAuditoryStack = []
 		for idx,stimPair in enumerate(self.stimSets):

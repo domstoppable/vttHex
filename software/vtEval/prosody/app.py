@@ -236,7 +236,7 @@ class ProsodyEvalApp(VtEvalApp):
 		focusStack = self.buildSubStack('focus')
 		phraseStack = self.buildSubStack('phrase')
 
-		self.widgetStack = [ ButtonPromptWidget('instructions', instructions['intro']) ]
+		self.widgetStack = [ TextInstructionsScreen('instructions', instructions['intro']) ]
 
 		# counterbalance order of focus vs phrase boundaries
 		if int(arguments['pid']) % 2 == 0:

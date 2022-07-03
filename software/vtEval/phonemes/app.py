@@ -197,7 +197,7 @@ class PhonemeEvalApp(VtEvalApp):
 
 	def initialize(self, arguments):
 		stack = [
-			ButtonPromptWidget('instructions', instructions['intro']),
+			TextInstructionsScreen('instructions', instructions['intro']),
 		]
 
 		sounds = self.loadConsonants('src', FileStimulus)[0]
