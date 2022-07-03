@@ -421,6 +421,7 @@ class ExecutionDialog(QtWidgets.QDialog):
 
 		self.label = QtWidgets.QLabel(text=f'<html>⏳ Running {textDescription} evaluation…', parent=self)
 		self.label.setAlignment(QtCore.Qt.AlignCenter)
+		self.label.setWordWrap(True)
 
 		self.layout().addWidget(self.label)
 
@@ -439,12 +440,12 @@ class ExecutionDialog(QtWidgets.QDialog):
 			if code is not None:
 				self.pollHandle.stop()
 
-				text = self.label.text() + '<br/>'
+				text = self.label.text() + '<br/><br/>'
 				if code == 0:
 					text += '<font color="#0c0">😺 Process completed normally</font><br/><br/>This window will automatically close.'
 					self.acceptTimer = QtCore.QTimer.singleShot(5000, self.accept)
 				else:
-					text += f'<font color="#c00">❌ Process completed with <b>error code {code}</b></font>'
+					text += f'<font color="#c00" style="font-size: 18pt">❌ Process completed with<br/><b>error code {code}</b></font>'
 
 				self.label.setText(text)
 				self.label.resize(self.minimumSizeHint())
