@@ -291,10 +291,9 @@ class VtEvalApp():
 
 				raise exc
 
-			
-
 	def getSaveStatePath(self):
-		nameBits = [self.arguments['pid'], self.arguments['condition'], self.app.applicationName(), self.arguments['facilitator']]
+		evalType = self.app.applicationName().split()[0].lower()
+		nameBits = [self.arguments['pid'], self.arguments['condition'], evalType]
 		return Path(f'states/' + '_'.join(nameBits) + '.savestate')
 
 class SerialErrorWidget(QtWidgets.QWidget):
