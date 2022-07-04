@@ -156,7 +156,8 @@ class VtEvalApp():
 		self.progressBar.setValue(progressValue)
 		logging.info(f'Progress at {progressValue}/{self.progressBar.maximum()}')
 
-		print(f'Progress at {progressValue}/{self.progressBar.maximum()}')
+		if isinstance(self.currentStateWidget, InstructionsScreen):
+			self.lastInstructionsScreen = self.currentStateWidget
 
 		while self.window.layout().count() > 1:
 			widget = self.window.layout().takeAt(1).widget()
@@ -166,8 +167,7 @@ class VtEvalApp():
 		self.window.layout().addWidget(self.currentStateWidget)
 		self.currentStateWidget.finished.connect(lambda: self.onStateWidgetFinished(self.currentStateWidget))
 
-		if isinstance(self.currentStateWidget, InstructionsScreen):
-			self.lastInstructionsScreen = self.currentStateWidget
+		logging.info(f'Current widget = {self.currentStateWidget}')
 
 		try:
 			self.device.ping()
@@ -247,7 +247,6 @@ class VtEvalApp():
 		logDir = 'data/executionLogs'
 		Path(logDir).mkdir(exist_ok=True)
 		logPath = f'{logDir}/{self.dataLogger.baseFilename}.log'
-		logPath = f'{logDir}/test.log'
 		print(f'Starting log at {logPath}')
 
 		logging.basicConfig(
