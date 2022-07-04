@@ -5,6 +5,7 @@ from pathlib import Path
 import csv
 import random
 import re
+import logging
 
 from PySide2 import QtCore, QtGui, QtWidgets, QtMultimedia, QtMultimediaWidgets
 
@@ -48,9 +49,14 @@ def isSerializable(value):
 
 	return True
 
-def nowStamp():
+def nowStamp(safeChars=False):
 	now = datetime.datetime.now()
-	return now.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (now.microsecond / 10000))
+	now = now.strftime('%Y-%m-%dT%H:%M:%S') + ('-%03d' % (now.microsecond / 1000))
+
+	if safeChars:
+		now = now.replace(':', '_')
+
+	return now
 
 class VtEvalApp():
 	def __init__(self, appName):
@@ -148,6 +154,8 @@ class VtEvalApp():
 	def popNextState(self):
 		progressValue = self.progressBar.maximum() - len(self.widgetStack) + 1
 		self.progressBar.setValue(progressValue)
+		logging.info(f'Progress at {progressValue}/{self.progressBar.maximum()}')
+
 		print(f'Progress at {progressValue}/{self.progressBar.maximum()}')
 
 		while self.window.layout().count() > 1:
@@ -194,7 +202,12 @@ class VtEvalApp():
 		self.parseArgs()
 
 		self.device = serial.SerialDevice(self.arguments['device'])
+
+		self.startDataLogger()
+		self.startLogger()
+
 		if self.openState():
+			logging.warning(f'Resuming from saved state {self.getSaveStatePath()}')
 
 			if self.lastInstructionsScreen is None:
 				restoredText = 'Wnen you are ready, the evaluation will immediately resume from where you left off.'
@@ -212,10 +225,12 @@ class VtEvalApp():
 					widget.stimulusTriggered.connect(self.playStimulus)
 
 		else:
+			logging.info(f'Starting fresh')
 			self.initialize(self.arguments)
 			self.widgetStack.append(KeyPromptWidget(name='finished', text='<center>You are finished!<br/><br/>Please let the facilitator know.</center>', dismissKey=QtCore.Qt.Key_F4))
 
-		self.startDataLogger()
+		for idx,widget in enumerate(self.widgetStack):
+			logging.info(f'self.widgetStack[{idx}] = {widget}')
 
 		self.window.showFullScreen()
 		QtCore.QTimer.singleShot(0, self.onStarted)
@@ -226,12 +241,32 @@ class VtEvalApp():
 			self.gamepadDaemon.start()
 			self.app.exec_()
 
+			logging.info(f'Eval ended with {len(self.widgetStack)} item(s) left')
+
+	def startLogger(self):
+		logDir = 'data/executionLogs'
+		Path(logDir).mkdir(exist_ok=True)
+		logPath = f'{logDir}/{self.dataLogger.baseFilename}.log'
+		logPath = f'{logDir}/test.log'
+		print(f'Starting log at {logPath}')
+
+		logging.basicConfig(
+			filename=logPath,
+			encoding='utf-8',
+			format='[{asctime}][{levelname:^8}][{filename:>16}:{lineno:<4}] {message}',
+			style='{',
+			level=logging.DEBUG
+		)
+		logging.info(f'Log started at = {logPath}')
+		logging.info(f'Data log path  = {self.dataLogger.path}')
+
 	def connectNewDevice(self, device):
-		print('Connect to', device)
+		logging.info(f'Connect to {device}')
 
 		self.device = serial.SerialDevice(device)
 		if self.device.open():
 			self.serialErrorWidget.enableButton()
+			logging.info(f'Connection to {device} ok')
 		else:
 			self.serialErrorWidget.showError('Could not connect to device.')
 
@@ -283,16 +318,19 @@ class VtEvalApp():
 			}
 
 			try:
+				logging.info(f'Saving state to {stateFilePath}')
 				stateFile = stateFilePath.open('wb')
 				pickle.dump(state, stateFile)
 				stateFile.close()
+				logging.info(f'State saved!')
+				# @TODO: save to a temp location, then if successful, copy over old state file
 			except Exception as exc:
+				logging.error(f'Failed to save state {exc}')
 				try:
+					# the file is junked, toss it
 					stateFile.unlink()
 				except:
 					pass
-
-				raise exc
 
 	def getSaveStatePath(self):
 		evalType = self.app.applicationName().split()[0].lower()
@@ -345,6 +383,7 @@ class SerialErrorWidget(QtWidgets.QWidget):
 	def showError(self, message):
 		self.messageLabel.setText(f'<center>{message}</center>')
 		self.messageLabel.setStyleSheet('QLabel { color: #A00; font-weight: bold; } ')
+		logging.error(f'Serial device error: {message}')
 
 	def enableButton(self):
 		self.messageLabel.setText('<center>Connected!</center>')
@@ -401,6 +440,10 @@ class KeyPromptWidget(PromptWidget):
 		if event.key() == self.dismissKey:
 			self.finished.emit()
 
+	def __repr__(self):
+		text = self.text.replace('\n', '\\n')
+		return f'<{self.__class__.__name__}(name={self.name}, text={text}, dismissKey={self.dismissKey})>'
+
 	def __setstate__(self, state):
 		self.__init__(state['name'], state['text'], state['dismissKey'])
 
@@ -430,6 +473,11 @@ class ButtonPromptWidget(PromptWidget):
 	def onButtonClicked(self):
 		self.setDisabled(True) # prevent double clicks
 		self.finished.emit()
+
+	def __repr__(self):
+		text = self.text.replace('\n', '\\n')
+		buttonText = self.buttonText.replace('\n', '\\n')
+		return f'<{self.__class__.__name__}(name={self.name}, text={text}, buttonText={buttonText}, enabledDelaySeconds={self.enabledDelaySeconds})>'
 
 	def __setstate__(self, state):
 		self.__init__(state['name'], state['text'], state['buttonText'], state['enabledDelaySeconds'])
@@ -532,6 +580,8 @@ class SoundCollectionButton(QtWidgets.QPushButton):
 		self.soundEffect.setSource(QtCore.QUrl.fromLocalFile(str(soundFile)))
 		self.soundEffect.play()
 
+		logging.info(f'Play sound {soundFile}')
+
 class ButtonPromptWidgetWithSoundBoard(ButtonPromptWidget, InstructionsScreen):
 	def __init__(self, name, text, buttonText='Continue', enabledDelaySeconds=0, sounds=None, buttonsPerRow=4, parent=None):
 		super().__init__(name, text, buttonText, enabledDelaySeconds, parent)
@@ -593,9 +643,12 @@ class DataLogger:
 
 		now = nowStamp().replace(':', '-')
 		nameBits = [now, arguments['pid'], arguments['condition'], evalType, arguments['facilitator']]
-		path = Path(f'data/' + '_'.join(nameBits) + '.csv')
-		path.parent.mkdir(parents=True, exist_ok=True)
-		self.dataFile = path.open('w')
+
+		self.baseFilename = '_'.join(nameBits)
+		self.path = Path(f'data/{self.baseFilename}.csv')
+		self.path.parent.mkdir(parents=True, exist_ok=True)
+
+		self.dataFile = self.path.open('w')
 		self.csvWriter = csv.DictWriter(
 			self.dataFile,
 			fieldnames=self.getFieldNames(),
@@ -621,7 +674,7 @@ class DataLogger:
 
 	def logWidgetCompletion(self, finishedWidget):
 		record = self.buildRecord(finishedWidget)
-		print('log', record)
+		logging.info(f'Logging record {record}')
 
 		self.csvWriter.writerow(record)
 		self.dataFile.flush()

@@ -79,7 +79,7 @@ phoneToHumanMap = {
 	'Z' : 'aZa',
 }
 
-class AFCWidget(StateWidget):
+class PhonemeAFCWidget(StateWidget):
 	stimulusBraced = QtCore.Signal(object)
 	stimulusTriggered = QtCore.Signal(object)
 
@@ -147,6 +147,9 @@ class AFCWidget(StateWidget):
 		super().keyPressEvent(event)
 		navigateGridLayout(self.buttonContainer, event)
 
+	def __repr__(self):
+		return f'<{self.__class__.__name__}(name={self.name}, stimulus={self.stimulus}, options={self.options})>'
+
 	def __setstate__(self, state):
 		self.__init__(state['name'], state['stimulus'], state['options'])
 
@@ -187,7 +190,7 @@ class PhonemeEvalApp(VtEvalApp):
 		isPreTest = self.arguments['condition'] == 'Pre-test'
 
 		for w in self.widgetStack:
-			if isinstance(w, AFCWidget):
+			if isinstance(w, PhonemeAFCWidget):
 				if isPreTest or random.random() > phoneFreqs[w.stimulus.id]:
 					w.selection = random.choice(w.options)
 				else:
@@ -208,7 +211,7 @@ class PhonemeEvalApp(VtEvalApp):
 		for idx,stim in enumerate(self.consonants):
 			options = self.makeRandomSubset(self.consonantSet, stim.id)
 
-			stimWidget = AFCWidget(f'consonant-{idx:03}', stim, options)
+			stimWidget = PhonemeAFCWidget(f'consonant-{idx:03}', stim, options)
 			stimWidget.stimulusBraced.connect(self.prepareStimulus)
 			stimWidget.stimulusTriggered.connect(self.playStimulus)
 			consonantStack.append(stimWidget)
@@ -226,7 +229,7 @@ class PhonemeEvalApp(VtEvalApp):
 		for idx,stim in enumerate(self.vowels):
 			options = self.makeRandomSubset(self.vowelSet, stim.id)
 
-			stimWidget = AFCWidget(f'vowel-{idx:03}', stim, options)
+			stimWidget = PhonemeAFCWidget(f'vowel-{idx:03}', stim, options)
 			stimWidget.stimulusBraced.connect(self.prepareStimulus)
 			stimWidget.stimulusTriggered.connect(self.playStimulus)
 			vowelStack.append(stimWidget)

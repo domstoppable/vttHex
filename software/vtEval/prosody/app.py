@@ -76,7 +76,10 @@ class StimPair:
 	def getMaxDurationMS(self):
 		return max(self.earlyStim.vtt.getDuration(), self.lateStim.vtt.getDuration())
 
-class AFCWidget(StateWidget):
+	def __repr__(self):
+		return f'<{self.__class__.__name__}(typeName={self.type}, typeIdx={self.typeIdx}, earlyStim={self.earlyStim}, lateStim={self.lateStim})>'
+
+class ProsodyAFCWidget(StateWidget):
 	stimulusBraced = QtCore.Signal(object)
 	stimulusTriggered = QtCore.Signal(object)
 
@@ -217,6 +220,9 @@ class AFCWidget(StateWidget):
 		elif keyEvent.key() == QtCore.Qt.Key_D:
 			self.choiceButtons[1].setFocus()
 
+	def __repr__(self):
+		return f'<{self.__class__.__name__}(name={self.name}, stimPair={self.stimPair}, earlyOrLate={self.earlyOrLate})>'
+
 	def __setstate__(self, state):
 		self.__init__(state['name'], state['stimPair'], state['earlyOrLate'])
 
@@ -271,7 +277,7 @@ class ProsodyEvalApp(VtEvalApp):
 		}
 
 		for w in self.widgetStack:
-			if isinstance(w, AFCWidget):
+			if isinstance(w, ProsodyAFCWidget):
 				if isPostTest and random.random() > 0.65:
 					w.selection = w.earlyOrLate
 				else:
@@ -330,7 +336,7 @@ class ProsodyEvalApp(VtEvalApp):
 		return stack
 
 	def makeStimWidget(self, name, stimPair, earlyOrLate):
-		stimWidget = AFCWidget(name=name, stimPair=stimPair, earlyOrLate=earlyOrLate)
+		stimWidget = ProsodyAFCWidget(name=name, stimPair=stimPair, earlyOrLate=earlyOrLate)
 		stimWidget.stimulusBraced.connect(self.prepareStimulus)
 		stimWidget.stimulusTriggered.connect(self.playStimulus)
 

@@ -1,3 +1,5 @@
+import logging
+
 from enum import IntEnum
 
 from PySide2 import QtCore, QtSerialPort
@@ -71,6 +73,7 @@ class SerialDevice():
 
 		self.port = QtSerialPort.QSerialPort(pathOrSerialInfo)
 		self.port.setBaudRate(115200)
+		self.lastFile = None
 
 	def open(self):
 		return self.port.open(QtCore.QIODevice.ReadWrite)
@@ -83,9 +86,12 @@ class SerialDevice():
 		self.send(formatPacket_PlayBite())
 
 	def sendFile(self, vttFile):
+		self.lastFile = vttFile
+		logging.info(f'Send {vttFile}')
 		self.send(formatPacket_SoundBite(vttFile))
 
 	def play(self):
+		logging.info(f'Play {self.lastFile}')
 		self.send(formatPacket_PlayBite())
 
 	def ping(self):
@@ -97,7 +103,8 @@ class SerialDevice():
 			if self.port.error() != QtSerialPort.QSerialPort.SerialPortError.NoError:
 				raise SerialError('Failed to open port', self.port.error())
 
-		print(f'Send {len(bytes)} bytes', bytes[:32], '...' if len(bytes) > 32 else '')
+		logging.info(f'Send {len(bytes)} bytes {list(bytes[:32])}{" ..." if len(bytes) > 32 else ""}')
+
 		self.port.write(bytes)
 		if self.port.error() != QtSerialPort.QSerialPort.SerialPortError.NoError:
 			raise SerialError('Failed to write to port', self.port.error())

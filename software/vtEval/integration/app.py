@@ -70,6 +70,9 @@ class StimPair(Stimulus):
 		return stimPairResponseOptions[(audible, tactile)]
 
 	def __repr__(self):
+		return f'<{self.__class__.__name__}(wavFile={self.wavFile}, vttFile={self.vttFile})>'
+
+	def __str__(self):
 		return f'{self.getAudiblePhone()}-{self.getTactilePhone()}'
 
 	def __getstate__(self):
@@ -81,7 +84,7 @@ class StimPair(Stimulus):
 	def __setstate__(self, state):
 		self.__init__(state['wavFile'], state['vttFile'])
 
-class AFCWidget(StateWidget):
+class IntegrationAFCWidget(StateWidget):
 	stimulusBraced = QtCore.Signal(object)
 	stimulusTriggered = QtCore.Signal(object)
 
@@ -164,6 +167,9 @@ class AFCWidget(StateWidget):
 			idx = buttonToKeyMap.index(event.key())
 			self.buttonContainer.layout().itemAt(idx).widget().setFocus()
 
+	def __repr__(self):
+		return f'<{self.__class__.__name__}(name={self.name}, stimulus={repr(self.stimulus)})>'
+
 	def __setstate__(self, state):
 		self.__init__(state['name'], state['stimulus'])
 
@@ -205,7 +211,7 @@ class IntegrationEvalApp(VtEvalApp):
 		isPostTest = self.arguments['condition'] == 'Post-test'
 
 		for w in self.widgetStack:
-			if isinstance(w, AFCWidget):
+			if isinstance(w, IntegrationAFCWidget):
 				if not isPostTest:
 					# on the pre-test, we'll pick the auditory stim at least 90%
 					if random.random() < .9:
@@ -233,7 +239,7 @@ class IntegrationEvalApp(VtEvalApp):
 
 		tactileAuditoryStack = []
 		for idx,stimPair in enumerate(self.stimSets):
-			stimWidget = AFCWidget(f'tactileAuditoryStack-{idx:03}', stimPair)
+			stimWidget = IntegrationAFCWidget(f'tactileAuditoryStack-{idx:03}', stimPair)
 			stimWidget.stimulusBraced.connect(self.prepareStimulus)
 			stimWidget.stimulusTriggered.connect(self.playStimulus)
 			tactileAuditoryStack.append(stimWidget)

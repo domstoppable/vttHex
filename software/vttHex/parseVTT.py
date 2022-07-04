@@ -68,6 +68,8 @@ class VTTFile:
 	def getIntensitySamples(self):
 		return [x['intensity'] for x in self.getSamplesAsDicts()]
 
+	def __repr__(self):
+		return f'<{self.__class__.__name__}({self.filepath})'
 
 class StructBuffer:
 	def __init__(self, bytes):
