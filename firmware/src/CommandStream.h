@@ -25,7 +25,7 @@
 
 #define FACE_VIBING     "\n    ^  ^\n   ~~~~~~\0"
 #define FACE_NORMAL     "\n    O  O\n   \\____/\0"
-#define FACE_LONELY     "\n    x  x\n    ----\0"
+#define FACE_LONELY     "\n    Z  Z\n    ----\0"
 #define FACE_CONFUSED   "\n    ?  ?\n    ----\0"
 
 extern uint8_t CMD_PAYLOAD_SIZES[NUM_COMMANDS];

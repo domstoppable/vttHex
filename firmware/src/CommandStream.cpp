@@ -134,7 +134,7 @@ void CommandStream::update(){
 		}
 	}
 
-	if(now - lastPing > 2000l){
+	if(now - lastPing > 5000l){
 		strcpy(face, FACE_LONELY);
 	}
 
