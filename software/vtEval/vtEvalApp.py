@@ -318,16 +318,19 @@ class VtEvalApp():
 
 			try:
 				logging.info(f'Saving state to {stateFilePath}')
-				stateFile = stateFilePath.open('wb')
-				pickle.dump(state, stateFile)
-				stateFile.close()
+				tmpStateFilePath = (stateFilePath.parent/'tmp')
+				tmpStateFile = tmpStateFilePath.open('wb')
+
+				pickle.dump(state, tmpStateFile)
+				tmpStateFile.close()
+
+				tmpStateFilePath.replace(stateFilePath)
+
 				logging.info(f'State saved!')
-				# @TODO: save to a temp location, then if successful, copy over old state file
 			except Exception as exc:
 				logging.error(f'Failed to save state {exc}')
 				try:
-					# the file is junked, toss it
-					stateFile.unlink()
+					tmpStateFilePath.unlink() # the file is junked, toss it
 				except:
 					pass
 
