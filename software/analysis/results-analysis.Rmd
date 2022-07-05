@@ -5,20 +5,7 @@ output: html_document
 
 R code for processing vibey-transcribey data
 
-
-can't use between variable as random slope - only random intercept
-
-by item random effect
-
-ryan last year - crowding study in eye perception
-	by item and by speaker
-	item / speaker
-
-
-Correct ~ Training*Condition + (Condition|Subject) + (1|Stim)
-
-McGurk
-Correct ~ Training*Condition + (Condition|Subject) + (1|stim/speaker)
+Working directory should be `/software`
 
 ```{r load-helpers, include = FALSE}
     # helper functions and folder setup
