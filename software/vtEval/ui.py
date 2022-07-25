@@ -411,6 +411,7 @@ class ButtonList(QtWidgets.QWidget):
 	def clearOptions(self):
 		while self.layout().count() > 0:
 			button = self.layout().takeAt(0).widget()
+			button.hide()
 			self.group.removeButton(button)
 			button.setParent(None)
 
