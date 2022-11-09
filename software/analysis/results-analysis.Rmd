@@ -318,7 +318,7 @@ Working directory should be `/software`
         dplyr::group_by(training_data, pid),
         first_day = min(datetime),
         lastDay = max(datetime),
-        uniqueSessions = max(training_session_idx),
+        uniqueSessions = max(training_session_idx)+1,
         dateRange = as.integer(max(datetime) - min(datetime)),
         totalPhraseStimExposures = sum(Ok)
     ))
