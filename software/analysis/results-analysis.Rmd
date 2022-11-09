@@ -1020,3 +1020,188 @@ Working directory should be `/software`
     ))
 
 ```
+
+
+
+
+
+# TRAINING PERFORMANCE (load data)
+```{r load-training-data-words, echo = FALSE}
+    setwd("data/training/TrainingLogs")
+
+    word_training_files <- list.files(".", "*.csv")
+    word_training_df <- data.frame()
+
+    for (idx in seq_along(word_training_files)) {
+        tmp_df <- read.csv(word_training_files[idx])
+        if (nrow(tmp_df) > 0) {
+            word_training_df <- dplyr::bind_rows(word_training_df, tmp_df)
+        }
+    }
+    setwd("../../../")
+
+    word_training_df <- within(word_training_df, {
+        PID <- as.factor(PID)
+        Level <- as.factor(Level)
+        Stimulus <- as.factor(Stimulus)
+        LevelAttemptGuid <- as.factor(LevelAttemptGuid)
+    })
+
+
+    word_training_df <- word_training_df[order(word_training_df$PID, word_training_df$Timestamp), ]
+
+    # merge in training game name
+    game_levels <- read.csv("aux-data/game-levels.csv")
+    game_levels$Level <- as.factor(game_levels$Level)
+    game_levels$Game <- as.factor(game_levels$Game)
+
+    word_training_df <- merge(
+        word_training_df, game_levels,
+        by.x = "Level", by.y = "Level",
+        keep.x = FALSE
+    )
+
+    # remove trials that occur after perfection
+    level_attempt_summary <- data.frame(
+        dplyr::summarise(
+            dplyr::group_by(word_training_df, PID, Level, LevelAttemptGuid, Game),
+            CorrectCount = sum(Correct),
+            IncorrectCount = dplyr::n() - sum(Correct),
+            TrialCount = dplyr::n(),
+            PercentageCorrect = mean(Correct),
+            LevelCompleteTime = max(Timestamp),
+            LevelAttemptPerfect = mean(Correct) == 1.0 && dplyr::n() >= 10
+        )
+    )
+    # remove disingenuous attempts?
+
+    # assign attempt idx
+    level_attempt_summary <- dplyr::arrange(level_attempt_summary, PID, Level, LevelCompleteTime)
+    level_attempt_summary <- data.frame(dplyr::mutate(
+        dplyr::group_by(level_attempt_summary, PID, Level),
+        attempt_idx = order(order(LevelCompleteTime)) - 1
+    ))
+
+    level_attempt_summary <- data.frame(dplyr::mutate(
+        dplyr::group_by(level_attempt_summary, PID, Level),
+        LastAttemptIdx = max(attempt_idx)
+    ))
+    level_attempt_summary$p_l_progression <- level_attempt_summary$attempt_idx / level_attempt_summary$LastAttemptIdx
+
+    # determine which levels were the first perfects
+    level_attempt_first_perfects <- data.frame(
+        dplyr::summarise(
+            dplyr::group_by(
+                dplyr::filter(level_attempt_summary, LevelAttemptPerfect),
+                PID,
+                Level
+            ),
+            LevelPerfectedTimestamp = min(LevelCompleteTime)
+        )
+    )
+
+    word_training_df <- merge(
+        word_training_df, level_attempt_first_perfects,
+        by.x = c("PID", "Level"), by.y = c("PID", "Level"),
+        keep.x = FALSE, all.x = TRUE
+    )
+
+    word_training_df <- dplyr::filter(
+        word_training_df,
+        is.na(LevelPerfectedTimestamp) | Timestamp <= LevelPerfectedTimestamp
+    )
+
+    # break out the phrase
+    stimuli_info <- data.frame(do.call("rbind", strsplit(as.character(word_training_df$Stimulus), "-")))
+
+    word_training_df <- within(word_training_df, {
+        pid <- as.factor(PID)
+        stimulus <- as.factor(Stimulus)
+        speaker <- as.factor(stimuli_info$X1)
+        phrase <- as.factor(stimuli_info$X2)
+        Game <- as.factor(Game)
+    })
+
+    word_training_df <- dplyr::arrange(word_training_df, pid, phrase, Timestamp)
+
+    # add the exposures column
+    word_training_df <- data.frame(dplyr::mutate(
+        dplyr::group_by(word_training_df, PID, phrase),
+        exposures = order(order(Timestamp))
+    ))
+    word_training_df <- data.frame(dplyr::mutate(
+        dplyr::group_by(word_training_df, PID, phrase),
+        totalExposures = max(exposures)
+    ))
+
+    word_training_df$exposure_progression <- (word_training_df$exposures-1) / (word_training_df$totalExposures-1)
+
+    write.csv(word_training_df, 'analysis-output/word_exposures.csv')
+
+    rm(idx)
+    rm(tmp_df)
+    rm(word_training_files)
+    rm(stimuli_info)
+```
+
+# TRAINING PERFORMANCE by level
+```{r training-perf-by-level, echo = FALSE}
+
+    level_attempt_progression_summary <- tidyr::drop_na(level_attempt_summary, p_l_progression)
+    write.csv(level_attempt_progression_summary, "analysis-output/level_attempt_progression_summary.csv")
+
+    lmer0 <- lmerTest::lmer(
+        PercentageCorrect ~ 1 + (1|Game/Level) + (1|PID),
+        data = level_attempt_progression_summary,
+        weights = TrialCount,
+        REML = FALSE
+    )
+
+    lmer1 <- lmerTest::lmer(
+        PercentageCorrect ~ p_l_progression + (p_l_progression|Game) + (p_l_progression|PID),
+        data = level_attempt_progression_summary,
+        weights = TrialCount,
+        REML = FALSE
+    )
+
+    lmer2 <- lmerTest::lmer(
+        PercentageCorrect ~ p_l_progression + (p_l_progression|Game/Level) + (p_l_progression|PID),
+        data = level_attempt_progression_summary,
+        weights = TrialCount,
+        REML = FALSE
+    )
+
+    summary(lmer0)
+    summary(lmer1)
+    summary(lmer2)
+    anova(lmer0, lmer1, lmer2)
+
+    plot_values <- ggeffects::ggpredict(lmer2, "p_l_progression")
+
+    ggplot2::ggplot(plot_values, ggplot2::aes(x = x, y = predicted)) +
+        ggplot2::geom_line() +
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = conf.low, ymax = conf.high), alpha = .1) +
+        ggplot2::geom_point(
+            mapping = ggplot2::aes(
+                x = p_l_progression,
+                y = PercentageCorrect,
+                size = TrialCount,
+            ),
+            data = level_attempt_progression_summary,
+            position = ggplot2::position_jitter(width=0.01, height=0.01),
+            alpha = 0.1
+        ) +
+        ggplot2::labs(
+            x = "Progression",
+            y = "Correct Portion",
+            title = "Training Performance"
+        )
+
+    save_plot()
+
+```
+
+
+
+
+# END
