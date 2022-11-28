@@ -5,27 +5,30 @@ output: html_document
 
 R code for processing vibey-transcribey data
 
-Working directory should be `/software`
+Working directory should be `/software/analysis`
 
 ```{r load-helpers, include = FALSE}
     # helper functions and folder setup
 
+    theme_colors <- c("#E3E3E3","#E69F00", "#56B4E9", "#009E73", "#F0E442")
+    #theme_colors <- c("#111111","#E69F00", "#56B4E9", "#009E73", "#F0E442")
+
     # ensure output plots exist
-    if (!file.exists("analysis-output/plots")) {
-        dir.create("analysis-output/plots", recursive = TRUE)
+    if (!file.exists("../analysis-output/plots")) {
+        dir.create("../analysis-output/plots", recursive = TRUE)
     }
 
     # Load helper funcs and dataframes and set directory
-    phone_translate <- read.csv("aux-data/phoneme-translate.csv")
+    phone_translate <- read.csv("../aux-data/phoneme-translate.csv")
     phone_translate$phone_type <- as.factor(phone_translate$phone_type)
-    training_lexicon <- read.csv("aux-data/training-lexicon.csv")
+    training_lexicon <- read.csv("../aux-data/training-lexicon.csv")
 
     load_eval_files <- function(file_pattern, create_correct_column = TRUE) {
         # find matching files, combine into single df
-        setwd("data/evals")
+        setwd("../data/evals")
         df_files <- list.files(".", file_pattern)
         df <- dplyr::bind_rows(lapply(df_files, read.csv))
-        setwd("../../")
+        setwd("../../analysis")
 
         # Remove unneeded columns and rows
         df <- subset(df, select = -c(timestamp, facilitator, event, item))
@@ -84,7 +87,7 @@ Working directory should be `/software`
         return(model)
     }
 
-    save_plot <- function(plot = NULL, path = NULL, filename = NULL, width = 6, height = 6) {
+    save_plot <- function(plot = NULL, path = NULL, filename = NULL, width = 6, height = 6, extension = "svg", theme_overrides = ggplot2::theme()) {
         if (is.null(plot)) {
             plot <- ggplot2::last_plot()
         }
@@ -97,12 +100,37 @@ Working directory should be `/software`
             filename <- stringr::str_replace_all(tolower(plot$labels$title), " ", "_")
         }
 
-        filename <- sprintf("%s/%s.png", path, filename)
+        filename <- sprintf("%s/%s.%s", path, filename, extension)
+
+        if (extension == "svg") {
+            width <- width * 2/3
+            height <- height * 2/3
+        }
+
+        plot <- plot +
+            ggplot2::scale_color_manual(values = theme_colors) +
+            ggplot2::scale_fill_manual(values = theme_colors) +
+            ggplot2::theme(
+                plot.title = ggplot2::element_blank(),
+                plot.background = ggplot2::element_rect(fill = "black"),
+                panel.grid = ggplot2::element_blank(),
+                panel.background = ggplot2::element_rect(fill="#0A0A0A"),
+                panel.grid.major = ggplot2::element_line(color = "#333333", size = 0.5),
+                panel.grid.minor = ggplot2::element_line(color = "#222222", size = 0.25),
+                legend.background = ggplot2::element_rect(fill = "black", color = "#888888"),
+                legend.key = ggplot2::element_blank(),
+                text = ggplot2::element_text(color = "white", family = "arial"),
+                axis.text.y = ggplot2::element_text(colour = "#BBBBBB", family = "arial"),
+                axis.text.x = ggplot2::element_text(colour = "#BBBBBB", family = "arial"),
+                axis.line.x.bottom = ggplot2::element_line(color = "#999999"),
+                axis.line.y.left = ggplot2::element_line(color = "#999999"),
+        ) + theme_overrides
 
         ggplot2::ggsave(
             plot = plot,
             file = filename,
-            width = width, height = height
+            width = width, height = height,
+            dpi = 300
         )
     }
 
@@ -124,11 +152,11 @@ Working directory should be `/software`
     }
 ```
 
-# TRAINING DATA
-```{r load-training-data, echo = FALSE}
+# TRAINING DATA (by phoneme)
+```{r load-training-data-phones, echo = FALSE}
     # Load training files from data/training/*.csv
 
-    setwd("data/training")
+    setwd("../data/training")
 
     training_files <- list.files(".", "*.csv")
     training_data <- data.frame()
@@ -139,7 +167,8 @@ Working directory should be `/software`
             training_data <- dplyr::bind_rows(training_data, tmp_df)
         }
     }
-    setwd("../../")
+
+    setwd("../../analysis")
 
     # calculate how much time has elapsed between rows
     # from this we can determine training day index
@@ -404,111 +433,21 @@ Working directory should be `/software`
 
 ## Explore and visualize 📈
 ```{r plot-phoneme-data, echo = FALSE}
-#    exposure_counts_by_phone_type <- data.frame(
-#        dplyr::summarise(
-#            dplyr::group_by(phone_df_with_phone_exposures, pid, condition, test_phone, phone_type),
-#            phoneme_exposures = mean(phoneme_exposures),
-#        )
-#    )
-#
-#    exposure_counts_by_phone_type <- data.frame(
-#        dplyr::summarise(
-#            dplyr::group_by(exposure_counts_by_phone_type, pid, phone_type, condition),
-#            phoneme_exposures = sum(phoneme_exposures),
-#        )
-#    )
-#
-#    test_summary <- data.frame(
-#        dplyr::summarise(
-#            dplyr::group_by(phone_df_with_phone_exposures, condition, pid, phone_type),
-#            correctPortion = 100 * mean(correct),
-#            se = 100 * sd(correct) / sqrt(length(correct))
-#        )
-#    )
-#
-#    phone_summary_by_type_and_pid <- merge(
-#        test_summary,
-#        exposure_counts_by_phone_type,
-#        by = c("condition", "pid", "phone_type")
-#    )
-#
-#    phone_summary_exp_by_pid <- dplyr::filter(phone_summary_by_type_and_pid, !is.na(phoneme_exposures))
-#
-#    ggplot2::ggplot(phone_summary_exp_by_pid, ggplot2::aes(
-#        x = phoneme_exposures, y = correctPortion,
-#        shape = phone_type, group = phone_type, color = phone_type
-#    )) +
-#        ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
-#        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
-#        ggplot2::geom_line() +
-#        ggplot2::geom_point(size = 3) +
-#        ggplot2::geom_errorbar(
-#            ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
-#            width = 500,
-#        ) +
-#        ggplot2::ylim(0, 100) +
-#        ggplot2::labs(
-#            colour = "Phoneme Type",
-#            shape = "Phoneme Type",
-#            x = "Phoneme Exposures",
-#            y = "Percentage Correct",
-#            title = "Phoneme Recognition (experimental group individuals)"
-#        ) +
-#        ggplot2::theme_classic() +
-#        ggplot2::theme(legend.position = c(0.85, 0.85))
-#
-#    save_last_plot("phoneme-recognition-exp-group-by-pid.png")
-#
-#    post_test_summary <- data.frame(
-#        dplyr::summarise(
-#            dplyr::group_by(phone_df_with_phone_exposures, phone_type, test_phone),
-#            correctPortion = 100 * mean(correct),
-#            phoneme_exposures = mean(phoneme_exposures),
-#            se = 100 * sd(correct) / sqrt(length(correct))
-#        )
-#    )
-#
-#    ggplot2::ggplot(post_test_summary, ggplot2::aes(
-#        x = phoneme_exposures, y = correctPortion,
-#        label = test_phone, color = phone_type
-#    )) +
-#        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
-#    #    ggplot2::geom_line(ggplot2::aes(y = fitLine$fit), color = 'black') +
-#    #    ggplot2::geom_ribbon(ggplot2::aes(ymin = fitLine$lwr, ymax = fitLine$upr), alpha = .15, color = 'gray') +
-#    #    ggplot2::geom_point(show.legend = FALSE) +
-#    #    ggrepel::geom_text_repel(max.overlaps = Inf) +
-#        ggplot2::geom_text(size = 3) +
-#        #ggplot2::ylim(min(fitLine$lwr), 100) +
-#        ggplot2::ylim(0, 100) +
-#        ggplot2::labs(
-#            colour = "Phoneme Type",
-#            x = "Mean Training Exposures",
-#            y = "Mean Percentage Correct",
-#            title = "Phoneme Recognition (experimental group)"
-#        ) +
-#        ggplot2::theme_classic() +
-#        ggplot2::theme(
-#            legend.position = "none",
-#            axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank()
-#        )
-#
-#    save_last_plot("phoneme-recognition-by-phone.png", width = 3, height = 3)
-
     post_test_summary_by_condition <- data.frame(
         dplyr::summarise(
             dplyr::group_by(phone_df_with_phone_exposures, group, condition),
-            correctPortion = 100 * mean(correct),
-            se = 100 * sd(correct) / sqrt(length(correct))
+            correctPortion = mean(correct),
+            se = sd(correct) / sqrt(length(correct))
         )
     )
 
-    dodge <- ggplot2::position_dodge(width = 0.125)
+    dodge <- ggplot2::position_dodge(width = 0.25)
 
     ggplot2::ggplot(post_test_summary_by_condition, ggplot2::aes(
         x = condition, y = correctPortion,
         group = group, color = group, shape = group
     )) +
-        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
+        ggplot2::geom_hline(yintercept = 1 / 9, linetype = "dashed", color = "gray") +
         ggplot2::geom_line(position = dodge) +
         ggplot2::geom_point(position = dodge, size = 4) +
         ggplot2::geom_errorbar(
@@ -517,18 +456,19 @@ Working directory should be `/software`
             width = .125,
             color = "#555555"
         ) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::labs(
             x = "Test Session",
-            y = "Percentage Correct",
+            y = "Portion Correct",
             title = "Phoneme Identification Before and After Training Period",
             color = "Group", shape = "Group"
         ) +
         ggplot2::theme_classic() +
         ggplot2::theme(
-            legend.position = c(0.85, 0.85),
+            legend.position = c(0.80, 0.85),
             legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
-        )
+        ) +
+        ggthemes::scale_color_colorblind()
 
     save_plot()
 
@@ -540,9 +480,9 @@ Working directory should be `/software`
     post_test_summary_by_pid <- data.frame(
         dplyr::summarise(
             dplyr::group_by(phone_exp_post_only, pid, group, phone_type, test_phone),
-            correctPortion = 100 * mean(correct),
+            correctPortion = mean(correct),
             phoneme_exposures = mean(phoneme_exposures),
-            se = 100 * sd(correct) / sqrt(length(correct))
+            se = sd(correct) / sqrt(length(correct))
         )
     )
 
@@ -551,34 +491,31 @@ Working directory should be `/software`
         label = test_phone, color = phone_type
     )) +
         ggplot2::facet_wrap(facets = ggplot2::vars(pid)) +
-        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
-    #    ggplot2::geom_line(ggplot2::aes(y = fitLine$fit), color = 'black') +
-    #    ggplot2::geom_ribbon(ggplot2::aes(ymin = fitLine$lwr, ymax = fitLine$upr), alpha = .15, color = 'gray') +
-    #    ggplot2::geom_point(show.legend = FALSE) +
+        ggplot2::geom_hline(yintercept = 1 / 9, linetype = "dashed", color = "gray") +
         ggplot2::geom_text(size = 3) +
-    #    ggrepel::geom_text_repel(max.overlaps = Inf) +
-        #ggplot2::ylim(min(fitLine$lwr), 100) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::labs(
             color = "Phone type",
             x = "Phoneme Exposures",
-            y = "Percentage Correct",
+            y = "Portion Correct",
             title = "(Individual's) Effect of Stimulus Exposures on Phoneme Identification"
         ) +
         ggplot2::theme_classic() +
         ggplot2::theme(
-            legend.position = c(0.9, 0.9),
+            legend.position = c(0.85, 0.2),
             legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
-        )
+        ) +
+        ggthemes::scale_color_colorblind()
 
     save_plot(width = 12)
+
 
     post_test_summary_by_phone <- data.frame(
         dplyr::summarise(
             dplyr::group_by(phone_exp_post_only, phone_type, test_phone),
-            correctPortion = 100 * mean(correct),
+            correctPortion = mean(correct),
             phoneme_exposures = mean(phoneme_exposures),
-            se = 100 * sd(correct) / sqrt(length(correct))
+            se = sd(correct) / sqrt(length(correct))
         )
     )
 
@@ -586,25 +523,21 @@ Working directory should be `/software`
         x = phoneme_exposures, y = correctPortion,
         label = test_phone, color = phone_type
     )) +
-        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
-    #    ggplot2::geom_line(ggplot2::aes(y = fitLine$fit), color = 'black') +
-    #    ggplot2::geom_ribbon(ggplot2::aes(ymin = fitLine$lwr, ymax = fitLine$upr), alpha = .15, color = 'gray') +
-    #    ggplot2::geom_point(show.legend = FALSE) +
+        ggplot2::geom_hline(yintercept = 1 / 9, linetype = "dashed", color = "gray") +
         ggplot2::geom_text(size = 3) +
-    #    ggrepel::geom_text_repel(max.overlaps = Inf) +
-        #ggplot2::ylim(min(fitLine$lwr), 100) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::labs(
-            colour = "Phone Type",
+            color = "Phone Type",
             x = "Phoneme Exposures",
-            y = "Percentage Correct",
+            y = "Portion Correct",
             title = "Effect of Stimulus Exposures on Phoneme Identification"
         ) +
         ggplot2::theme_classic() +
         ggplot2::theme(
-            legend.position = c(0.85, 0.85),
+            legend.position = c(0.8, 0.85),
             legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
-        )
+        ) +
+        ggthemes::scale_color_colorblind()
 
     save_plot()
 ```
@@ -616,9 +549,9 @@ Working directory should be `/software`
     post_test_summary_by_type <- data.frame(
         dplyr::summarise(
             dplyr::group_by(phone_df_with_phone_exposures, group, phone_type),
-            correctPortion = 100 * mean(correct),
+            correctPortion = mean(correct),
             phoneme_exposures = mean(phoneme_exposures),
-            se = 100 * sd(correct) / sqrt(length(correct))
+            se = sd(correct) / sqrt(length(correct))
         )
     )
 
@@ -626,25 +559,30 @@ Working directory should be `/software`
         x = phone_type, y = correctPortion,
         label = phone_type, fill = group
     )) +
-        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
+        ggplot2::geom_hline(yintercept = 1 / 9, linetype = "dashed", color = "gray") +
         ggplot2::geom_bar(stat = "identity", , position = ggplot2::position_dodge()) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::labs(
             fill = "Group",
             x = "Phoneme Exposures",
-            y = "Percentage Correct",
-            title = "Post-test Phoneme Identification"
+            y = "Portion Correct",
+            title = "Post-test Phoneme Identification Group Comparison"
         ) +
-        ggplot2::theme_classic()
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+            legend.position = c(0.8, 0.85),
+            legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
+        ) +
+        ggthemes::scale_fill_colorblind()
 
     save_plot()
 
     post_test_summary_by_group <- data.frame(
         dplyr::summarise(
             dplyr::group_by(phone_df_with_phone_exposures, group, phone_type, test_phone),
-            correctPortion = 100 * mean(correct),
+            correctPortion = mean(correct),
             phoneme_exposures = mean(phoneme_exposures),
-            se = 100 * sd(correct) / sqrt(length(correct))
+            se = sd(correct) / sqrt(length(correct))
         )
     )
 
@@ -652,16 +590,21 @@ Working directory should be `/software`
         x = test_phone, y = correctPortion,
         label = test_phone, fill = group
     )) +
-        ggplot2::geom_hline(yintercept = 100 / 9, linetype = "dashed", color = "gray") +
+        ggplot2::geom_hline(yintercept = 1 / 9, linetype = "dashed", color = "gray") +
         ggplot2::geom_bar(stat = "identity", , position = ggplot2::position_dodge()) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::labs(
             fill = "Group",
             x = "Phoneme Exposures",
-            y = "Percentage Correct",
+            y = "Portion Correct",
             title = "Post-test Phoneme Identification (by phoneme)"
         ) +
-        ggplot2::theme_classic()
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+            legend.position = c(0.8, 0.85),
+            legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
+        ) +
+        ggthemes::scale_fill_colorblind()
 
     save_plot()
 
@@ -669,41 +612,121 @@ Working directory should be `/software`
 
 ## Model
 ```{r model-phoneme-data, echo = FALSE}
-    # Question here: should training_word_exposures be NA or 0 for the control group?
 
-    phone_m0 <- bin_lme(
+    phone_m0 <- glm(correct ~ 1, data = phone_df_with_phone_exposures, family = "binomial")
+
+    phone_m0.0 <- bin_lme(
         data = phone_df_with_phone_exposures,
-        formula = correct
-            ~ training_word_exposures_n * condition
-            + (0 + condition | pid)
-            + (0 + condition | phone_type / test_phone)
+        formula = correct ~ 1
+            + (1 | pid)
     )
 
-    results_phone_m0 <- get_logistic_odds_results(phone_m0)
+    anova(phone_m0.0, phone_m0) # 0.0 not different
 
-    print(sprintf(
-        "The odds of correctly specifying a phoneme on the post-test, when trained, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
-        results_phone_m0[1], results_phone_m0[2], results_phone_m0[3]
-    ))
-
-    # @TODO: Question - do the lines above need to be de-transformed? training_word_exposures_n is min-max normalized
-
-    exp_post_only <- dplyr::filter(phone_df_with_phone_exposures, group == "Experimental", condition == "Post-test")
-    phone_m1 <- bin_lme(
-        data = exp_post_only,
-        formula = correct
-            ~ phoneme_exposures_n
-            + (1 | pid)
+    phone_m0.1 <- bin_lme(
+        data = phone_df_with_phone_exposures,
+        formula = correct ~ 1
             + (1 | phone_type / test_phone)
     )
 
-    results_phone_m1 <- get_logistic_odds_results(phone_m1)
+    anova(phone_m0.1, phone_m0) # 0.1 is different
 
-    print(sprintf(
-        "The odds of correctly specifying a phoneme on the post-test, when trained, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
-        results_phone_m1[1], results_phone_m1[2], results_phone_m1[3]
-    ))
+    phone_m0.2 <- bin_lme(
+        data = phone_df_with_phone_exposures,
+        formula = correct ~ 1
+            + (1 | phone_type / test_phone)
+            + (1 | pid)
+    )
+    anova(phone_m0.1, phone_m0, phone_m0.2) # not different
 
+    phone_m0.3 <- bin_lme(
+        data = phone_df_with_phone_exposures,
+        formula = correct ~ condition * group
+            + (1 | phone_type / test_phone)
+    )
+    anova(phone_m0.1, phone_m0, phone_m0.3) # not different
+
+    phone_m0.4 <- bin_lme(
+        data = phone_df_with_phone_exposures,
+        formula = correct ~ condition * group
+            + (1 + condition | phone_type / test_phone)
+            + (1 + group | phone_type / test_phone)
+    )
+    anova(phone_m0.1, phone_m0, phone_m0.4) # not different
+    summary(phone_m0.4)
+
+    # conclusion: no significant interaction between group and test session
+
+
+    ggplot2::ggplot(data = phone_df_with_phone_exposures, ggplot2::aes(x = condition, y = correct, color = group)) +
+        ggplot2::geom_point(
+            alpha = 0.25,
+            position = ggplot2::position_jitter(width = .2, height = 0.05),
+        ) +
+        ggplot2::labs(
+            x = "Testing Session",
+            y = ggplot2::element_blank(),
+            title = "Phoneme Trials before and after training (logistic) Trials",
+            color = "Group"
+        ) +
+        ggplot2::scale_y_continuous(breaks = c(0.0, 1.0), labels = c("Incorrect", "Correct")) +
+        ggplot2::theme(
+            legend.position = c(0.9, 0.5),
+            panel.grid.minor.y = ggplot2::element_blank()
+        ) +
+        ggthemes::scale_color_colorblind()
+
+    save_plot(width=12)
+
+
+
+    # Examine effect of # of phoneme exposures
+    exp_post_only <- dplyr::filter(phone_df_with_phone_exposures, group == "Experimental", condition == "Post-test")
+    phone_m1 <- glm(correct ~ 1, data = exp_post_only, family = "binomial")
+
+    phone_m1.0 <- bin_lme(
+        data = exp_post_only,
+        formula = correct ~ 1
+            + (1 | pid)
+    )
+    anova(phone_m1.0, phone_m1) # not different
+
+    phone_m1.1 <- bin_lme(
+        data = exp_post_only,
+        formula = correct ~ 1
+            + (1 | phone_type / test_phone)
+    )
+
+    anova(phone_m1.1, phone_m1) # is different!
+
+    phone_m1.2 <- bin_lme(
+        data = exp_post_only,
+        formula = correct ~ phoneme_exposures_n
+            + (phoneme_exposures_n | phone_type / test_phone)
+    )
+
+    anova(phone_m1.2, phone_m1.1, phone_m1) # is not different
+    # conclude: no effect of exposures
+
+    ggplot2::ggplot(data = exp_post_only, ggplot2::aes(x = phoneme_exposures, y = correct, color = phone_type)) +
+        ggplot2::geom_point(
+            alpha = 0.25,
+            position = ggplot2::position_jitter(width = 100, height = 0.05),
+        ) +
+        ggplot2::labs(
+            x = "Phoneme Exposures",
+            y = ggplot2::element_blank(),
+            title = "Post-training Phoneme Identification Trials",
+            color = "Phoneme Type"
+        ) +
+        ggplot2::scale_y_continuous(breaks = c(0.0, 1.0), labels = c("Incorrect", "Correct")) +
+        ggplot2::theme(
+            legend.position = c(0.9, 0.5),
+            panel.grid.minor.y = ggplot2::element_blank()
+        ) +
+        ggthemes::scale_color_colorblind()
+
+    save_plot(width=12)
 ```
 
 # PROSODY
@@ -723,12 +746,6 @@ Working directory should be `/software`
     prosody_df$prosody_type <- as.factor(ifelse(type_starts_with_f, "Focus", "Phrase"))
     prosody_df$stimfile <- as.factor(prosody_df$stimfile)
 
-    #prosody_df <- data.frame(dplyr::summarise(
-    #    dplyr::group_by(prosody_df, pid, condition, sentence_id, prosody_type),
-    #    training_word_exposures = mean(training_word_exposures),
-    #    portionCorrect = mean(correct)
-    #))
-
     focus_df <- dplyr::filter(prosody_df, prosody_df$prosody_type == "Focus")
     focus_df$sentence_id <- as.factor(focus_df$sentence_id)
 
@@ -744,8 +761,8 @@ Working directory should be `/software`
 
     focus_test_session_comparison_by_group <- dplyr::summarise(
         dplyr::group_by(focus_df, group, condition),
-        correctPortion = 100 * mean(correct),
-        se = 100 * sd(correct) / sqrt(length(correct))
+        correctPortion = mean(correct),
+        se = sd(correct) / sqrt(length(correct))
     )
 
     dodge <- ggplot2::position_dodge(width = 0.125)
@@ -754,7 +771,7 @@ Working directory should be `/software`
         x = condition, y = correctPortion,
         group = group, color = group, shape = group
     )) +
-        ggplot2::geom_hline(yintercept = 50, linetype = "dashed", color = "gray") +
+        ggplot2::geom_hline(yintercept = .5, linetype = "dashed", color = "gray") +
         ggplot2::geom_line(position = dodge) +
         ggplot2::geom_point(position = dodge, size = 4) +
         ggplot2::geom_errorbar(
@@ -763,18 +780,19 @@ Working directory should be `/software`
             width = .125,
             color = "#555555"
         ) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::labs(
             x = "Test Session",
-            y = "Percentage Correct",
+            y = "Portion Correct",
             title = "Focus Discrimination Before and After Training",
             color = "Group", shape = "Group"
         ) +
         ggplot2::theme_classic() +
         ggplot2::theme(
-            legend.position = c(0.85, 0.85),
+            legend.position = c(0.8, 0.85),
             legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
-        )
+        ) +
+        ggthemes::scale_color_colorblind()
 
     save_plot()
 
@@ -782,29 +800,27 @@ Working directory should be `/software`
 
     focus_post_experimental_only_summary <- dplyr::summarise(
         dplyr::group_by(focus_post_experimental_only, pid, training_word_exposures),
-        correctPortion = 100 * mean(correct),
-        se = 100 * sd(correct) / sqrt(length(correct))
+        correctPortion = mean(correct),
+        color = as.factor(1),
+        se = sd(correct) / sqrt(length(correct))
     )
 
     ggplot2::ggplot(focus_post_experimental_only_summary, ggplot2::aes(
         x = training_word_exposures, y = correctPortion
     )) +
-        ggplot2::geom_hline(yintercept = 50, linetype = "dashed", color = "gray") +
-        ggplot2::geom_point(position = dodge, size = 4) +
+        ggplot2::geom_hline(yintercept = .5, linetype = "dashed", color = "gray") +
+        ggplot2::geom_point(ggplot2::aes(color = color), size = 3, show.legend = FALSE) +
         ggplot2::geom_errorbar(
             ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
-            position = dodge,
-            width = .125,
             color = "#555555"
         ) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::xlim(0, NA) +
         ggplot2::labs(
             x = "Training Word Exposures",
-            y = "Percentage Correct",
+            y = "Portion Correct",
             title = "Word Exposure Effect on Focus Discrimination"
-        ) +
-        ggplot2::theme_classic()
+        )
 
     save_plot()
 ```
@@ -813,20 +829,77 @@ Working directory should be `/software`
 ```{r model-focus-data, echo = FALSE}
     focus_model <- function(formula) bin_lme(formula = formula, data = focus_df)
 
-    focus_m0 <- bin_lme(
+    focus_m0 <- glm(data = focus_df, formula = correct ~ 1, family = "binomial")
+
+    focus_m0.1 <- bin_lme(
         data = focus_df,
-        formula = correct
-            ~ training_word_exposures_n * condition
-            + (condition | pid)
+        formula = correct ~ 1
+            + (1 | sentence_id / stimulus)
+    )
+    anova(focus_m0.1, focus_m0)
+
+    focus_m0.2 <- bin_lme(
+        data = focus_df,
+        formula = correct ~ 1
+            + (1 | pid)
+    )
+    anova(focus_m0.2, focus_m0)
+
+    # conclude - random effects are unimportant
+
+    focus_m0.3 <- glm(
+        data = focus_df, family = "binomial",
+        formula = correct ~ group * condition
+    )
+
+    summary(focus_m0.3)
+
+
+    # conclude - no different between groups or testing session
+
+    focus_df_exp_post_test_only <- dplyr::filter(focus_df, condition == "Post-test", group == "Experimental")
+
+    focus_m1 <- glm(data = focus_df_exp_post_test_only, formula = correct ~ 1, family = "binomial")
+
+    focus_m1.0 <- bin_lme(
+        data = focus_df_exp_post_test_only,
+        formula = correct ~ 1
             + (1 | sentence_id / stimulus)
     )
 
-    results_focus_m0 <- get_logistic_odds_results(focus_m0)
-    print(sprintf(
-        "The odds of correctly identifying the emphasized word after training, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
-        results_focus_m0[1], results_focus_m0[2], results_focus_m0[3]
-    ))
+    anova(focus_m1.0, focus_m1) # not different
 
+    focus_m1.1 <- bin_lme(
+        data = focus_df_exp_post_test_only,
+        formula = correct ~ 1
+            + (1 | pid)
+    )
+    anova(focus_m1.1, focus_m1) # not different
+
+    # conclude - random effects do not add value
+
+    focus1.2 <- glm(data = focus_df_exp_post_test_only, formula = correct ~ training_word_exposures_n, family = "binomial")
+    summary(focus1.2)
+
+    # conclude - no training effect
+
+    ggplot2::ggplot(
+        focus_df_exp_post_test_only,
+        ggplot2::aes(x = training_word_exposures, y = correct)
+    ) +
+        ggplot2::geom_point(
+            color = theme_colors[1],
+            position = ggplot2::position_jitter(width = 500, height = 0.05),
+            alpha = 0.1
+        ) +
+        ggplot2::labs(
+            x = "Training Word Exposures",
+            y = ggplot2::element_blank(),
+            title = "Post-training Focus Discrimination Trials"
+        ) +
+        ggplot2::scale_y_continuous(breaks = c(0.0, 1.0), labels = c("Incorrect", "Correct"))
+
+    save_plot()
 ```
 
 ## Plot Phrase Discrimination
@@ -834,8 +907,8 @@ Working directory should be `/software`
 
     phrase_test_session_by_group <- dplyr::summarise(
         dplyr::group_by(phrase_df, group, condition),
-        correctPortion = 100 * mean(correct),
-        se = 100 * sd(correct) / sqrt(length(correct))
+        correctPortion =  mean(correct),
+        se = sd(correct) / sqrt(length(correct))
     )
 
     dodge <- ggplot2::position_dodge(width = 0.125)
@@ -844,7 +917,7 @@ Working directory should be `/software`
         x = condition, y = correctPortion,
         group = group, color = group, shape = group
     )) +
-        ggplot2::geom_hline(yintercept = 50, linetype = "dashed", color = "gray") +
+        ggplot2::geom_hline(yintercept = .5, linetype = "dashed", color = "gray") +
         ggplot2::geom_line(position = dodge) +
         ggplot2::geom_point(position = dodge, size = 4) +
         ggplot2::geom_errorbar(
@@ -853,18 +926,19 @@ Working directory should be `/software`
             width = .125,
             color = "#555555"
         ) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::labs(
             x = "Test Session",
-            y = "Percentage Correct",
+            y = "Portion Correct",
             title = "Phrase Discrimination Before and After Training",
             color = "Group", shape = "Group"
         ) +
         ggplot2::theme_classic() +
         ggplot2::theme(
-            legend.position = c(0.85, 0.85),
+            legend.position = c(0.80, 0.85),
             legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
-        )
+        ) +
+        ggthemes::scale_color_colorblind()
 
     save_plot()
 
@@ -872,26 +946,26 @@ Working directory should be `/software`
 
     phrase_post_exp_only_summary <- dplyr::summarise(
         dplyr::group_by(phrase_post_exp_only, pid, training_word_exposures),
-        correctPortion = 100 * mean(correct),
-        se = 100 * sd(correct) / sqrt(length(correct))
+        color = as.factor(1),
+        correctPortion = mean(correct),
+        se = sd(correct) / sqrt(length(correct))
     )
 
     ggplot2::ggplot(phrase_post_exp_only_summary, ggplot2::aes(
         x = training_word_exposures, y = correctPortion
     )) +
-        ggplot2::geom_hline(yintercept = 50, linetype = "dashed", color = "gray") +
-        ggplot2::geom_point(position = dodge, size = 4) +
+        ggplot2::geom_hline(yintercept = 0.5, linetype = "dashed", color = "gray") +
+        ggplot2::geom_point(ggplot2::aes(color = color), size = 3, show.legend = FALSE) +
         ggplot2::geom_errorbar(
             ggplot2::aes(ymin = correctPortion - se, ymax = correctPortion + se),
             position = dodge,
-            width = .125,
             color = "#555555"
         ) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::xlim(0, NA) +
         ggplot2::labs(
             x = "Training Word Exposures",
-            y = "Percentage Correct",
+            y = "Portion Correct",
             title = "Word Exposure Effect on Phrase Boundary Discrimination"
         ) +
         ggplot2::theme_classic()
@@ -901,20 +975,81 @@ Working directory should be `/software`
 
 ## Phrase Boundary - Model & Test
 ```{r model-phrase-data, echo = FALSE}
-    phrase_m0 <- bin_lme(
+    phrase_m0 <- glm(data = phrase_df, formula = correct ~ 1, family = "binomial")
+
+    phrase_m0.0 <- bin_lme(
         data = phrase_df,
-        formula = correct
-            ~ training_word_exposures_n * condition
-            + (training_word_exposures_n | pid)
-            + (condition | pid)
-            + (1 | sentence_id / stimulus)
+        formula = correct ~ 1
+            + (1|sentence_id / stimulus)
     )
 
-    results_phrase_m0 <- get_logistic_odds_results(phrase_m0)
-    print(sprintf(
-        "The odds of correctly identifying the phrase boundary word after training, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
-        results_phrase_m0[1], results_phrase_m0[2], results_phrase_m0[3]
-    ))
+    anova(phrase_m0.0, phrase_m0) # not different
+
+    phrase_m0.1 <- bin_lme(
+        data = phrase_df,
+        formula = correct ~ 1
+            + (1|pid)
+    )
+
+    anova(phrase_m0.1, phrase_m0) # not different
+
+    # conclude - random effects do not contribute to the model
+
+    phrase_m0.2 <- glm(
+        data = phrase_df,
+        family = "binomial",
+        formula = correct ~ group * condition
+    )
+
+    summary(phrase_m0.2)
+    # conclude - no effect between groups or between pre/post test sessions
+
+    phrase_m1 <- glm(data = phrase_post_exp_only, formula = correct ~ 1, family = "binomial")
+
+    phrase_m1.1 <- bin_lme(
+        data = phrase_post_exp_only,
+        formula = correct ~ 1
+            + (1|sentence_id / stimulus)
+    )
+
+    anova(phrase_m1.1, phrase_m1) # not different
+
+    phrase_m1.2 <- bin_lme(
+        data = phrase_post_exp_only,
+        formula = correct ~ 1
+            + (1|pid)
+    )
+
+    anova(phrase_m1.2, phrase_m1) # not different
+
+    # conclude - random effects do not contribute
+
+    phrase_m1.3 <- glm(
+        data = phrase_post_exp_only,
+        family = "binomial",
+        formula = correct ~ training_word_exposures_n
+    )
+
+    anova(phrase_m1.3, phrase_m1) # not different
+
+    ggplot2::ggplot(
+        phrase_post_exp_only,
+        ggplot2::aes(x = training_word_exposures, y = correct)
+    ) +
+        ggplot2::geom_point(
+            color = theme_colors[1],
+            position = ggplot2::position_jitter(width = 500, height = 0.05),
+            alpha = 0.1,
+            show.legend = FALSE
+        ) +
+        ggplot2::labs(
+            x = "Training Word Exposures",
+            y = ggplot2::element_blank(),
+            title = "Post-training Phrase Discrimination Trials"
+        ) +
+        ggplot2::scale_y_continuous(breaks = c(0.0, 1.0), labels = c("Incorrect", "Correct"))
+
+    save_plot()
 ```
 
 # INTEGRATION
@@ -929,21 +1064,48 @@ Working directory should be `/software`
         tactile_stim <- as.factor(substring(stimulus, 4, 5))
         speaker <- as.integer(substring(audibleFile, 8, 9))
         speaker_gender <- as.factor(substring(stimfile, 1, 1))
+        train_phone <- as.factor(substring(stimulus, 4, 4))
     })
+    integration_df$selected_auditory <- as.character(integration_df$selection) == as.character(integration_df$auditory_stim)
+
+    integration_df <- merge(
+        integration_df, p_exposures,
+        by.x = c("pid", "train_phone"), by.y = c("pid", "phoneme"),
+        keep.X = FALSE, all.x = TRUE
+    )
+
+    integration_df$phoneme_exposures <- replace(
+        integration_df$phoneme_exposures,
+        is.na(integration_df$phoneme_exposures),
+        0
+    )
+    integration_df$phoneme_exposures_n <- integration_df$phoneme_exposures / max(integration_df$phoneme_exposures, na.rm = TRUE)
+
+    write.csv(integration_df, 'analysis-output/integration.csv')
 ```
 
 ## Explore & Visualize 📈
 ```{r plot-integration-data, echo = FALSE}
+    integration_by_audible_file <- dplyr::summarise(
+        dplyr::group_by(dplyr::filter(integration_df, condition == 'Pre-test'), audibleFile),
+        auditory_selection_portion = mean(selected_auditory),
+        se = sd(selected_auditory) / sqrt(length(selected_auditory))
+    )
+    integration_by_audible_file <- dplyr::arrange(integration_by_audible_file, auditory_selection_portion)
+
+    # remove hard to understand auditory stim
+    integration_df <- dplyr::filter(integration_df, audibleFile != "m_Pa_TK07.wav" & audibleFile != "f_Pa_TK03.wav" & audibleFile != "f_Ma_TK02.wav")
+
     integration_summary <- dplyr::summarise(
         dplyr::group_by(integration_df, group, condition),
-        correctPortion = 100 * mean(integrated),
-        se = 100 * sd(integrated) / sqrt(length(integrated)),
+        correctPortion =  mean(integrated),
+        se = sd(integrated) / sqrt(length(integrated)),
         training_word_exposures = mean(training_word_exposures),
     )
 
     ggplot2::ggplot(integration_summary, ggplot2::aes(
         x = condition, y = correctPortion,
-        group = group, color = group, shape = group
+        group = group, color = group, shape = group,
     )) +
         ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
         ggplot2::geom_line(position = dodge) +
@@ -954,80 +1116,143 @@ Working directory should be `/software`
             width = .125,
             color = "#555555"
         ) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(0, 1.0)) +
         ggplot2::labs(
             x = "Test Session",
-            y = "Percentage Integrated",
+            y = "Portion Integrated",
             title = "Perceptual Integration Before and After Training",
             color = "Group", shape = "Group"
         ) +
         ggplot2::theme_classic() +
         ggplot2::theme(
-            legend.position = c(0.85, 0.85),
+            legend.position = c(0.8, 0.85),
             legend.background = ggplot2::element_rect(size = 0.5, color = "#888888", fill = "#EEEEEE")
-        )
+        ) +
+        ggthemes::scale_color_colorblind()
 
     save_plot()
 
     integration_post_exp_only <- dplyr::filter(integration_df, group == "Experimental", condition == "Post-test")
 
     integration_post_exp_only_summary <- dplyr::summarise(
-        dplyr::group_by(integration_post_exp_only, pid, training_word_exposures),
-        integratedPortion = 100 * mean(integrated),
-        se = 100 * sd(integrated) / sqrt(length(integrated))
+        dplyr::group_by(integration_post_exp_only, pid, tactile_stim, training_word_exposures, phoneme_exposures, phoneme_exposures_n),
+        integratedPortion = mean(integrated),
+        se = sd(integrated) / sqrt(length(integrated))
     )
 
     ggplot2::ggplot(integration_post_exp_only_summary, ggplot2::aes(
-        x = training_word_exposures, y = integratedPortion
+        x = phoneme_exposures, y = integratedPortion,
+        label = tactile_stim
     )) +
         ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
-        ggplot2::geom_point(position = dodge, size = 4) +
         ggplot2::geom_errorbar(
             ggplot2::aes(ymin = integratedPortion - se, ymax = integratedPortion + se),
-            position = dodge,
-            width = .125,
-            color = "#555555"
+            color = "#555555", width = 100
         ) +
-        ggplot2::ylim(0, 100) +
+        ggplot2::geom_text(ggplot2::aes(color = pid), size = 3) +
+        ggplot2::scale_y_continuous(labels = scales::percent, limits = c(NA, 1.0)) +
         ggplot2::xlim(0, NA) +
         ggplot2::labs(
-            x = "Training Word Exposures",
-            y = "Percentage Integrated",
-            title = "Word Exposure Effect on Perceptual Integration"
+            x = "Consonant Exposures in Training",
+            y = "Portion Integrated",
+            title = "Phoneme Exposure Effect on Perceptual Integration",
+            color = "Participant"
         ) +
-        ggplot2::theme_classic()
+        ggplot2::theme_classic() +
+        ggthemes::scale_color_colorblind() +
+        ggplot2::theme(legend.position = c(0.50, 0.75), legend.direction = "horizontal")
 
     save_plot()
-
 ```
 
 ## Model & Test
 ```{r model-integration-data, echo = FALSE}
-    integration_m0 <- bin_lme(
+
+    integration_m0 <- glm(data = integration_df, formula = integrated ~ 1, family = "binomial")
+
+    integration_m0.0 <- bin_lme(
         data = integration_df,
-        formula = integrated
-            ~ training_word_exposures_n * condition
-            + (condition | pid)
-            + (1 | tactile_stim)
-            + (1 | auditory_stim)
-            + (1 | speaker_gender / speaker)
+        formula = integrated ~ 1
+            + (1|auditory_stim)
     )
 
-    results_integration_m0 <- get_logistic_odds_results(integration_m0)
-    print(sprintf(
-        "The odds of integrating percepts after training, increased by %0.f%% (95%% CI [%0.2f, %0.2f]).",
-        results_integration_m0[1], results_integration_m0[2], results_integration_m0[3]
-    ))
+    anova(integration_m0.0, integration_m0) # yes diff
+
+    integration_m0.1 <- bin_lme(
+        data = integration_df,
+        formula = integrated ~ 1
+            + (1|auditory_stim)
+            + (1|tactile_stim)
+    )
+
+    anova(integration_m0.1, integration_m0.0, integration_m0) # no diff
+
+    integration_m0.2 <- bin_lme(
+        data = integration_df,
+        formula = integrated ~ 1
+            + (1|auditory_stim)
+            + (1|pid)
+    )
+
+    anova(integration_m0.2, integration_m0.0, integration_m0) # yes diff
+
+    integration_m0.3 <- bin_lme(
+        data = integration_df,
+        formula = integrated ~ group*condition
+            + (group|auditory_stim)
+            + (group|pid)
+            + (condition|auditory_stim)
+            + (condition|pid)
+    )
+
+    anova(integration_m0.3, integration_m0.2, integration_m0.1, integration_m0) # yes diff
+
+    summary(integration_m0.3)
+
+    # conclude - no interaction effect
+
+    integration_m1 <- glm(data = integration_post_exp_only, formula = integrated ~ 1, family = "binomial")
+
+    integration_m1.0 <- bin_lme(
+        data = integration_post_exp_only,
+        formula = integrated ~ 1
+            + (1|auditory_stim)
+    )
+
+    anova(integration_m1.0, integration_m1) # no diff
+
+    integration_m1.1 <- bin_lme(
+        data = integration_post_exp_only,
+        formula = integrated ~ 1
+            + (1|tactile_stim)
+    )
+
+    anova(integration_m1.1, integration_m1) # no diff
+
+    integration_m1.2 <- bin_lme(
+        data = integration_post_exp_only,
+        formula = integrated ~ 1
+            + (1|pid)
+    )
+
+    anova(integration_m1.2, integration_m1) # yes diff
+
+    integration_m1.3 <- bin_lme(
+        data = integration_post_exp_only,
+        formula = integrated ~ phoneme_exposures_n
+            + (phoneme_exposures_n|pid)
+    )
+
+    anova(integration_m1.3, integration_m1.2, integration_m1) # no diff
 
 ```
-
-
 
 
 
 # TRAINING PERFORMANCE (load data)
 ```{r load-training-data-words, echo = FALSE}
-    setwd("data/training/TrainingLogs")
+
+    setwd("../data/training/TrainingLogs")
 
     word_training_files <- list.files(".", "*.csv")
     word_training_df <- data.frame()
@@ -1038,7 +1263,7 @@ Working directory should be `/software`
             word_training_df <- dplyr::bind_rows(word_training_df, tmp_df)
         }
     }
-    setwd("../../../")
+    setwd("../../../analysis")
 
     word_training_df <- within(word_training_df, {
         PID <- as.factor(PID)
@@ -1051,7 +1276,7 @@ Working directory should be `/software`
     word_training_df <- word_training_df[order(word_training_df$PID, word_training_df$Timestamp), ]
 
     # merge in training game name
-    game_levels <- read.csv("aux-data/game-levels.csv")
+    game_levels <- read.csv("../aux-data/game-levels.csv")
     game_levels$Level <- as.factor(game_levels$Level)
     game_levels$Game <- as.factor(game_levels$Game)
 
@@ -1150,43 +1375,75 @@ Working directory should be `/software`
     level_attempt_progression_summary <- tidyr::drop_na(level_attempt_summary, p_l_progression)
     write.csv(level_attempt_progression_summary, "analysis-output/level_attempt_progression_summary.csv")
 
-    lmer0 <- lmerTest::lmer(
-        PercentageCorrect ~ 1 + (1|Game/Level) + (1|PID),
+    train_perf_m0 <- lm(
         data = level_attempt_progression_summary,
         weights = TrialCount,
-        REML = FALSE
+        PercentageCorrect ~ 1,
     )
 
-    lmer1 <- lmerTest::lmer(
-        PercentageCorrect ~ p_l_progression + (p_l_progression|Game) + (p_l_progression|PID),
+    train_perf_m0.1 <- lmerTest::lmer(
         data = level_attempt_progression_summary,
         weights = TrialCount,
-        REML = FALSE
+        REML = FALSE,
+        PercentageCorrect ~ 1
+            + (1|Game/Level),
     )
 
-    lmer2 <- lmerTest::lmer(
-        PercentageCorrect ~ p_l_progression + (p_l_progression|Game/Level) + (p_l_progression|PID),
+    anova(train_perf_m0.1, train_perf_m0) # contributes
+
+    train_perf_m0.2 <- lmerTest::lmer(
         data = level_attempt_progression_summary,
         weights = TrialCount,
-        REML = FALSE
+        REML = FALSE,
+        PercentageCorrect ~ 1
+            + (1|Game/Level)
+            + (1|PID),
     )
 
-    summary(lmer0)
-    summary(lmer1)
-    summary(lmer2)
-    anova(lmer0, lmer1, lmer2)
+    anova(train_perf_m0.2, train_perf_m0.1, train_perf_m0) # contributes
 
-    plot_values <- ggeffects::ggpredict(lmer2, "p_l_progression")
+
+    train_perf_m0.3 <- lmerTest::lmer(
+        data = level_attempt_progression_summary,
+        weights = TrialCount,
+        REML = FALSE,
+        PercentageCorrect ~ p_l_progression
+            + (p_l_progression|Game/Level)
+            + (p_l_progression|PID),
+    )
+
+    anova(train_perf_m0.3, train_perf_m0.2, train_perf_m0.1, train_perf_m0) # contributes
+
+    summary(train_perf_m0.3)
+
+
+    train_perf_m0.4 <- lm(
+        data = level_attempt_progression_summary,
+        weights = TrialCount,
+        PercentageCorrect ~ p_l_progression
+    )
+
+    anova(train_perf_m0.3, train_perf_m0.4)
+
+    plot_values <- ggeffects::ggpredict(train_perf_m0.3, "p_l_progression")
 
     ggplot2::ggplot(plot_values, ggplot2::aes(x = x, y = predicted)) +
-        ggplot2::geom_line() +
-        ggplot2::geom_ribbon(ggplot2::aes(ymin = conf.low, ymax = conf.high), alpha = .1) +
+        ggplot2::geom_line(color = theme_colors[2], show.legend = FALSE) +
+        ggplot2::geom_ribbon(
+            ggplot2::aes(
+                ymin = conf.low,
+                ymax = conf.high,
+            ),
+            alpha = .25,
+            fill = theme_colors[2]
+        ) +
         ggplot2::geom_point(
             mapping = ggplot2::aes(
                 x = p_l_progression,
                 y = PercentageCorrect,
                 size = TrialCount,
             ),
+            color = theme_colors[1],
             data = level_attempt_progression_summary,
             position = ggplot2::position_jitter(width=0.01, height=0.01),
             alpha = 0.1
@@ -1195,13 +1452,114 @@ Working directory should be `/software`
             x = "Progression",
             y = "Correct Portion",
             title = "Training Performance"
-        )
+        ) +
+        ggplot2::scale_y_continuous(labels = scales::percent) +
+        ggplot2::theme(legend.position = c(0.5, 0.02), legend.direction = "horizontal")
+
+    save_plot()
+```
+
+# Phoneme exposures proportions
+```{r phoneme-proportions, echo = FALSE}
+    buckeye <- read.csv("../aux-data/buckeye-phone-frequencies.csv")
+    buckeye <- dplyr::filter(buckeye, trainPhoneme != "")
+
+    aggregated_exposures <- dplyr::summarise(
+        dplyr::group_by(p_exposures, phoneme),
+        frequency = sum(phoneme_exposures)
+    )
+
+    phoneme_exposure_comparison <- merge(buckeye, aggregated_exposures, by.x = "trainPhoneme", by.y = "phoneme")
+    phoneme_exposure_comparison <- dplyr::summarise(
+        dplyr::group_by(phoneme_exposure_comparison, trainPhoneme),
+        expected = sum(phonemeExposures),
+        observed = sum(frequency)
+    )
+    phoneme_exposure_comparison <- merge(phoneme_exposure_comparison, phone_translate, by.x = "trainPhoneme", by.y = "train_phone")
+
+    phoneme_exposure_comparison$expected_p <- phoneme_exposure_comparison$expected / sum(phoneme_exposure_comparison$expected)
+    phoneme_exposure_comparison$observed_p <- phoneme_exposure_comparison$observed / sum(phoneme_exposure_comparison$observed)
+
+    chisq.test(
+        x = phoneme_exposure_comparison$observed,
+        p = phoneme_exposure_comparison$expected_p
+    )
+
+    # x2(37, 162120) = 37364, p < 0.01
+    # conclude - exposures did not match proportions for conversational english
+
+    ordered_phones <- dplyr::arrange(phoneme_exposure_comparison, expected_p)$trainPhoneme
+
+    phone_exp_long <- data.frame(tidyr::gather(phoneme_exposure_comparison, key = "Distribution", value = "proportion", expected_p, observed_p))
+    phone_exp_long$Distribution = ifelse(phone_exp_long$Distribution == "expected_p", "Conversational", "Trained")
+
+    phone_exp_long$trainPhoneme <- factor(phone_exp_long$trainPhoneme, ordered_phones)
+    phone_exp_long$Distribution <- factor(phone_exp_long$Distribution, c("Trained", "Conversational"))
+
+    ggplot2::ggplot(
+        phone_exp_long,
+        ggplot2::aes(y = trainPhoneme, x = proportion, fill = Distribution),
+    ) +
+        ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge()) +
+        ggplot2::labs(
+            x = "Proportion",
+            y = "Phoneme",
+            title = "Conversational vs Trained Phoneme Distribution"
+        ) +
+        ggplot2::theme(legend.position = c(0.8, 0.15)) +
+        ggthemes::scale_fill_colorblind()
 
     save_plot()
 
+    phone_exp_long$trainPhoneme <- factor(phone_exp_long$trainPhoneme, rev(ordered_phones))
+
+    ggplot2::ggplot(
+        phone_exp_long,
+        ggplot2::aes(x = trainPhoneme, y = proportion, fill = Distribution),
+    ) +
+        ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge()) +
+        ggplot2::labs(
+            y = "Proportion",
+            x = "Phoneme",
+            title = "Conversational vs Trained Phoneme Distribution - horizontal"
+        ) +
+        ggplot2::theme(legend.position = c(0.85, 0.8)) +
+        ggthemes::scale_fill_colorblind()
+
+    save_plot(width = 12)
+
+    phoneme_exposure_comparison$relative_training <- phoneme_exposure_comparison$observed_p / phoneme_exposure_comparison$expected_p
+
+    ggplot2::ggplot(
+        phoneme_exposure_comparison,
+        ggplot2::aes(x = trainPhoneme, y = relative_training, fill = phone_type),
+    ) +
+        ggplot2::geom_hline(yintercept = 1.0, linetype = "dashed", color = "gray") +
+        ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge()) +
+        ggplot2::geom_text(
+            ggplot2::aes(label = trainPhoneme, color = phone_type),
+            nudge_y = .05 * sign(phoneme_exposure_comparison$relative_training),
+            show.legend = FALSE
+        ) +
+        ggplot2::labs(
+            fill = "Phone Type",
+            y = "Proportion Difference vs Expected",
+            x = "Phoneme",
+            title = "Conversational vs Trained Phoneme Distribution - horizontal"
+        ) +
+        ggplot2::scale_y_continuous(labels = scales::percent) +
+        ggplot2::theme(legend.position = c(0.85, 0.8)) +
+        ggthemes::scale_fill_colorblind()
+
+    save_plot(
+        width = 12,
+        theme_overrides = ggplot2::theme(
+            axis.text.x = ggplot2::element_blank(),
+            panel.grid.major.x = ggplot2::element_blank(),
+            panel.grid.minor.x = ggplot2::element_blank(),
+            axis.ticks.x = ggplot2::element_blank()
+        )
+    )
 ```
-
-
-
 
 # END
